@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Channeling System - Book Appointment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f0f4f8;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0, transparent 40%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.1) 0, transparent 40%);
+            min-height: 100vh;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        .glass-sidebar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .premium-card {
+            background: white;
+            border-radius: 24px;
+            border: 1px solid rgba(226, 232, 240, 1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-item {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-item.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 4px;
+            background: #10b981;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .doctor-card {
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .doctor-card:hover { transform: translateY(-5px); border-color: #10b981; }
+        .doctor-card.selected { border-color: #10b981; background: #f0fdf4; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.1); }
+
+        .sidebar-overlay {
+            transition: opacity 0.3s ease;
+        }
+
+        /* Step indicator */
+        .step-badge {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/dark-mode.css">
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen relative">
+
+<!-- Mobile Header -->
+<div class="lg:hidden flex items-center justify-between p-4 glass-sidebar sticky top-0 z-40 border-b border-slate-200">
+    <a href="/" class="flex items-center gap-2" style="text-decoration: none;">
+        <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white shadow">
+            <i class="fa-solid fa-heart-pulse text-sm"></i>
+        </div>
+        <span class="text-lg font-bold tracking-tight">E-CHANNELING<span class="text-emerald-600">PLUS</span></span>
+    </a>
+    <button id="mobileMenuBtn" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+        <i class="fa-solid fa-bars text-xl"></i>
+    </button>
+</div>
+
+<!-- Sidebar Overlay -->
+<div id="sidebarOverlay" class="sidebar-overlay fixed inset-0 bg-black/30 z-40 hidden lg:hidden"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="w-80 glass-sidebar h-screen p-8 flex flex-col fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 z-50 transition-transform duration-300 ease-in-out">
+    <div class="flex justify-between items-center mb-10 lg:block">
+        <a href="/" class="flex items-center gap-3 lg:mb-8 hover:opacity-85 transition-opacity" style="text-decoration: none;">
+            <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <i class="fa-solid fa-calendar-plus"></i>
+            </div>
+            <span class="text-xl font-bold tracking-tight text-slate-800">BOOK<span class="text-emerald-600">APPOINTMENT</span></span>
+        </a>
+        <button id="closeSidebarBtn" class="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+    </div>
+
+    <nav class="space-y-2">
+        <a href="/patient/dashboard" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-all">
+            <i class="fa-solid fa-table-columns"></i> Dashboard
+        </a>
+        <a href="/patient/book-appointment" class="nav-item active flex items-center gap-4 px-4 py-3 rounded-xl font-semibold">
+            <i class="fa-solid fa-calendar-plus"></i> Book Appointment
+        </a>
+        <a href="/patient/history" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-all">
+            <i class="fa-solid fa-clock-rotate-left"></i> My History
+        </a>
+        <a href="/patient/profile" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-all">
+            <i class="fa-solid fa-user-gear"></i> Profile Settings
+        </a>
+    </nav>
+
+    <div class="mt-auto">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-400 font-bold hover:text-red-500 transition-all">
+                <i class="fa-solid fa-power-off"></i> Sign Out
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="flex-1 p-4 sm:p-6 md:p-10">
+    <header class="mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Schedule a <span class="text-emerald-600">Consultation</span></h1>
+        <p class="text-slate-500 mt-1 text-sm sm:text-base">Book your appointment with our world-class medical specialists</p>
+    </header>
+
+    <div class="premium-card p-5 sm:p-8 md:p-10 max-w-5xl">
+        <form th:action="@{/patient/book-appointment}" th:object="${appointment}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}" />
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 mb-6 sm:mb-10">
+                <div>
+                    <h3 class="font-bold mb-4 sm:mb-6 text-slate-800 flex items-center gap-3">
+                        <span class="step-badge">1</span> Contact Details
+                    </h3>
+                    <div class="space-y-4 sm:space-y-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Contact Email</label>
+                            <input type="email" th:field="*{contactEmail}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm" required/>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Contact Phone</label>
+                            <input type="tel" th:field="*{contactPhone}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm" required/>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-4 sm:mb-6 text-slate-800 flex items-center gap-3">
+                        <span class="step-badge">2</span> Preferred Schedule
+                    </h3>
+                    <div class="space-y-4 sm:space-y-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Appointment Date</label>
+                            <input type="text" id="datePicker" placeholder="Select a date..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm" required>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Available Slots</label>
+                            <select id="timeSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm" required disabled>
+                                <option value="">Please select a date first</option>
+                            </select>
+                            <input type="hidden" id="appointmentDate" th:field="*{appointmentDate}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="doctorSelectSection">
+                <h3 class="font-bold mb-4 sm:mb-6 text-slate-800 flex items-center justify-between">
+                    <span class="flex items-center gap-3"><span class="step-badge">3</span> Select Specialist</span>
+                    <span class="text-xs font-normal text-slate-400">Click a doctor to select</span>
+                </h3>
+                <div id="doctorSelectWarning" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-hand-pointer text-base"></i> Please click to select a doctor below first before picking a date.
+                </div>
+                <input type="hidden" name="doctor.id" id="selectedDoctorId" required>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
+                    <div th:if="${#lists.isEmpty(doctors)}" class="col-span-full p-8 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-user-doctor text-xl"></i>
+                        </div>
+                        <p class="font-bold text-slate-700">No Doctors Available Currently</p>
+                        <p class="text-xs text-slate-500 mt-1">Please contact hospital administration to register doctors.</p>
+                    </div>
+                    <div th:each="doc : ${doctors}" class="doctor-card" th:data-id="${doc.id}" onclick="selectDoctor(this)">
+                        <img th:src="${(doc.user != null and doc.user.profileImage != null and doc.user.profileImage.length() > 20) ? (doc.user.profileImage.startsWith('http') or doc.user.profileImage.startsWith('data:') ? doc.user.profileImage : 'data:image/jpeg;base64,' + doc.user.profileImage) : 'https://ui-avatars.com/api/?name=' + (doc.name ?: 'Doctor') + '&background=random&color=fff'}" class="w-16 h-16 rounded-full mx-auto mb-4 border-2 border-white shadow-sm object-cover">
+                        <p class="text-sm font-bold text-slate-900" th:text="${doc.name}">Doctor Name</p>
+                        <p class="text-[10px] text-emerald-600 font-bold uppercase mt-0.5" th:text="${doc.specialization}">Specialty</p>
+                        <div class="mt-2 flex items-center justify-center gap-2">
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full" th:text="${doc.experience ?: 'Exp: N/A'}">5 Yrs</span>
+                            <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full" th:text="${'Rs.' + (doc.consultationFee ?: 500)}">Rs.500</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end gap-3">
+                <a href="/patient/dashboard" class="text-center px-6 py-3.5 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-all text-sm order-2 sm:order-1">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-emerald-200 text-sm order-1 sm:order-2 active:scale-[0.98]">
+                    <i class="fa-solid fa-calendar-check mr-2"></i> Confirm Appointment
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    // Mobile Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+        }
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        }
+
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+        if (overlay) overlay.addEventListener('click', closeSidebar);
+    });
+
+    // Initialize Flatpickr
+    flatpickr("#datePicker", {
+        minDate: "today",
+        disable: [date => date.getDay() === 0],
+        onChange: (selectedDates, dateStr) => {
+            const docId = document.getElementById('selectedDoctorId').value;
+            if (docId) fetchSlots(docId, dateStr);
+            else alert("Please select a doctor first");
+        }
+    });
+
+    function selectDoctor(element) {
+        document.querySelectorAll('.doctor-card').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        document.getElementById('selectedDoctorId').value = element.getAttribute('data-id');
+        
+        // Reset schedule inputs
+        document.getElementById('datePicker').value = "";
+        document.getElementById('timeSelect').innerHTML = '<option value="">Reselect Date</option>';
+        document.getElementById('timeSelect').disabled = true;
+    }
+
+    function fetchSlots(doctorId, dateStr) {
+        const timeSelect = document.getElementById('timeSelect');
+        timeSelect.disabled = true;
+        timeSelect.innerHTML = '<option value="">Loading slots...</option>';
+
+        fetch(`/api/doctors/${doctorId}/slots?date=${dateStr}`)
+            .then(r => r.json())
+            .then(slots => {
+                timeSelect.innerHTML = '<option value="">-- Select Time --</option>';
+                if (slots.length === 0) {
+                    timeSelect.innerHTML = '<option value="">No Slots Available</option>';
+                } else {
+                    slots.forEach(slot => {
+                        const timeFormat = new Date(slot).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        const option = document.createElement('option');
+                        option.value = slot;
+                        option.textContent = timeFormat;
+                        timeSelect.appendChild(option);
+                    });
+                    timeSelect.disabled = false;
+                }
+            });
+    }
+
+    document.getElementById('timeSelect').addEventListener('change', function() {
+        document.getElementById('appointmentDate').value = this.value;
+    });
+</script>
+
+</body>
+</html>
