@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Channeling System - My History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f0f4f8;
+            background-image:
+                radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.1) 0, transparent 40%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.1) 0, transparent 40%);
+            min-height: 100vh;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        .glass-sidebar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .premium-card {
+            background: white;
+            border-radius: 24px;
+            border: 1px solid rgba(226, 232, 240, 1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .nav-item {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-item.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            height: 60%;
+            width: 4px;
+            background: #10b981;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .sidebar-overlay {
+            transition: opacity 0.3s ease;
+        }
+
+        .history-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid rgba(226, 232, 240, 1);
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .history-card:active {
+            transform: scale(0.98);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/dark-mode.css">
+</head>
+<body class="flex flex-col lg:flex-row min-h-screen relative">
+
+<!-- Mobile Header -->
+<div class="lg:hidden flex items-center justify-between p-4 glass-sidebar sticky top-0 z-40 border-b border-slate-200">
+    <a href="/" class="flex items-center gap-2" style="text-decoration: none;">
+        <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white shadow">
+            <i class="fa-solid fa-heart-pulse text-sm"></i>
+        </div>
+        <span class="text-lg font-bold tracking-tight">E-CHANNELING<span class="text-emerald-600">PLUS</span></span>
+    </a>
+    <button id="mobileMenuBtn" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+        <i class="fa-solid fa-bars text-xl"></i>
+    </button>
+</div>
+
+<!-- Sidebar Overlay -->
+<div id="sidebarOverlay" class="sidebar-overlay fixed inset-0 bg-black/30 z-40 hidden lg:hidden"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="w-80 glass-sidebar h-screen p-8 flex flex-col fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 z-50 transition-transform duration-300 ease-in-out">
+    <div class="flex justify-between items-center mb-10 lg:block">
+        <a href="/" class="flex items-center gap-3 lg:mb-8 hover:opacity-85 transition-opacity" style="text-decoration: none;">
+            <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <span class="text-xl font-bold tracking-tight text-slate-800">HEALTH<span class="text-emerald-600">HISTORY</span></span>
+        </a>
+        <button id="closeSidebarBtn" class="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+    </div>
+
+    <nav class="space-y-2">
+        <a href="/patient/dashboard" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-all">
+            <i class="fa-solid fa-table-columns"></i> Dashboard
+        </a>
+        <a href="/patient/book-appointment" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-all">
+            <i class="fa-solid fa-calendar-plus"></i> Book Appointment
+        </a>
+        <a href="/patient/history" class="nav-item active flex items-center gap-4 px-4 py-3 rounded-xl font-semibold">
+            <i class="fa-solid fa-clock-rotate-left"></i> My History
+        </a>
+        <a href="/patient/profile" class="nav-item flex items-center gap-4 px-4 py-3 text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-all">
+            <i class="fa-solid fa-user-gear"></i> Profile Settings
+        </a>
+    </nav>
+
+    <div class="mt-auto">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-3 text-slate-400 font-bold hover:text-red-500 transition-all">
+                <i class="fa-solid fa-power-off"></i> Sign Out
+            </button>
+        </form>
+    </div>
+</aside>
+
+<main class="flex-1 p-4 sm:p-6 md:p-10">
+    <header class="mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Medical <span class="text-emerald-600">Timeline</span></h1>
+        <p class="text-slate-500 mt-1 text-sm sm:text-base">Detailed record of your past consultations and prescriptions</p>
+    </header>
+
+    <div th:if="${param.success}" class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center gap-3">
+        <i class="fa-solid fa-circle-check"></i>
+        <span class="text-sm font-bold">Appointment booked successfully!</span>
+    </div>
+
+    <div th:if="${param.cancelled}" class="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-700 rounded-2xl flex items-center gap-3">
+        <i class="fa-solid fa-calendar-minus"></i>
+        <span class="text-sm font-bold">Appointment cancelled successfully.</span>
+    </div>
+
+    <!-- ===== DESKTOP: Table View (hidden on mobile) ===== -->
+    <div class="premium-card hidden lg:block">
+        <table class="w-full text-left">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Medical Specialist</th>
+                    <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Date & Time</th>
+                    <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                    <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <tr th:each="app : ${appointments}" class="hover:bg-slate-50/50 transition-all group">
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-all">
+                                <i class="fa-solid fa-user-md"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-900" th:text="${app.doctor.name}">Dr. Name</p>
+                                <p class="text-[10px] text-slate-500" th:text="${app.doctor.specialization}">Specialty</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-5">
+                        <p class="text-sm font-bold text-slate-700" th:text="${#temporals.format(app.appointmentDate, 'MMM dd, yyyy')}">Date</p>
+                        <p class="text-[10px] text-slate-400 font-bold" th:text="${#temporals.format(app.appointmentDate, 'HH:mm')}">Time</p>
+                    </td>
+                    <td class="px-8 py-5">
+                        <span th:class="${'px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ' +
+                            (app.status == 'SCHEDULED' ? 'bg-blue-100 text-blue-600' :
+                             app.status == 'COMPLETED' ? 'bg-emerald-100 text-emerald-600' :
+                             'bg-rose-100 text-rose-600')}"
+                              th:text="${app.status}">Status</span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                        <div class="flex justify-end gap-2">
+                            <a th:if="${recordMap.get(app.id) != null}" th:href="@{/patient/appointment/{id}/record(id=${app.id})}" class="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="View Record">
+                                <i class="fa-solid fa-file-medical"></i>
+                            </a>
+                            <form th:if="${app.status == 'SCHEDULED'}" th:action="@{/patient/appointment/{id}/cancel(id=${app.id})}" method="post">
+                                <button type="submit" class="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-all" title="Cancel Appointment">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(appointments)}">
+                    <td colspan="4" class="px-8 py-20 text-center">
+                        <div class="flex flex-col items-center gap-4">
+                            <i class="fa-solid fa-calendar-xmark text-5xl text-slate-200"></i>
+                            <p class="text-slate-400 font-medium">No medical history found yet.</p>
+                            <a href="/patient/book-appointment" class="text-emerald-600 font-bold hover:underline">Book an appointment now</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===== MOBILE: Card View (hidden on desktop) ===== -->
+    <div class="lg:hidden space-y-4">
+        <div th:each="app : ${appointments}" class="history-card p-5">
+            <!-- Doctor Info + Status -->
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 flex-shrink-0">
+                        <i class="fa-solid fa-user-doctor text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-900" th:text="${app.doctor.name}">Dr. Name</p>
+                        <p class="text-xs text-slate-500" th:text="${app.doctor.specialization}">Specialty</p>
+                    </div>
+                </div>
+                <span th:class="${'px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest flex-shrink-0 ' +
+                    (app.status == 'SCHEDULED' ? 'bg-blue-100 text-blue-600' :
+                     app.status == 'COMPLETED' ? 'bg-emerald-100 text-emerald-600' :
+                     'bg-rose-100 text-rose-600')}"
+                      th:text="${app.status}">Status</span>
+            </div>
+
+            <!-- Date & Time -->
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-4 pl-14">
+                <i class="fa-regular fa-calendar"></i>
+                <span th:text="${#temporals.format(app.appointmentDate, 'MMM dd, yyyy')}">Date</span>
+                <span class="text-slate-300">•</span>
+                <i class="fa-regular fa-clock"></i>
+                <span th:text="${#temporals.format(app.appointmentDate, 'hh:mm a')}">Time</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2 flex-wrap pl-14">
+                <a th:if="${recordMap.get(app.id) != null}" th:href="@{/patient/appointment/{id}/record(id=${app.id})}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-all active:scale-95">
+                    <i class="fa-solid fa-file-medical text-[10px]"></i> View Record
+                </a>
+                <form th:if="${app.status == 'SCHEDULED'}" th:action="@{/patient/appointment/{id}/cancel(id=${app.id})}" method="post" class="inline">
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all active:scale-95">
+                        <i class="fa-solid fa-xmark text-[10px]"></i> Cancel
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Empty State (mobile) -->
+        <div th:if="${#lists.isEmpty(appointments)}" class="history-card p-10 text-center">
+            <div class="flex flex-col items-center gap-4">
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-calendar-xmark text-3xl text-slate-300"></i>
+                </div>
+                <p class="text-slate-400 font-medium">No medical history found yet.</p>
+                <a href="/patient/book-appointment" class="inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all active:scale-95">
+                    <i class="fa-solid fa-calendar-plus"></i> Book Appointment
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+        }
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        }
+
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+        if (overlay) overlay.addEventListener('click', closeSidebar);
+    });
+</script>
+
+</body>
+</html>
