@@ -17,6 +17,10 @@ import java.util.Optional;
 
 @Controller
 public class AuthController {
+    @InitBinder("user")
+    public void registrationFields(org.springframework.web.bind.WebDataBinder binder) {
+        binder.setAllowedFields("username", "password", "fullName", "email", "phoneNo", "address", "nic");
+    }
 
     @Autowired
     private UserService userService;
@@ -78,18 +82,72 @@ public class AuthController {
 
     @PostMapping("/register")
     public String registerUser(@ModelAttribute("user") Patient user) {
-        System.out.println("Registering user: " + user.getUsername());
-
-        user.setRole("ROLE_PATIENT"); // Default role assigned automatically
-        if (user.getAddress() == null || user.getAddress().trim().isEmpty()) {
-            user.setAddress("Residential Address");
+        if (user.getUsername() == null || user.getUsername().trim().length() < 4) {
+            return "redirect:/register?error=short_username";
         }
-        if (user.getPhoneNo() == null || user.getPhoneNo().trim().isEmpty()) {
+        String cleanUsername = user.getUsername().trim();
+        user.setUsername(cleanUsername);
+
+        if (userService.findByUsername(cleanUsername).isPresent()) {
+            return "redirect:/register?error=duplicate_username";
+        }
+
+        if (user.getEmail() == null || !user.getEmail().trim().contains("@")) {
+            return "redirect:/register?error=invalid_email";
+        }
+        String cleanEmail = user.getEmail().trim().toLowerCase(java.util.Locale.ROOT);
+        user.setEmail(cleanEmail);
+
+        if (userService.getAllUsers().stream().anyMatch(u -> u.getEmail() != null && cleanEmail.equalsIgnoreCase(u.getEmail().trim()))) {
+            return "redirect:/register?error=duplicate_email";
+        }
+
+        if (user.getPassword() == null || user.getPassword().length() < 6) {
+            return "redirect:/register?error=weak_password";
+        }
+
+        if (user.getNic() != null && !user.getNic().trim().isEmpty()) {
+            String cleanNic = user.getNic().replaceAll("\\s+", "");
+            user.setNic(cleanNic);
+            if (!cleanNic.matches("^([0-9]{9}[x|X|v|V]|[0-9]{12})$")) {
+                return "redirect:/register?error=invalid_nic";
+            }
+        } else {
+            user.setNic("200012345678");
+        }
+
+        if (user.getPhoneNo() != null && !user.getPhoneNo().trim().isEmpty()) {
+            String cleanPhone = user.getPhoneNo().trim();
+            user.setPhoneNo(cleanPhone);
+            if (!cleanPhone.matches("^\\+?[0-9\\s\\-()]{9,20}$")) {
+                return "redirect:/register?error=invalid_phone";
+            }
+        } else {
             user.setPhoneNo("0770000000");
         }
-        userService.saveUser(user);
 
-        return "redirect:/login?registered";
+        if (user.getFullName() == null || user.getFullName().trim().isEmpty()) {
+            user.setFullName(cleanUsername);
+        } else {
+            user.setFullName(user.getFullName().trim());
+        }
+
+        if (user.getAddress() == null || user.getAddress().trim().isEmpty()) {
+            user.setAddress("Residential Address, Sri Lanka");
+        } else {
+            user.setAddress(user.getAddress().trim());
+        }
+
+        user.setRole("ROLE_PATIENT");
+        user.setId(null);
+
+        try {
+            userService.saveUser(user);
+            return "redirect:/login?registered";
+        } catch (Exception e) {
+            System.err.println("Registration failed: " + e.getMessage());
+            return "redirect:/register?error=registration_failed";
+        }
     }
 
     @GetMapping("/forgot-password")
@@ -99,15 +157,8 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public String processForgotPassword(@RequestParam String username, @RequestParam String newPassword) {
-        Optional<User> optUser = userService.findByUsername(username);
-
-        if (optUser.isPresent()) {
-            User user = optUser.get();
-            user.setPassword(newPassword); // Overwriting the old password
-            userService.saveUser(user);
-            return "redirect:/forgot-password?success";
-        }
-        return "redirect:/forgot-password?error";
+        // Recovery requires identity verification by a hospital administrator.
+        return "redirect:/forgot-password?contact_admin";
     }
 
     @GetMapping("/dashboard")

@@ -7,7 +7,7 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue("PATIENT")
 public class Patient extends User {
     @jakarta.validation.constraints.NotBlank(message = "NIC is required")
-    @jakarta.validation.constraints.Pattern(regexp = "^([0-9]{9}[x|X|v|V]|[0-9]{12})$", message = "Invalid Sri Lankan NIC format")
+    @jakarta.validation.constraints.Pattern(regexp = "^([0-9]{9}[xXvV]|[0-9]{12})$", message = "Invalid Sri Lankan NIC format")
     private String nic;
 
     private String bloodGroup;

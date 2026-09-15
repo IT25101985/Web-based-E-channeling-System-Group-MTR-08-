@@ -28,12 +28,12 @@ public class User {
     @Email(message = "Invalid email format")
     private String email;
 
-    @Pattern(regexp = "^\\+?[0-9]{9,15}$", message = "Invalid phone number")
+    @Pattern(regexp = "^\\+?[0-9\\s\\-()]{9,20}$", message = "Invalid phone number")
     private String phoneNo;
 
     @NotBlank(message = "Address is required")
     private String address;
-    @Column(columnDefinition = "VARCHAR(MAX)")
+    @Column(length = 10000000)
     private String profileImage;
 
     // Default constructor
