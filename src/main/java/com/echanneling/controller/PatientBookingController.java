@@ -44,7 +44,7 @@ public class PatientBookingController {
 
     @InitBinder("appointment")
     public void bookingFields(org.springframework.web.bind.WebDataBinder binder) {
-        binder.setAllowedFields("id", "doctor.id", "appointmentDate", "contactEmail", "contactPhone");
+        binder.setAllowedFields("id", "doctor.id", "hospitalBranch.id", "appointmentDate", "contactEmail", "contactPhone");
     }
 
     @PostMapping("/book-appointment")
@@ -78,8 +78,7 @@ public class PatientBookingController {
             if (optApp.isPresent() && optApp.get().getPatient().getUsername().equals(principal.getName())) {
                 Appointment app = optApp.get();
                 if (!"SCHEDULED".equals(app.getStatus())) return "redirect:/patient/dashboard?section=history&error=invalid_status";
-                app.setStatus("CANCELLED");
-                appointmentService.saveAppointment(app);
+                appointmentService.cancel(app.getId());
             }
         }
         return "redirect:/patient/dashboard?section=history&cancelled";
