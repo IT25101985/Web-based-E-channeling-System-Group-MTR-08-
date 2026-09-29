@@ -11,6 +11,15 @@ import java.util.List;
 
 @Service
 public class AppointmentService {
+    @Autowired private NotificationService notifications;
+    @org.springframework.transaction.annotation.Transactional
+    public void cancel(Long id) {
+        Appointment a=appointmentRepository.findLockedById(id).orElseThrow();
+        if (!"SCHEDULED".equals(a.getStatus())) throw new IllegalArgumentException("Only scheduled appointments can be cancelled.");
+        a.setStatus("CANCELLED");
+        notifications.appointmentEvent(a,com.echanneling.entity.Notification.NotificationType.CANCELLATION);
+    }
+
     @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbc;
     @Autowired
     private AppointmentRepository appointmentRepository;
@@ -30,15 +39,15 @@ public class AppointmentService {
     public List<Appointment> getAppointmentsForDoctor(Doctor doctor) {
         return appointmentRepository.findByDoctor(doctor);
     }
-    
+
     public List<Appointment> getRecentAppointmentsForDoctor(Doctor doctor) {
         return appointmentRepository.findByDoctorOrderByIdDesc(doctor);
     }
-    
+
     public List<Appointment> getAllAppointments() {
         return appointmentRepository.findAll();
     }
-    
+
     @org.springframework.transaction.annotation.Transactional
     public void deleteAppointment(Appointment appointment) {
         Long id = appointment.getId();
