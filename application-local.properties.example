@@ -1,0 +1,4 @@
+# Copy to application-local.properties; do not commit real credentials.
+DB_URL=jdbc:sqlserver://localhost:1433;databaseName=echanneling_system;encrypt=true;trustServerCertificate=true
+DB_USERNAME=sa
+DB_PASSWORD=replace-with-your-local-password

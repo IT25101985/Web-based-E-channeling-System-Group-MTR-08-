@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Register | CareLink E-Channeling</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/app.js" defer></script>
+</head>
+<body>
+<main class="auth">
+    <section class="auth-story">
+        <a href="/" class="brand"><span class="brand-mark">+</span>CareLink<span>.</span></a>
+        <div>
+            <div class="eyebrow">CARE THAT STAYS CONNECTED</div>
+            <h1>A healthier day<br>starts here.</h1>
+            <p class="story-detail">One simple place to manage appointments, stay close to your care team and access your medical records.</p>
+        </div>
+        <small>CareLink · Hospital e-channeling</small>
+    </section>
+
+    <section class="auth-form">
+        <div>
+            <div class="eyebrow">WELCOME TO CARELINK</div>
+            <h1>Start your care journey.</h1>
+            <p>Create a patient account to book your first appointment.</p>
+            
+            <div class="section-gap">
+                <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+                <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+                
+                <!-- Specific Error Notices -->
+                <div th:if="${param.error != null}" class="notice error" role="alert">
+                    <span th:if="${param.error[0] == 'duplicate_username'}">This username is already taken. Please choose another username.</span>
+                    <span th:if="${param.error[0] == 'duplicate_email'}">This email is already registered. Please sign in or use another email.</span>
+                    <span th:if="${param.error[0] == 'short_username'}">Username must be at least 4 characters long.</span>
+                    <span th:if="${param.error[0] == 'weak_password'}">Password must be at least 6 characters long.</span>
+                    <span th:if="${param.error[0] == 'invalid_nic'}">Invalid NIC format. Use 12 digits (e.g. 200012345678) or 9 digits with 'V' (e.g. 123456789V).</span>
+                    <span th:if="${param.error[0] == 'invalid_phone'}">Invalid phone number. Please enter a valid 10-digit phone number.</span>
+                    <span th:if="${param.error[0] == 'invalid_email'}">Please enter a valid email address.</span>
+                    <span th:if="${param.error[0] == 'registration_failed'}">Registration failed due to a server error. Please try again.</span>
+                    <span th:if="${param.error[0] == 'invalid_details' or param.error[0] == 'true'}">The request could not be completed. Please check your details and try again.</span>
+                </div>
+                
+                <div id="actionNotice" class="notice" role="status" hidden>Changes saved successfully.</div>
+            </div>
+
+            <form th:action="@{/register}" method="post">
+                <div class="form-grid">
+                    <label class="field">
+                        Full name
+                        <input type="text" name="fullName" placeholder="e.g. John Doe" required>
+                    </label>
+                    <label class="field">
+                        Username
+                        <input type="text" name="username" placeholder="e.g. johndoe" required minlength="4" maxlength="50" autocomplete="username">
+                    </label>
+                    <label class="field">
+                        Email
+                        <input type="email" name="email" placeholder="e.g. john@example.com" required>
+                    </label>
+                    <label class="field">
+                        Phone
+                        <input type="tel" name="phoneNo" placeholder="e.g. 0771234567" required>
+                    </label>
+                    <label class="field">
+                        NIC
+                        <input type="text" name="nic" placeholder="e.g. 200012345678 or 123456789V" required pattern="([0-9]{9}[xXvV]|[0-9]{12})">
+                    </label>
+                    <label class="field">
+                        Address
+                        <input type="text" name="address" placeholder="e.g. 123 Main Street, Colombo" required>
+                    </label>
+                    <label class="field" style="grid-column: 1 / -1;">
+                        Password (minimum 6 characters)
+                        <input type="password" name="password" placeholder="••••••••" required minlength="6" maxlength="72" autocomplete="new-password">
+                    </label>
+                </div>
+                <div class="form-footer">
+                    <button class="btn" type="submit">Create patient account →</button>
+                </div>
+            </form>
+            
+            <div class="auth-links">
+                Already registered? <a href="/login">Sign in</a>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
