@@ -1,59 +1,135 @@
-package com.echanneling.service;
+package com.echanneling.controller;
 
-import com.echanneling.entity.AvailabilitySlot;
-import com.echanneling.entity.Doctor;
-import com.echanneling.repository.AvailabilitySlotRepository;
+import com.echanneling.entity.*;
+import com.echanneling.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-@Service
-public class AvailabilitySlotService {
+@Controller
+@RequestMapping("/patient")
+public class PatientBookingController {
 
     @Autowired
-    private AvailabilitySlotRepository slotRepository;
+    private UserService userService;
 
-    public AvailabilitySlot save(AvailabilitySlot slot) {
-        return slotRepository.save(slot);
+    @Autowired
+    private DoctorService doctorService;
+
+    @Autowired
+    private AppointmentService appointmentService;
+
+    @Autowired
+    private MedicalRecordService medicalRecordService;
+
+    @Autowired
+    private InvoiceService invoiceService;
+
+    // Dashboard mapping has been moved to PatientProfileController for workload distribution and advanced analytics integration.
+
+    @GetMapping("/book-appointment")
+    public String bookAppointmentForm() {
+        return "redirect:/patient/dashboard?section=booking";
     }
 
-    public List<AvailabilitySlot> getSlotsByDoctor(Doctor doctor) {
-        return slotRepository.findByDoctor(doctor);
+    @Autowired private BookingService bookingService;
+
+    @InitBinder("appointment")
+    public void bookingFields(org.springframework.web.bind.WebDataBinder binder) {
+        binder.setAllowedFields("id", "doctor.id", "hospitalBranch.id", "appointmentDate", "contactEmail", "contactPhone");
     }
 
-    public List<AvailabilitySlot> getAvailableSlotsByDate(LocalDate date) {
-        return slotRepository.findBySlotDateAndIsActive(date, true);
+    @PostMapping("/book-appointment")
+    public String saveAppointment(@ModelAttribute("appointment") Appointment appointment,
+                                  org.springframework.validation.BindingResult binding,
+                                  Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
+        if (principal == null) return "redirect:/login";
+        String rescheduleParam = (appointment != null && appointment.getId() != null) ? "&reschedule=" + appointment.getId() : "";
+        if (binding.hasErrors()) {
+            flash.addFlashAttribute("errorMessage", "Please check your appointment details.");
+            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
+        }
+        try {
+            bookingService.book(userService.findByUsername(principal.getName()).orElseThrow(), appointment);
+            flash.addFlashAttribute("successMessage", appointment.getId() != null ? "Your appointment was rescheduled successfully." : "Your appointment is confirmed.");
+            return "redirect:/patient/dashboard?section=history";
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            flash.addFlashAttribute("errorMessage", e.getReason() != null ? e.getReason() : "Invalid appointment request.");
+            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
+        } catch (Exception e) {
+            Throwable cause = e;
+            while (cause.getCause() != null && !(cause instanceof IllegalArgumentException || cause instanceof org.springframework.web.server.ResponseStatusException)) {
+                cause = cause.getCause();
+            }
+            if (cause instanceof IllegalArgumentException) {
+                flash.addFlashAttribute("errorMessage", cause.getMessage());
+            } else if (cause instanceof org.springframework.web.server.ResponseStatusException rse) {
+                flash.addFlashAttribute("errorMessage", rse.getReason() != null ? rse.getReason() : "Invalid appointment request.");
+            } else {
+                flash.addFlashAttribute("errorMessage", e.getMessage() != null ? e.getMessage() : "Could not complete reschedule operation. Please check your details and try again.");
+            }
+            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
+        }
     }
 
-    /**
-     * Atomic booking with double-booking prevention (synchronized)
-     * Returns true if booking succeeded, false if slot is full
-     */
-    @Transactional
-    public synchronized boolean bookSlot(Long slotId) {
-        Optional<AvailabilitySlot> opt = slotRepository.findById(slotId);
-        if (opt.isPresent()) {
-            AvailabilitySlot slot = opt.get();
-            if (slot.getBookedCount() < slot.getMaxPatients()) {
-                slot.setBookedCount(slot.getBookedCount() + 1);
-                if (slot.getBookedCount().equals(slot.getMaxPatients())) {
-                    slot.setIsActive(false); // Mark full
-                }
-                slotRepository.save(slot);
-                return true; // Booking successful
+    @GetMapping("/history")
+    public String viewHistory() {
+        return "redirect:/patient/dashboard?section=history";
+    }
+
+    @PostMapping("/appointment/{id}/cancel")
+    public String cancelAppointment(@PathVariable Long id, Principal principal) {
+        if (principal != null) {
+            Optional<Appointment> optApp = appointmentService.getAppointmentById(id);
+            if (optApp.isPresent() && optApp.get().getPatient().getUsername().equals(principal.getName())) {
+                Appointment app = optApp.get();
+                if (!"SCHEDULED".equals(app.getStatus())) return "redirect:/patient/dashboard?section=history&error=invalid_status";
+                appointmentService.cancel(app.getId());
             }
         }
-        return false; // Slot full - double-booking prevented
+        return "redirect:/patient/dashboard?section=history&cancelled";
     }
 
-    public Optional<AvailabilitySlot> getById(Long id) {
-        return slotRepository.findById(id);
+    @PostMapping("/appointment/{id}/delete")
+    public String deleteAppointment(@PathVariable Long id, Principal principal) {
+        if (principal != null) {
+            Optional<Appointment> optApp = appointmentService.getAppointmentById(id);
+            if (optApp.isPresent() && optApp.get().getPatient().getUsername().equals(principal.getName())) {
+                if (!"CANCELLED".equals(optApp.get().getStatus())) return "redirect:/patient/dashboard?section=history&error=cancel_first";
+                appointmentService.deleteAppointment(optApp.get());
+            }
+        }
+        return "redirect:/patient/dashboard?section=history&deleted";
     }
 
-    public void delete(Long id) {
-        slotRepository.deleteById(id);
+    @GetMapping("/appointment/{id}/reschedule")
+    public String rescheduleForm(@PathVariable Long id) {
+        return "redirect:/patient/dashboard?section=booking&reschedule=" + id;
+    }
+
+    @GetMapping("/appointment/{id}/record")
+    public String viewPrescription(@PathVariable Long id, Model model, Principal principal) {
+        if (principal != null) {
+            Optional<Appointment> optApp = appointmentService.getAppointmentById(id);
+            if (optApp.isPresent() && optApp.get().getPatient().getUsername().equals(principal.getName())) {
+                Optional<MedicalRecord> optRecord = medicalRecordService.getRecordByAppointment(optApp.get());
+                if (optRecord.isPresent()) {
+                    model.addAttribute("record", optRecord.get());
+                    return "patient/view-record";
+                }
+            }
+        }
+        return "redirect:/patient/dashboard?section=history&error=no_record";
     }
 }
