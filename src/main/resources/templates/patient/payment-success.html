@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Appointment Confirmed</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: patient}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Booking Confirmation</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Patient Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">CL</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">BOOKING COMPLETE &bull; RESERVATION GUARANTEED</div>
+        <h1>Appointment Confirmed</h1>
+        <p>Your clinic consultation has been locked on the national healthcare ledger.</p>
+      </div>
+    </div>
+
+    <div class="card" style="max-width: 680px; margin: 0 auto; padding: 36px 32px;">
+      <!-- Animated SVG Checkmark -->
+      <div class="animated-checkmark-wrap">
+        <svg class="animated-checkmark" viewBox="0 0 52 52">
+          <circle class="checkmark-circle" cx="26" cy="26" r="24" fill="none"/>
+          <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div class="eyebrow" style="justify-content: center;">OFFICIAL BOOKING RECEIPT</div>
+        <h2 style="font-size: 26px; color: var(--primary-navy); margin: 0 0 6px;">
+          Reference #REF-<span th:text="${invoice.appointment != null ? invoice.appointment.id : invoice.id}">001</span>
+        </h2>
+        <span class="badge" th:data-status="${invoice.status}" th:text="|Invoice Status: ${invoice.status}|" style="font-size: 13px; padding: 6px 14px;">Status</span>
+      </div>
+
+      <!-- Booking Summary & QR Code Grid -->
+      <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 24px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;">
+        <div>
+          <div style="font-size: 12px; color: var(--ink-muted); text-transform: uppercase; font-weight: 700;">Consulting Specialist</div>
+          <div style="font-size: 16px; font-weight: 800; color: var(--primary-navy);"
+               th:text="${invoice.appointment != null and invoice.appointment.doctor != null ? invoice.appointment.doctor.name : 'Medical Consultant'}">Dr. Specialist</div>
+          
+          <div style="font-size: 13px; color: var(--primary-blue); font-weight: 600; margin-top: 2px;"
+               th:text="${invoice.appointment != null and invoice.appointment.doctor != null ? invoice.appointment.doctor.specialization : 'Consultant'}">Specialization</div>
+
+          <div style="margin-top: 10px; font-size: 13px; color: var(--ink-secondary);">
+            <div>📅 <strong>Date &amp; Time:</strong> <span th:text="${invoice.appointment != null and invoice.appointment.appointmentDate != null ? #temporals.format(invoice.appointment.appointmentDate, 'dd MMMM yyyy · HH:mm a') : 'Scheduled Time'}">Today</span></div>
+            <div>🏥 <strong>Hospital Branch:</strong> <span th:text="${invoice.appointment != null and invoice.appointment.hospitalBranch != null ? invoice.appointment.hospitalBranch.branchName : 'Hospital Facility'}">Central Branch</span></div>
+            <div>💳 <strong>Total Amount:</strong> <strong style="color: var(--primary-navy);" th:text="|LKR ${invoice.amount}|">LKR 2,500</strong></div>
+          </div>
+        </div>
+
+        <!-- Simulated SVG QR Code for Counter Verification -->
+        <div style="text-align: center; border-left: 1px solid var(--border); padding-left: 20px;">
+          <svg width="90" height="90" viewBox="0 0 100 100" style="background: #fff; border: 1px solid #e2e8f0; padding: 6px; border-radius: 8px;">
+            <rect x="0" y="0" width="30" height="30" fill="#0B1F3A"/>
+            <rect x="6" y="6" width="18" height="18" fill="#fff"/>
+            <rect x="10" y="10" width="10" height="10" fill="#0B1F3A"/>
+            <rect x="70" y="0" width="30" height="30" fill="#0B1F3A"/>
+            <rect x="76" y="6" width="18" height="18" fill="#fff"/>
+            <rect x="80" y="10" width="10" height="10" fill="#0B1F3A"/>
+            <rect x="0" y="70" width="30" height="30" fill="#0B1F3A"/>
+            <rect x="6" y="76" width="18" height="18" fill="#fff"/>
+            <rect x="10" y="80" width="10" height="10" fill="#0B1F3A"/>
+            <rect x="40" y="10" width="10" height="10" fill="#0B1F3A"/>
+            <rect x="40" y="30" width="10" height="20" fill="#0B1F3A"/>
+            <rect x="60" y="40" width="10" height="10" fill="#0B1F3A"/>
+            <rect x="40" y="70" width="20" height="10" fill="#0B1F3A"/>
+            <rect x="70" y="70" width="20" height="20" fill="#0B1F3A"/>
+          </svg>
+          <div style="font-size: 10px; color: var(--ink-muted); margin-top: 4px; font-weight: 700;">SCAN AT COUNTER</div>
+        </div>
+      </div>
+
+      <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: #1E40AF;">
+        <strong>Counter Cash Payment Guidance:</strong>
+        <p style="margin: 4px 0 0; line-height: 1.5;">
+          Please present this Reference ID or QR code at the hospital reception counter 15 minutes prior to your time slot to settle your consultation fee in cash.
+        </p>
+      </div>
+
+      <!-- Action Buttons (Add to Calendar, Download PDF, WhatsApp, Cancel/Reschedule) -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+        <button type="button" class="btn secondary" id="btnAddToCalendar" style="justify-content: center;">
+          📅 Add to Calendar
+        </button>
+        <a class="btn" th:href="@{/invoice/download/{id}(id=${invoice.id})}" style="justify-content: center;">
+          <span>↓</span> Download PDF
+        </a>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <a class="btn secondary" style="justify-content: center; background: #ECFDF5; border-color: #A7F3D0; color: #065F46;"
+           th:href="|https://api.whatsapp.com/send?text=My%20MediCare%20Pro%20Appointment%20is%20Confirmed!%20Reference:%20REF-${invoice.id}|"
+           target="_blank" rel="noopener">
+          💬 Share WhatsApp
+        </a>
+        <a class="btn secondary" href="/patient/dashboard?section=history" style="justify-content: center;">
+          Cancel / Reschedule →
+        </a>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified Sri Lanka E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const calBtn = document.getElementById('btnAddToCalendar');
+  if (calBtn) {
+    calBtn.addEventListener('click', () => {
+      const icsData = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//MediCare Pro//E-Channeling Appointment//EN',
+        'BEGIN:VEVENT',
+        'SUMMARY:MediCare Pro Doctor Consultation',
+        'DESCRIPTION:Hospital Doctor Appointment. Present Booking Reference ID at reception counter.',
+        'LOCATION:Hospital Consultation Clinic, Sri Lanka',
+        'STATUS:CONFIRMED',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+
+      const blob = new Blob([icsData], { type: 'text/calendar;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', 'MediCare-Pro-Appointment.ics');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  }
+});
+</script>
+</body>
+</html>

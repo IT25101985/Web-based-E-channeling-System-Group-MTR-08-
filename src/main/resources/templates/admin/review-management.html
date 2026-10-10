@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Patient Reviews &amp; Moderation</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Patient Feedback Moderation</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Admin Console</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">QUALITY OF CLINICAL CARE</div>
+        <h1>Patient Reviews Moderation</h1>
+        <p>Review submitted patient feedback to ensure constructive, appropriate commentary before publishing.</p>
+      </div>
+      <input type="search" data-filter="#feedbackTable" placeholder="Filter reviews..."
+             style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 260px;">
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete moderation action.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Feedback Submissions (<span th:text="${#lists.size(feedbacks)}">0</span>)</h2>
+        <span class="badge" data-status="Scheduled">Verified Visit Reviews</span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="feedbackTable">
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Rating &amp; Comments</th>
+              <th>Moderation Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="f : ${feedbacks}">
+              <td>
+                <strong th:text="${f.patient?.fullName ?: 'Patient'}">Patient</strong>
+                <p th:text="|Visit #${f.appointment?.id}|"></p>
+              </td>
+              <td>
+                <strong th:text="${f.doctor?.name ?: 'Doctor'}">Doctor</strong>
+                <p style="color: var(--healthcare-teal); font-weight: 600;" th:text="${f.doctor?.specialization}"></p>
+              </td>
+              <td style="max-width: 400px; white-space: normal;">
+                <div style="color: #F59E0B; font-weight: 700; font-size: 14px; margin-bottom: 4px;" th:text="|★ ${f.rating} / 5|">★ 5 / 5</div>
+                <p style="margin: 0; color: var(--ink-primary); line-height: 1.5; font-size: 13px;" th:text="${f.comments}">Comments</p>
+              </td>
+              <td>
+                <span class="badge" th:data-status="${f.moderationStatus}" th:text="${f.moderationStatus}">PENDING</span>
+              </td>
+              <td>
+                <div class="actions">
+                  <form th:if="${f.moderationStatus != 'APPROVED'}" th:action="@{/admin/reviews/{id}/approve(id=${f.id})}" method="post">
+                    <button class="btn small" type="submit">Approve ✓</button>
+                  </form>
+                  <form th:if="${f.moderationStatus != 'REJECTED'}" th:action="@{/admin/reviews/{id}/reject(id=${f.id})}" method="post">
+                    <button class="btn small secondary" type="submit">Reject</button>
+                  </form>
+                  <form th:action="@{/admin/reviews/{id}/delete(id=${f.id})}" method="post"
+                        data-confirm="Permanently delete this patient review?">
+                    <button class="btn small danger" type="submit">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(feedbacks)}">
+              <td colspan="5" class="empty">
+                <h3>No patient reviews to moderate</h3>
+                <p>Submitted reviews following completed clinic visits will appear here.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

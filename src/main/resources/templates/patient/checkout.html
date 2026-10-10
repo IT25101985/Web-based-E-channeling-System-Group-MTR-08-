@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Consultation Checkout &amp; Billing</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: patient}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Consultation Checkout</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Patient Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">CL</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">BILLING &amp; SETTLEMENT</div>
+        <h1>Consultation Checkout</h1>
+        <p>Review your clinical appointment details and select a settlement method.</p>
+      </div>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete checkout. Check your details and try again.</div>
+
+    <div class="grid two-col">
+      <!-- Checkout Form Card -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Appointment Fee Breakdown</h2>
+            <p>Direct doctor consultation fee</p>
+          </div>
+          <span class="badge" data-status="Scheduled">Verified Slot</span>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom: 20px;">
+            <div class="eyebrow">CONSULTING SPECIALIST</div>
+            <h2 style="font-size: 22px; color: var(--primary-navy); margin-bottom: 4px;" th:text="${appointment.doctor.name}">Dr. Specialist</h2>
+            <p style="font-size: 13.5px;" th:text="${appointment.doctor.specialization}">Specialization</p>
+            <p style="font-size: 13px; color: var(--ink-secondary);"
+               th:text="${#temporals.format(appointment.appointmentDate, 'EEEE, dd MMMM yyyy · HH:mm a')}">Date</p>
+          </div>
+
+          <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13.5px;">
+              <span style="color: var(--ink-secondary);">Specialist Consultation Fee</span>
+              <strong style="color: var(--primary-navy);" th:text="|LKR ${appointment.doctor.consultationFee}|">LKR 2,500</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13.5px;">
+              <span style="color: var(--ink-secondary);">Hospital Facility Charge</span>
+              <span style="color: var(--success); font-weight: 600;">Included</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 10px; font-size: 16px;">
+              <strong>Total Payable</strong>
+              <strong style="color: var(--primary-blue); font-size: 19px;" th:text="|LKR ${appointment.doctor.consultationFee}|">LKR 2,500</strong>
+            </div>
+          </div>
+
+          <form th:action="@{/pay}" method="post">
+            <input type="hidden" name="appointmentId" th:value="${appointment.id}">
+            <div class="field" style="margin-bottom: 20px;">
+              <span>Select Settlement Method *</span>
+              <select name="type" required>
+                <option value="cash">Counter Cash — Settle at hospital reception counter (Recommended)</option>
+                <option value="card">Demonstration Card — Simulate instant card settlement</option>
+              </select>
+            </div>
+
+            <div class="form-footer" style="padding-top: 0; border-top: none;">
+              <button class="btn" type="submit" style="width: 100%; justify-content: center; padding: 12px;">
+                Confirm &amp; Proceed to Settlement →
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Policy and Guidance Card -->
+      <div class="card card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div class="eyebrow">DEMONSTRATION &amp; COUNTER NOTICE</div>
+          <h2 style="font-size: 19px; color: var(--primary-navy); margin-bottom: 12px;">Payment Policy &amp; Security</h2>
+          <p style="font-size: 13.5px; line-height: 1.6; margin-bottom: 16px;">
+            MediCare Pro supports both hospital counter cash settlement and simulated card payments:
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--ink-secondary);">
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--primary-blue); font-weight: 700;">•</span>
+              <span><strong>Counter Cash:</strong> Generates an unpaid invoice. Pay at the hospital reception desk on the consultation day to obtain your official printed receipt.</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--primary-blue); font-weight: 700;">•</span>
+              <span><strong>Demonstration Card:</strong> Simulates a paid invoice for testing without debiting real bank accounts. Do not provide real card numbers.</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--ink-muted);">
+          Protected under Sri Lanka Healthcare E-Channeling protocols.
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
