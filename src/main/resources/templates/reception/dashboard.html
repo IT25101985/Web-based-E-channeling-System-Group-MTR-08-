@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Reception Operations &amp; Cash Desk</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+  <script src="/js/reception.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: reception}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Reception Operations &amp; Cash Desk</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Front Desk Active</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">RC</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">FRONT DESK WORKSPACE</div>
+        <h1>Reception Operations &amp; Counter Billing</h1>
+        <p>Rapid walk-in patient booking, slot verification, and on-the-spot counter cash collection.</p>
+      </div>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <!-- Walk-in Booking Form -->
+    <div class="card" style="margin-bottom: 28px;">
+      <div class="card-header">
+        <div>
+          <h2 th:text="${appointment.id == null ? '⚡ Rapid Walk-in Appointment Booking' : 'Reschedule Appointment'}">
+            ⚡ Rapid Walk-in Appointment Booking
+          </h2>
+          <p>Book on behalf of walk-in patients and lock live doctor clinic slots instantly.</p>
+        </div>
+        <span class="badge" data-status="Scheduled">Assisted Walk-in Flow</span>
+      </div>
+
+      <div class="card-body">
+        <form id="bookingForm" th:action="@{/reception/book}" method="post">
+          <input type="hidden" name="id" th:value="${appointment.id}">
+          <div class="form-grid">
+            <label class="field">
+              <span>Select Registered Patient *</span>
+              <select id="receptionPatient" name="patientId" required>
+                <option value="">-- Choose Patient Account --</option>
+                <option th:each="p : ${patients}" th:value="${p.id}" th:text="|${p.fullName} (${p.username}) - NIC: ${p.nic != null ? p.nic : 'N/A'}|"
+                        th:data-email="${p.email}" th:data-phone="${p.phoneNo}"
+                        th:selected="${appointment.patient != null and appointment.patient.id == p.id}"></option>
+              </select>
+              <small>Choose an active patient or create one via Admin.</small>
+            </label>
+
+            <label class="field">
+              <span>Location / Area Filter</span>
+              <input type="search" id="areaFilter" placeholder="Filter hospital branches by area">
+              <small>Type to filter branches list.</small>
+            </label>
+
+            <label class="field">
+              <span>Hospital Branch *</span>
+              <select id="selectedBranchId" name="branchId" required>
+                <option value="">-- Choose Hospital Branch --</option>
+                <option th:each="b : ${branches}" th:value="${b.id}" th:text="|${b.branchName} · ${b.area}|"
+                        th:data-area="${b.area}"
+                        th:selected="${appointment.hospitalBranch != null and appointment.hospitalBranch.id == b.id}"></option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Medical Specialization</span>
+              <select id="specializationFilter">
+                <option value="">All Specializations</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Consulting Doctor *</span>
+              <select id="selectedDoctorId" name="doctorId" required
+                      th:data-selected="${appointment.doctor != null ? appointment.doctor.id : ''}">
+                <option value="">Choose hospital branch first</option>
+              </select>
+              <small id="doctorStatus">Select a hospital branch above to view active doctors.</small>
+            </label>
+
+            <label class="field">
+              <span>Consultation Date *</span>
+              <input type="date" id="datePicker" required
+                     th:value="${appointment.appointmentDate != null ? #temporals.format(appointment.appointmentDate, 'yyyy-MM-dd') : ''}">
+            </label>
+
+            <label class="field">
+              <span>Available Time Slot *</span>
+              <select id="timeSelect" name="appointmentDate" required disabled>
+                <option value="">Select doctor &amp; date first</option>
+              </select>
+              <small id="slotStatus">Real-time availability will be verified.</small>
+            </label>
+
+            <label class="field">
+              <span>Contact Email *</span>
+              <input type="email" id="receptionEmail" name="contactEmail" required
+                     th:value="${appointment.contactEmail}" placeholder="patient@example.com">
+            </label>
+
+            <label class="field">
+              <span>Contact Phone Number *</span>
+              <input type="tel" id="receptionPhone" name="contactPhone" required
+                     th:value="${appointment.contactPhone}" placeholder="0771234567">
+            </label>
+          </div>
+
+          <div class="form-footer">
+            <button class="btn" id="confirmBooking" type="submit" style="padding: 12px 24px;">
+              <span th:text="${appointment.id == null ? '⚡ Book & Lock Walk-in Slot' : 'Confirm Reschedule'}">Book Slot</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Reception Queue & Counter Cash Ledger -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2>Front Desk Appointment Queue &amp; Counter Payments</h2>
+          <p>Collect counter cash payments, verify arrivals, or reschedule visits</p>
+        </div>
+        <input type="search" data-filter="#receptionAppointmentsTable" placeholder="Search patient, doctor, booking..."
+               style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 280px;">
+      </div>
+
+      <div class="table-wrap">
+        <table id="receptionAppointmentsTable">
+          <thead>
+            <tr>
+              <th>Booking Ref &amp; Patient</th>
+              <th>Doctor &amp; Hospital</th>
+              <th>Schedule Time</th>
+              <th>Status &amp; Billing</th>
+              <th>Desk Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="a : ${appointments}">
+              <td>
+                <strong th:text="|#${a.id} - ${a.patient != null ? a.patient.fullName : 'Patient'}|">#001 - Name</strong>
+                <p th:text="${a.contactPhone}">0771234567</p>
+              </td>
+              <td>
+                <strong th:text="${a.doctor != null ? a.doctor.name : 'Doctor'}">Doctor</strong>
+                <p th:text="${a.hospitalBranch != null ? a.hospitalBranch.branchName : 'Main Hospital'}">Hospital</p>
+              </td>
+              <td>
+                <strong th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy') : 'Unset'}">Date</strong>
+                <p th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'HH:mm a') : ''}"></p>
+              </td>
+              <td>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <span class="badge" th:data-status="${a.status}" th:text="${a.status}">SCHEDULED</span>
+                  <span th:if="${invoiceMap.containsKey(a.id)}" class="badge" th:data-status="${invoiceMap.get(a.id).status}"
+                        th:text="|Invoice: ${invoiceMap.get(a.id).status} (LKR ${invoiceMap.get(a.id).amount})|">PAID</span>
+                  <span th:if="${!invoiceMap.containsKey(a.id) and a.status == 'SCHEDULED'}" class="badge" data-status="Pending">
+                    Unpaid at Counter
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="actions">
+                  <!-- Cash collection button -->
+                  <form th:if="${a.status == 'SCHEDULED' and (!invoiceMap.containsKey(a.id) or invoiceMap.get(a.id).status == 'UNPAID')}"
+                        th:action="@{/reception/appointments/{id}/cash(id=${a.id})}" method="post">
+                    <button class="btn small" type="submit">💵 Collect Cash &amp; Receipt</button>
+                  </form>
+
+                  <!-- Invoice PDF download -->
+                  <a th:if="${invoiceMap.containsKey(a.id)}" class="btn small secondary"
+                     th:href="@{/invoice/download/{id}(id=${invoiceMap.get(a.id).id})}">Receipt PDF ↓</a>
+
+                  <!-- Reschedule -->
+                  <a th:if="${a.status == 'SCHEDULED'}" class="btn small secondary"
+                     th:href="@{/reception/dashboard(reschedule=${a.id})}">Reschedule</a>
+
+                  <!-- Cancel -->
+                  <form th:if="${a.status == 'SCHEDULED'}" th:action="@{/reception/appointments/{id}/cancel(id=${a.id})}" method="post"
+                        data-confirm="Cancel this appointment and release the clinic slot?">
+                    <button class="btn small danger" type="submit">Cancel</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appointments)}">
+              <td colspan="5" class="empty">
+                <h3>No appointments recorded</h3>
+                <p>Walk-in bookings and patient reservations will appear here.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
