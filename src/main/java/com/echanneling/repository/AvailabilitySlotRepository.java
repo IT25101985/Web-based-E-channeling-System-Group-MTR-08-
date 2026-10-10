@@ -9,6 +9,8 @@ import java.util.List;
 
 @Repository
 public interface AvailabilitySlotRepository extends JpaRepository<AvailabilitySlot, Long> {
+    List<AvailabilitySlot> findByHospitalBranchIdAndIsActiveTrueAndSlotDateGreaterThanEqual(Long branchId, LocalDate date);
+    boolean existsByHospitalBranchId(Long branchId);
     List<AvailabilitySlot> findByDoctor(Doctor doctor);
     List<AvailabilitySlot> findByDoctorAndSlotDateAndIsActive(Doctor doctor, LocalDate date, Boolean isActive);
     List<AvailabilitySlot> findBySlotDateAndIsActive(LocalDate date, Boolean isActive);
