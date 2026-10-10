@@ -1,135 +1,88 @@
-package com.echanneling.controller;
+package com.echanneling.entity;
 
-import com.echanneling.entity.*;
-import com.echanneling.service.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+@Entity
+public class Appointment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@Controller
-@RequestMapping("/patient")
-public class PatientBookingController {
+    @Version
+    private Long version;
 
-    @Autowired
-    private UserService userService;
+    @ManyToOne
+    private Doctor doctor;
 
-    @Autowired
-    private DoctorService doctorService;
+    @ManyToOne
+    private HospitalBranch hospitalBranch;
 
-    @Autowired
-    private AppointmentService appointmentService;
+    public HospitalBranch getHospitalBranch() { return hospitalBranch; }
+    public void setHospitalBranch(HospitalBranch hospitalBranch) { this.hospitalBranch = hospitalBranch; }
 
-    @Autowired
-    private MedicalRecordService medicalRecordService;
+    @ManyToOne
+    private User patient;
 
-    @Autowired
-    private InvoiceService invoiceService;
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime appointmentDate;
+    private String contactPhone;
+    private String contactEmail;
+    private String status; // SCHEDULED, COMPLETED, CANCELLED
 
-    // Dashboard mapping has been moved to PatientProfileController for workload distribution and advanced analytics integration.
+    // Additional fields for database reporting/display
+    private String doctorName;
+    private String patientName;
+    private String date;
 
-    @GetMapping("/book-appointment")
-    public String bookAppointmentForm() {
-        return "redirect:/patient/dashboard?section=booking";
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Doctor getDoctor() { return doctor; }
+    public void setDoctor(Doctor doctor) { this.doctor = doctor; }
+
+    public User getPatient() { return patient; }
+    public void setPatient(User patient) { this.patient = patient; }
+
+    public String getDoctorName() { return doctorName; }
+    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
+
+    public String getPatientName() { return patientName; }
+    public void setPatientName(String patientName) { this.patientName = patientName; }
+
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
+
+    public LocalDateTime getAppointmentDate() { return appointmentDate; }
+
+    /**
+     * Encapsulation demo: Simple validation
+     */
+    public void setAppointmentDate(LocalDateTime date) {
+        this.appointmentDate = date;
     }
 
-    @Autowired private BookingService bookingService;
+    public String getContactPhone() { return contactPhone; }
+    public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
 
-    @InitBinder("appointment")
-    public void bookingFields(org.springframework.web.bind.WebDataBinder binder) {
-        binder.setAllowedFields("id", "doctor.id", "hospitalBranch.id", "appointmentDate", "contactEmail", "contactPhone");
-    }
+    public String getContactEmail() { return contactEmail; }
+    public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
 
-    @PostMapping("/book-appointment")
-    public String saveAppointment(@ModelAttribute("appointment") Appointment appointment,
-                                  org.springframework.validation.BindingResult binding,
-                                  Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
-        if (principal == null) return "redirect:/login";
-        String rescheduleParam = (appointment != null && appointment.getId() != null) ? "&reschedule=" + appointment.getId() : "";
-        if (binding.hasErrors()) {
-            flash.addFlashAttribute("errorMessage", "Please check your appointment details.");
-            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    @PrePersist
+    @PreUpdate
+    public void populateNames() {
+        if (doctor != null) {
+            this.doctorName = doctor.getName();
         }
-        try {
-            bookingService.book(userService.findByUsername(principal.getName()).orElseThrow(), appointment);
-            flash.addFlashAttribute("successMessage", appointment.getId() != null ? "Your appointment was rescheduled successfully." : "Your appointment is confirmed.");
-            return "redirect:/patient/dashboard?section=history";
-        } catch (IllegalArgumentException e) {
-            flash.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
-        } catch (org.springframework.web.server.ResponseStatusException e) {
-            flash.addFlashAttribute("errorMessage", e.getReason() != null ? e.getReason() : "Invalid appointment request.");
-            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
-        } catch (Exception e) {
-            Throwable cause = e;
-            while (cause.getCause() != null && !(cause instanceof IllegalArgumentException || cause instanceof org.springframework.web.server.ResponseStatusException)) {
-                cause = cause.getCause();
-            }
-            if (cause instanceof IllegalArgumentException) {
-                flash.addFlashAttribute("errorMessage", cause.getMessage());
-            } else if (cause instanceof org.springframework.web.server.ResponseStatusException rse) {
-                flash.addFlashAttribute("errorMessage", rse.getReason() != null ? rse.getReason() : "Invalid appointment request.");
-            } else {
-                flash.addFlashAttribute("errorMessage", e.getMessage() != null ? e.getMessage() : "Could not complete reschedule operation. Please check your details and try again.");
-            }
-            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
+        if (patient != null) {
+            this.patientName = patient.getFullName();
         }
-    }
-
-    @GetMapping("/history")
-    public String viewHistory() {
-        return "redirect:/patient/dashboard?section=history";
-    }
-
-    @PostMapping("/appointment/{id}/cancel")
-    public String cancelAppointment(@PathVariable Long id, Principal principal) {
-        if (principal != null) {
-            Optional<Appointment> optApp = appointmentService.getAppointmentById(id);
-            if (optApp.isPresent() && optApp.get().getPatient().getUsername().equals(principal.getName())) {
-                Appointment app = optApp.get();
-                if (!"SCHEDULED".equals(app.getStatus())) return "redirect:/patient/dashboard?section=history&error=invalid_status";
-                appointmentService.cancel(app.getId());
-            }
+        if (appointmentDate != null) {
+            this.date = appointmentDate.toLocalDate().toString();
         }
-        return "redirect:/patient/dashboard?section=history&cancelled";
-    }
-
-    @PostMapping("/appointment/{id}/delete")
-    public String deleteAppointment(@PathVariable Long id, Principal principal) {
-        if (principal != null) {
-            Optional<Appointment> optApp = appointmentService.getAppointmentById(id);
-            if (optApp.isPresent() && optApp.get().getPatient().getUsername().equals(principal.getName())) {
-                if (!"CANCELLED".equals(optApp.get().getStatus())) return "redirect:/patient/dashboard?section=history&error=cancel_first";
-                appointmentService.deleteAppointment(optApp.get());
-            }
-        }
-        return "redirect:/patient/dashboard?section=history&deleted";
-    }
-
-    @GetMapping("/appointment/{id}/reschedule")
-    public String rescheduleForm(@PathVariable Long id) {
-        return "redirect:/patient/dashboard?section=booking&reschedule=" + id;
-    }
-
-    @GetMapping("/appointment/{id}/record")
-    public String viewPrescription(@PathVariable Long id, Model model, Principal principal) {
-        if (principal != null) {
-            Optional<Appointment> optApp = appointmentService.getAppointmentById(id);
-            if (optApp.isPresent() && optApp.get().getPatient().getUsername().equals(principal.getName())) {
-                Optional<MedicalRecord> optRecord = medicalRecordService.getRecordByAppointment(optApp.get());
-                if (optRecord.isPresent()) {
-                    model.addAttribute("record", optRecord.get());
-                    return "patient/view-record";
-                }
-            }
-        }
-        return "redirect:/patient/dashboard?section=history&error=no_record";
     }
 }
