@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 
-@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:portal;MODE=MSSQLServer;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE", "spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect", "spring.jpa.hibernate.ddl-auto=create-drop", "app.seed-demo=true"})
+@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:portal;MODE=MSSQLServer;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE", "spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa", "spring.datasource.password=", "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect", "spring.jpa.hibernate.ddl-auto=create-drop", "app.seed-demo=true", "app.notifications.scheduling-enabled=false", "app.mail.enabled=false"})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
@@ -48,7 +48,7 @@ class PortalIntegrationTest {
         LocalDate day=LocalDate.now().plusDays(21);
         while(day.getDayOfWeek()==DayOfWeek.SUNDAY)day=day.plusDays(1);
         Doctor doc=doctors.findAll().get(0);
-        Appointment a=new Appointment();a.setDoctor(doc);a.setAppointmentDate(day.atTime(10,0));a.setContactEmail("patient@example.com");a.setContactPhone("0771234567");return a;
+        Appointment a=new Appointment();a.setDoctor(doc);a.setHospitalBranch(branches.findAll().get(0));a.setAppointmentDate(day.atTime(10,0));a.setContactEmail("patient@example.com");a.setContactPhone("0771234567");return a;
     }
     @Test void bookingPersistsAndRejectsDuplicatePastAndForeignReschedule() throws Exception {
         User patient=users.findByUsername("dhanu").orElseThrow();
