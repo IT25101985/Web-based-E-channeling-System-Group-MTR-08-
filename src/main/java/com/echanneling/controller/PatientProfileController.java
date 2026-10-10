@@ -122,7 +122,7 @@ public class PatientProfileController {
                         p.setHeartRate(hr.isEmpty() ? null : hr);
                     }
                     if (emergencyContact != null) p.setEmergencyContact(emergencyContact.isEmpty() ? null : emergencyContact);
-                    
+
                     if (rawPassword != null) {
                         p.setPassword(rawPassword);
                         userService.saveUser(p); // Hashing and saving patient credentials securely
@@ -138,7 +138,7 @@ public class PatientProfileController {
                         currentUser.setPassword(rawPassword);
                     }
                     userService.saveUser(currentUser);
-                    
+
                     String newBg = updatedUser.getBloodGroup();
                     String newBp = (bp != null && !bp.isEmpty()) ? bp : null;
                     String newHr = null;
@@ -231,8 +231,8 @@ public class PatientProfileController {
                 .count();
 
         // Analytical processing mapping ratio calculation logic safely avoiding division by zero
-        double attendanceRate = (totalVisits + cancelledVisits > 0) 
-                ? ((double) totalVisits / (totalVisits + cancelledVisits)) * 100 
+        double attendanceRate = (totalVisits + cancelledVisits > 0)
+                ? ((double) totalVisits / (totalVisits + cancelledVisits)) * 100
                 : 100.0;
 
         // Binding complex parameters directly to data keys for the view engine

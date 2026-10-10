@@ -173,7 +173,7 @@ public class DoctorScheduleController {
             requireOwner(optApp.get(), principal);
             Appointment app = optApp.get();
             if (!"SCHEDULED".equals(app.getStatus()) || medicalRecordService.getRecordByAppointment(app).isPresent()) return "redirect:/doctor/appointments?error=already_processed";
-            
+
             // Create and save medical record
             MedicalRecord record = new MedicalRecord();
             record.setPatient(app.getPatient());
@@ -181,7 +181,7 @@ public class DoctorScheduleController {
             record.setDiagnosis(diagnosis);
             record.setRecordDate(LocalDateTime.now());
             medicalRecordService.saveMedicalRecord(record);
-            
+
             // Create and save prescription
             Prescription prescription = new Prescription();
             prescription.setMedicalRecord(record);
@@ -190,7 +190,7 @@ public class DoctorScheduleController {
             prescription.setDuration(duration);
             prescription.setPrice(price); // Set medicine price
             medicalRecordService.savePrescription(prescription);
-            
+
             // Mark appointment as COMPLETED
             app.setStatus("COMPLETED");
             appointmentService.saveAppointment(app);

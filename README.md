@@ -55,4 +55,3 @@ Workflow: **Appoinment_Management → def → main**. Other module branches merg
 ## Current limits
 
 Card checkout is simulated. SMS delivery and password-reset emails are not implemented. External SMTP requires configuration; sent means the SMTP server accepted the message. H2 tests do not verify live SQL Server, real payments or real mailbox delivery.
-

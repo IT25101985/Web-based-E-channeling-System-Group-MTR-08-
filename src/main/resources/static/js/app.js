@@ -3,15 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Section router for tabbed portals
   const q = new URLSearchParams(location.search);
   const section = ['dashboard', 'booking', 'history', 'profile'].includes(q.get('section')) ? q.get('section') : 'dashboard';
-  
+
   document.querySelectorAll('.section-content').forEach(e => {
     e.classList.toggle('active', e.id === 'section-' + section);
   });
-  
+
   document.querySelectorAll('[data-section]').forEach(e => {
     e.classList.toggle('active', e.dataset.section === section);
   });
-  
+
   document.querySelectorAll('.sidebar nav a').forEach(e => {
     const u = new URL(e.href, location.origin);
     const active = location.pathname === u.pathname && (location.pathname !== '/patient/dashboard' || (u.searchParams.get('section') || 'dashboard') === section);
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const open = sidebar.classList.toggle('open');
       mobileToggle.setAttribute('aria-expanded', String(open));
     });
-    
+
     document.addEventListener('click', e => {
       if (sidebar.classList.contains('open') && !e.target.closest('.sidebar, .mobile-menu')) {
         sidebar.classList.remove('open');
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateSlotChips(slots);
 
       if (status) {
-        status.textContent = slots.length 
+        status.textContent = slots.length
           ? `${slots.length} available slots found at this hospital branch. Slot will be reserved on confirmation.`
           : 'No published clinic sessions for this doctor on the selected date. Please choose another date.';
       }
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (doctorStatus) {
-        doctorStatus.textContent = data.length 
+        doctorStatus.textContent = data.length
           ? `${data.length} registered specialists available at this hospital branch.`
           : 'No active specialists registered with published clinic sessions at this location.';
       }

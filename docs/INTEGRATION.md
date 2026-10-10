@@ -18,4 +18,3 @@ The baseline failed compilation because referenced doctor, hospital, notificatio
 ## Verification
 
 Results will be recorded after the integrated build finishes. The default tests use H2; live SQL Server and external email require separate checks.
-

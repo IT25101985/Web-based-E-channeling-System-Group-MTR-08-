@@ -24,4 +24,3 @@ TC_BOOK_AppointmentBookingTest covers the booking lifecycle. Its duplicate-slot 
 Integration retains doctor, hospital and notification branch histories, restores hospital source paths, connects shared services, restores templates/assets and adds the existing local regression suites. See docs/INTEGRATION.md for the baseline and verification.
 
 Each member should explain their module and record their actual contribution. Integration commits do not establish sole authorship of imported modules.
-

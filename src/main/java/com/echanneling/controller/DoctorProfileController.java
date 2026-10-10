@@ -39,12 +39,12 @@ public class DoctorProfileController {
         if (principal != null) {
             String username = principal.getName();
             model.addAttribute("username", username);
-            
+
             Optional<User> optUser = userService.findByUsername(username);
             if (optUser.isPresent()) {
                 User user = optUser.get();
                 model.addAttribute("profileImage", user.getProfileImage());
-                
+
                 // Provide defaults to prevent Thymeleaf 500 errors
                 model.addAttribute("reviews", java.util.Collections.emptyList());
                 model.addAttribute("averageRating", "0.0");
@@ -55,11 +55,11 @@ public class DoctorProfileController {
                 if (optDoctor.isPresent()) {
                     Doctor doctor = optDoctor.get();
                     model.addAttribute("doctor", doctor);
-                    
+
                     // Fetch Reviews
                     List<Feedback> reviews = feedbackService.getFeedbackByDoctor(doctor).stream().filter(f -> "APPROVED".equals(f.getModerationStatus())).toList();
                     model.addAttribute("reviews", reviews);
-                    
+
                     // Calculate Average Rating
                     double avg = 0.0;
                     if (!reviews.isEmpty()) {

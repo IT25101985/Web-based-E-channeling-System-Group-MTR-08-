@@ -57,7 +57,7 @@
           <div style="font-size: 12px; color: var(--ink-muted); text-transform: uppercase; font-weight: 700;">Consulting Specialist</div>
           <div style="font-size: 16px; font-weight: 800; color: var(--primary-navy);"
                th:text="${invoice.appointment != null and invoice.appointment.doctor != null ? invoice.appointment.doctor.name : 'Medical Consultant'}">Dr. Specialist</div>
-          
+
           <div style="font-size: 13px; color: var(--primary-blue); font-weight: 600; margin-top: 2px;"
                th:text="${invoice.appointment != null and invoice.appointment.doctor != null ? invoice.appointment.doctor.specialization : 'Consultant'}">Specialization</div>
 

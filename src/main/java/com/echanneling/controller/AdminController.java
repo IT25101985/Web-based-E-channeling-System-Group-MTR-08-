@@ -174,7 +174,7 @@ public class AdminController {
             }
 
             User savedUser = userService.saveUser(userObj);
-            
+
             Doctor doctor = new Doctor();
             doctor.setUser(savedUser);
             doctor.setName(savedUser.getFullName());
@@ -199,7 +199,7 @@ public class AdminController {
         if (d.isPresent()) {
             Doctor doc = d.get();
             User u = doc.getUser();
-            
+
             // Clean up doctor record first
             if (u == null) doctorService.deleteDoctor(id);
 

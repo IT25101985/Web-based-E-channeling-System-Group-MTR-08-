@@ -15,7 +15,7 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -29,7 +29,7 @@ public class UserService {
         }
         return userRepository.save(user);
     }
-    
+
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -41,7 +41,7 @@ public class UserService {
         user.setActive(active);
         userRepository.save(user);
     }
-    
+
     public User updateUserProfile(User currentUser, User updatedInfo) {
         currentUser.setFullName(updatedInfo.getFullName());
         currentUser.setAddress(updatedInfo.getAddress());
@@ -67,7 +67,7 @@ public class UserService {
         jdbcTemplate.update("DELETE FROM availability_slots WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id);
         jdbcTemplate.update("DELETE FROM schedule WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id);
         jdbcTemplate.update("DELETE FROM doctor WHERE user_id = ?", id);
-        
+
         jdbcTemplate.update("DELETE FROM notifications WHERE recipient_user_id = ?", id);
         userRepository.deleteById(id);
     }

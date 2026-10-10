@@ -13,4 +13,3 @@ app.mail.enabled=false
 # spring.mail.password=your-smtp-password
 # spring.mail.properties.mail.smtp.auth=true
 # spring.mail.properties.mail.smtp.starttls.enable=true
-

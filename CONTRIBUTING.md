@@ -10,4 +10,3 @@ The integration branch is named def; the appointment branch is Appoinment_Manage
 6. Fetch and sync feature branches after the release.
 
 Keep passwords, local databases, generated build output, IDE files and backup copies out of commits. Do not split unchanged code into artificial commits. New commits use the current date; existing published dates and authors are retained.
-

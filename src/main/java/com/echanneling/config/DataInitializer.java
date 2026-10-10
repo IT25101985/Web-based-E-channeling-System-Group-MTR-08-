@@ -348,4 +348,3 @@ public class DataInitializer implements CommandLineRunner {
         doctorRepository.save(doctor);
     }
 }
-

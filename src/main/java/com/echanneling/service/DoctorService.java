@@ -17,11 +17,11 @@ public class DoctorService {
     public List<Doctor> getAllDoctors() {
         return doctorRepository.findAll();
     }
-    
+
     public Optional<Doctor> getDoctorById(Long id) {
         return doctorRepository.findById(id);
     }
-    
+
     public Doctor saveDoctor(Doctor doctor) {
         if (doctor.getConsultationFee() == null || !Double.isFinite(doctor.getConsultationFee()) || doctor.getConsultationFee() <= 0) throw new IllegalArgumentException("Consultation fee must be positive");
         if (doctor.getName() == null || doctor.getName().isBlank() || doctor.getSpecialization() == null || doctor.getSpecialization().isBlank()) throw new IllegalArgumentException("Doctor name and specialization are required");

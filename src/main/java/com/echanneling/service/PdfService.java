@@ -50,7 +50,7 @@ public class PdfService implements PDFGenerator {
             PdfPTable table = new PdfPTable(2);
             table.setWidthPercentage(100);
             table.setWidths(new int[]{1, 2});
-            
+
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
 
             addTableRow(table, "Appointment ID", "#" + appointment.getId());
@@ -62,7 +62,7 @@ public class PdfService implements PDFGenerator {
 
             document.add(table);
             document.close();
-            
+
         } catch (DocumentException ex) {
             ex.printStackTrace();
         }
@@ -105,7 +105,7 @@ public class PdfService implements PDFGenerator {
         PdfPCell hCell = new PdfPCell(new Phrase(header, headerFont));
         hCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
         hCell.setPadding(8);
-        
+
         PdfPCell cCell = new PdfPCell(new Phrase(content, contentFont));
         cCell.setPadding(8);
 
