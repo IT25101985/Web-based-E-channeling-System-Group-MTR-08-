@@ -19,27 +19,24 @@ import java.util.Optional;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserRepository userRepository) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(org.springframework.security.config.Customizer.withDefaults())
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/register", "/login", "/forgot-password", "/error", "/css/**", "/js/**", "/images/**", "/api/**", "/invoice/download/**").permitAll()
+                        .requestMatchers("/", "/register", "/login", "/forgot-password", "/error", "/css/**", "/js/**", "/images/**", "/api/doctors/*/slots", "/api/branches/*/doctors").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/reception/**").hasAnyRole("RECEPTIONIST", "ADMIN")
                         .requestMatchers("/doctor/**").hasRole("DOCTOR")
                         .requestMatchers("/patient/**", "/pay", "/feedback/add").hasRole("PATIENT")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard")
+                        .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
-                .rememberMe(remember -> remember
-                        .key("superSecretKey")
-                        .alwaysRemember(true)
-                        .tokenValiditySeconds(86400 * 30)) // 30 days
                 .sessionManagement(session -> session
-                        .invalidSessionUrl("/login?expired")
                         .maximumSessions(1)
                 )
                 .logout(logout -> logout
@@ -47,6 +44,7 @@ public class SecurityConfig {
                         .permitAll()
                 );
 
+        http.addFilterAfter(new ActiveAccountFilter(userRepository), org.springframework.security.web.authentication.AnonymousAuthenticationFilter.class);
         return http.build();
     }
 
@@ -72,6 +70,7 @@ public class SecurityConfig {
                 return org.springframework.security.core.userdetails.User
                         .withUsername(user.getUsername())
                         .password(user.getPassword())
+                        .disabled(!user.isActive())
                         .roles(roleName)
                         .build();
             }

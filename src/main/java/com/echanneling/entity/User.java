@@ -22,7 +22,12 @@ public class User {
     @NotBlank(message = "Full name is required")
     private String fullName;
 
-    private String role; // ROLE_ADMIN, ROLE_DOCTOR, ROLE_PATIENT
+    private String role; // ROLE_ADMIN, ROLE_DOCTOR, ROLE_PATIENT, ROLE_RECEPTIONIST
+
+    // Null means active for accounts created before this field was introduced.
+    private Boolean active = true;
+    public boolean isActive() { return !Boolean.FALSE.equals(active); }
+    public void setActive(boolean active) { this.active = active; }
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")

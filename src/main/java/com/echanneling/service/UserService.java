@@ -33,6 +33,14 @@ public class UserService {
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
+
+    @Transactional
+    public void setAccountActive(Long id, boolean active) {
+        User user = userRepository.findById(id).orElseThrow();
+        if ("ROLE_ADMIN".equals(user.getRole())) throw new IllegalArgumentException("Administrator accounts are protected.");
+        user.setActive(active);
+        userRepository.save(user);
+    }
     
     public User updateUserProfile(User currentUser, User updatedInfo) {
         currentUser.setFullName(updatedInfo.getFullName());
@@ -60,6 +68,7 @@ public class UserService {
         jdbcTemplate.update("DELETE FROM schedule WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id);
         jdbcTemplate.update("DELETE FROM doctor WHERE user_id = ?", id);
         
+        jdbcTemplate.update("DELETE FROM notifications WHERE recipient_user_id = ?", id);
         userRepository.deleteById(id);
     }
 
