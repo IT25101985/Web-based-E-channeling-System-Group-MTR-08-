@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Edit Medical Record</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: doctor}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Edit Medical Record</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Doctor Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">DR</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">CLINICAL AMENDMENT</div>
+        <h1>Edit Clinical Diagnosis</h1>
+        <p>Refine the clinical diagnostic notes while preserving existing prescription history.</p>
+      </div>
+      <a class="btn secondary" href="/doctor/records">← Back to Records</a>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+
+    <div class="card" style="max-width: 680px; margin: 0 auto;">
+      <div class="card-header">
+        <div>
+          <h2 th:text="|Medical Record #REC-${medicalRecord.id}|">Record #REC-001</h2>
+          <p th:text="|Patient: ${medicalRecord.patient?.fullName ?: 'Patient'}|">Patient Details</p>
+        </div>
+        <span class="badge" data-status="Completed">Active Record</span>
+      </div>
+
+      <div class="card-body">
+        <form th:action="@{/doctor/record/{id}/update(id=${medicalRecord.id})}" method="post">
+          <div class="field" style="margin-bottom: 24px;">
+            <span>Clinical Diagnosis Summary *</span>
+            <textarea name="diagnosis" rows="5" required maxlength="255"
+                      th:text="${medicalRecord.diagnosis}"></textarea>
+            <small>Updated diagnosis will reflect in the patient's record summary immediately.</small>
+          </div>
+
+          <div class="form-footer">
+            <a class="btn secondary" href="/doctor/records">Cancel</a>
+            <button class="btn" type="submit">Save Diagnosis Update ✓</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

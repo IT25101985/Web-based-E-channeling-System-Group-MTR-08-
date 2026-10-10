@@ -1,38 +1,23 @@
 package com.echanneling.service;
 
-import com.echanneling.entity.Doctor;
-import com.echanneling.entity.Patient;
-import com.echanneling.entity.User;
+import com.echanneling.entity.*;
 import org.springframework.stereotype.Component;
+import java.util.Locale;
 
-/**
- * Factory Pattern Implementation
- * Creates appropriate User subtypes based on role string.
- * This decouples object creation logic from the rest of the application.
- */
+/** Simple Factory centralizes the supported account creation rules. */
 @Component
 public class UserFactory {
-
-    /**
-     * Factory method - creates the correct User subtype based on role.
-     * Demonstrates the Factory Design Pattern for the SE2030 rubric.
-     */
     public User createUser(String role) {
-        switch (role.toUpperCase()) {
-            case "PATIENT":
-                Patient patient = new Patient();
-                patient.setRole("ROLE_PATIENT");
-                return patient;
-            case "DOCTOR":
-                User doctorUser = new User();
-                doctorUser.setRole("ROLE_DOCTOR");
-                return doctorUser;
-            case "ADMIN":
-                User admin = new User();
-                admin.setRole("ROLE_ADMIN");
-                return admin;
-            default:
-                return new User();
-        }
+        if (role == null) throw new IllegalArgumentException("Choose an account role.");
+        String value = role.toUpperCase(Locale.ROOT).replace("ROLE_", "");
+        User user = switch (value) {
+            case "PATIENT" -> new Patient();
+            case "ADMIN" -> new Admin();
+            // Doctor is a separate profile entity; staff accounts use User.
+            case "DOCTOR", "RECEPTIONIST" -> new User();
+            default -> throw new IllegalArgumentException("Unsupported account role.");
+        };
+        user.setRole("ROLE_" + value);
+        return user;
     }
 }

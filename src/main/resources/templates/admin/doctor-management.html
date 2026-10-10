@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Medical Team Management</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Medical Specialists Directory</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Admin Console</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">HOSPITAL MEDICAL STAFF</div>
+        <h1>Doctors &amp; Specialists Management</h1>
+        <p>Register new consultants, configure clinic hours, and manage specialist fees.</p>
+      </div>
+      <a class="btn" href="/admin/sessions">Manage Clinic Sessions →</a>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete request. Please verify inputs.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <!-- Add Doctor Section -->
+    <details class="card" style="margin-bottom: 24px;">
+      <summary>✚ Register New Specialist / Doctor</summary>
+      <div class="card-body">
+        <form th:action="@{/admin/doctors/add}" method="post">
+          <div class="form-grid">
+            <label class="field">
+              <span>Full Name with Title *</span>
+              <input type="text" name="fullName" required placeholder="e.g. Dr. Kasun Bandara">
+            </label>
+            <label class="field">
+              <span>Email Address *</span>
+              <input type="email" name="email" required placeholder="doctor@hospital.lk">
+            </label>
+            <label class="field">
+              <span>System Username *</span>
+              <input type="text" name="username" required minlength="4" maxlength="50" placeholder="e.g. drkasun">
+            </label>
+            <label class="field">
+              <span>Temporary Password *</span>
+              <input type="password" name="password" required minlength="8" maxlength="72" placeholder="Minimum 8 characters">
+            </label>
+            <label class="field">
+              <span>Contact Phone Number *</span>
+              <input type="tel" name="phoneNo" required placeholder="e.g. 0777123456">
+            </label>
+            <label class="field">
+              <span>Official Clinic Address *</span>
+              <input type="text" name="address" required placeholder="e.g. Consultant Lounge, Colombo">
+            </label>
+            <label class="field">
+              <span>Medical Specialization *</span>
+              <input type="text" name="specialization" required placeholder="e.g. Cardiology, Neurology">
+            </label>
+            <label class="field">
+              <span>Clinical Experience *</span>
+              <input type="text" name="experience" required placeholder="e.g. 10 Years">
+            </label>
+            <label class="field">
+              <span>Default Clinic Hours *</span>
+              <input type="text" name="clinicHours" required value="09:00 AM - 05:00 PM">
+            </label>
+            <label class="field">
+              <span>Consultation Fee (LKR) *</span>
+              <input type="number" name="consultationFee" required min="1" step="0.01" placeholder="2500.00">
+            </label>
+          </div>
+          <div class="form-footer">
+            <button class="btn" type="submit">Complete Doctor Registration</button>
+          </div>
+        </form>
+      </div>
+    </details>
+
+    <!-- Doctors Directory Grid -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Registered Medical Specialists (<span th:text="${#lists.size(doctors)}">0</span>)</h2>
+        <input type="search" data-filter="#doctorsTable" placeholder="Filter specialists..."
+               style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 260px;">
+      </div>
+
+      <div class="table-wrap">
+        <table id="doctorsTable">
+          <thead>
+            <tr>
+              <th>Doctor &amp; Specialization</th>
+              <th>Contact Details</th>
+              <th>Clinic Hours</th>
+              <th>Consultation Fee</th>
+              <th>Manage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="d : ${doctors}">
+              <td>
+                <strong th:text="${d.name}">Dr. Specialist Name</strong>
+                <p style="color: var(--healthcare-teal); font-weight: 600;" th:text="${d.specialization}">Specialization</p>
+                <small style="color: var(--ink-muted);" th:text="${d.experience ?: 'Senior Consultant'}"></small>
+              </td>
+              <td>
+                <span th:text="${d.user != null ? d.user.phoneNo : 'N/A'}">Phone</span>
+                <p th:text="${d.user != null ? d.user.email : 'N/A'}">Email</p>
+              </td>
+              <td>
+                <span th:text="${d.clinicHours}">09:00 AM - 05:00 PM</span>
+              </td>
+              <td>
+                <strong style="color: var(--primary-navy);" th:text="|LKR ${d.consultationFee}|">LKR 2,500</strong>
+              </td>
+              <td>
+                <details style="margin-bottom: 6px;">
+                  <summary style="font-size: 12px; color: var(--primary-blue); cursor: pointer; font-weight: 600;">
+                    Edit Doctor
+                  </summary>
+                  <form th:action="@{/admin/doctors/{id}/update(id=${d.id})}" method="post" style="margin-top: 10px;">
+                    <div class="form-grid" style="grid-template-columns: 1fr; gap: 8px;">
+                      <label class="field">
+                        <span style="font-size: 11px;">Specialization</span>
+                        <input type="text" name="specialization" th:value="${d.specialization}" required style="padding: 6px; font-size: 12px;">
+                      </label>
+                      <label class="field">
+                        <span style="font-size: 11px;">Clinic Hours</span>
+                        <input type="text" name="clinicHours" th:value="${d.clinicHours}" required style="padding: 6px; font-size: 12px;">
+                      </label>
+                      <label class="field">
+                        <span style="font-size: 11px;">Consultation Fee (LKR)</span>
+                        <input type="number" name="consultationFee" th:value="${d.consultationFee}" required min="1" step="0.01" style="padding: 6px; font-size: 12px;">
+                      </label>
+                    </div>
+                    <div style="margin-top: 10px;">
+                      <button class="btn small" type="submit">Save Changes</button>
+                    </div>
+                  </form>
+                </details>
+
+                <form th:action="@{/admin/doctors/{id}/delete(id=${d.id})}" method="post"
+                      data-confirm="Permanently delete this doctor profile? Associated appointments and sessions will be affected.">
+                  <button class="btn small danger" type="submit">Remove</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(doctors)}">
+              <td colspan="5" class="empty">
+                <h3>No doctors registered yet</h3>
+                <p>Register a specialist above to populate the clinical faculty.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

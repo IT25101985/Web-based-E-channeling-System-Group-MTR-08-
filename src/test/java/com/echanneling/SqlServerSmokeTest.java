@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /** Opt-in read-only page verification against the installed SQL Server database. */
-@SpringBootTest(properties="app.seed-demo=false")
+@SpringBootTest(properties={"app.seed-demo=false", "app.legacy-repair.enabled=false", "app.notifications.scheduling-enabled=false", "app.mail.enabled=false", "spring.jpa.hibernate.ddl-auto=validate"})
 @ActiveProfiles("sqlserver")
 @AutoConfigureMockMvc
 @EnabledIfSystemProperty(named="carelink.sqlserver",matches="true")

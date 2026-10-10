@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Secure Healthcare Portal Sign In</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<main class="auth">
+  <!-- Left Story Panel -->
+  <section class="auth-story">
+    <a href="/" class="brand" style="color: #FFFFFF;">
+      <span class="brand-mark">✚</span>
+      <span class="brand-text">
+        <span class="brand-title" style="color: #FFFFFF;">MediCare<span style="color: #60A5FA;">Pro</span></span>
+        <span class="brand-subtitle" style="color: #5EEAD4;">Digital Healthcare</span>
+      </span>
+    </a>
+
+    <div>
+      <div class="eyebrow" style="color: #5EEAD4;">CONNECTED HEALTHCARE ECOSYSTEM</div>
+      <h1>Trusted care,<br>closer to you.</h1>
+      <p>Sign in to manage doctor appointments, inspect clinical prescriptions, track billing invoices, and consult verified medical specialists across Sri Lanka.</p>
+
+      <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #E2E8F0;">
+          <span style="color: #2DD4BF; font-weight: 800;">✓</span>
+          <span>Instant reservation with zero double booking</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #E2E8F0;">
+          <span style="color: #2DD4BF; font-weight: 800;">✓</span>
+          <span>Sri Lanka Medical Council accredited consultants</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #E2E8F0;">
+          <span style="color: #2DD4BF; font-weight: 800;">✓</span>
+          <span>Official receipts &amp; counter cash settlement</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size: 12px; color: #94A3B8;">
+      MediCare Pro Healthcare Platform &bull; Group 2026-Y2-S1-MTR-08
+    </div>
+  </section>
+
+  <!-- Right Form Panel -->
+  <section class="auth-form">
+    <div>
+      <div class="eyebrow">PORTAL ACCESS</div>
+      <h1>Sign in to your account</h1>
+      <p style="margin-bottom: 24px;">Please enter your credentials to open your healthcare workspace.</p>
+
+      <!-- Alert Notices -->
+      <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+      <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+      <div th:if="${param.error != null}" class="notice error" role="alert">Invalid username or password. Please verify your details.</div>
+      <div th:if="${param.registered != null}" class="notice" role="status">Account created successfully! Please sign in with your credentials.</div>
+      <div th:if="${param.logout != null}" class="notice info" role="status">You have been signed out safely.</div>
+      <div th:if="${param.inactive != null}" class="notice info" role="status">This account is currently inactive. Contact the hospital desk to reactivate.</div>
+
+      <form th:action="@{/login}" method="post">
+        <div class="field" style="margin-bottom: 18px;">
+          <span>Username or Account ID *</span>
+          <input type="text" name="username" required autocomplete="username" placeholder="e.g. dhanu or drsmith">
+        </div>
+
+        <div class="field" style="margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Password *</span>
+            <a href="/forgot-password" style="font-size: 12.5px; color: var(--primary-blue); font-weight: 600;">Forgot password?</a>
+          </div>
+          <div style="position: relative;">
+            <input type="password" id="loginPassword" name="password" required autocomplete="current-password" placeholder="••••••••" style="padding-right: 44px;">
+            <button type="button" id="togglePasswordBtn" aria-label="Toggle password visibility"
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748B; font-size: 14px;">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div class="form-footer" style="margin-top: 24px; padding-top: 0; border-top: none;">
+          <button class="btn" type="submit" style="width: 100%; justify-content: center; padding: 12px;">
+            Sign In to Portal →
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-links">
+        Don't have an account yet? <a href="/register">Register as a Patient</a>
+      </div>
+      <div style="margin-top: 14px; text-align: center; font-size: 12px; color: var(--ink-muted);">
+        <a href="/">← Return to Homepage</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const toggleBtn = document.getElementById('togglePasswordBtn');
+  const passInput = document.getElementById('loginPassword');
+  if (toggleBtn && passInput) {
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = passInput.type === 'password';
+      passInput.type = isPassword ? 'text' : 'password';
+      toggleBtn.textContent = isPassword ? '🔒' : '👁️';
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Administrative Notification Center</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Notification Operations &amp; Outbox</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Admin Console</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">PATIENT &amp; STAFF COMMUNICATIONS</div>
+        <h1>Notification Center &amp; Outbox</h1>
+        <p>Monitor delivery logs, retry failed messages, and broadcast announcements.</p>
+      </div>
+      <div class="actions">
+        <a class="btn secondary" href="/admin/notifications/templates">Manage Event Templates →</a>
+        <span class="badge" th:data-status="${mailEnabled ? 'Active' : 'Pending'}"
+              th:text="${mailEnabled ? 'SMTP Email Gateway Active' : 'In-App Notifications Active'}">Active</span>
+      </div>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes saved successfully.</div>
+
+    <div class="notice info" th:unless="${mailEnabled}">
+      In-app alerts appear in recipient inboxes instantly. Background SMTP email delivery is awaiting server configuration in application properties.
+    </div>
+
+    <!-- Provision New Notification -->
+    <details class="card" style="margin-bottom: 24px;">
+      <summary>✚ Dispatch Direct System / General Notification</summary>
+      <div class="card-body">
+        <form th:action="@{/admin/notifications/add}" method="post">
+          <div class="form-grid">
+            <label class="field">
+              <span>Recipient Email *</span>
+              <input type="email" name="recipient" required maxlength="254" placeholder="patient@example.com">
+            </label>
+            <label class="field">
+              <span>Message Subject *</span>
+              <input name="subject" required maxlength="150" placeholder="e.g. Clinic Session Rescheduled">
+            </label>
+            <label class="field">
+              <span>Category *</span>
+              <select name="type">
+                <option value="GENERAL">General Announcement</option>
+                <option value="SYSTEM">System Alert</option>
+              </select>
+            </label>
+            <label class="field full">
+              <span>Message Body *</span>
+              <textarea name="message" rows="4" required maxlength="2000" placeholder="Enter notification message text..."></textarea>
+            </label>
+          </div>
+          <div class="form-footer">
+            <button class="btn" type="submit">Queue Message for Delivery</button>
+          </div>
+        </form>
+      </div>
+    </details>
+
+    <!-- Outbox Log Table -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Delivery History Log (<span th:text="${#lists.size(notifications)}">0</span>)</h2>
+        <input type="search" data-filter="#notificationTable" placeholder="Search notifications..."
+               style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 260px;">
+      </div>
+
+      <div class="table-wrap">
+        <table id="notificationTable">
+          <thead>
+            <tr>
+              <th>Recipient</th>
+              <th>Message Content</th>
+              <th>Delivery Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="n : ${notifications}">
+              <td>
+                <strong th:text="${n.recipient}">patient@example.com</strong>
+                <p th:text="|ID #${n.id}|"></p>
+              </td>
+              <td>
+                <strong th:text="${n.subject ?: 'MediCare Pro notification'}">Subject</strong>
+                <p class="message-body" th:text="${n.message}"></p>
+                <small th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'dd MMM yyyy, HH:mm') : 'Recent'}"></small>
+              </td>
+              <td>
+                <span class="badge" th:text="${n.status}" th:data-status="${n.status}">SENT</span>
+                <p th:if="${n.sentAt != null}" style="font-size: 11.5px; color: var(--ink-muted);" th:text="|Sent: ${n.sentAt}|"></p>
+                <p th:if="${n.deliveryError != null}" style="color: var(--error); font-size: 11.5px;" th:text="${n.deliveryError}"></p>
+                <small th:if="${n.nextAttemptAt != null and n.status.name() == 'PENDING'}" style="color: var(--warning);" th:text="|Retry after: ${n.nextAttemptAt}|"></small>
+              </td>
+              <td>
+                <div class="actions">
+                  <details th:if="${n.appointment == null and (n.status.name() == 'PENDING' or n.status.name() == 'FAILED')}">
+                    <summary style="font-size: 11.5px; color: var(--primary-blue); cursor: pointer; font-weight: 600;">Edit</summary>
+                    <div class="card-body" style="padding: 12px; background: #F8FAFC; border-radius: 8px; margin-top: 6px;">
+                      <form th:action="@{/admin/notifications/{id}/update(id=${n.id})}" method="post">
+                        <input type="email" name="recipient" th:value="${n.recipient}" required style="padding: 6px; font-size: 12px; margin-bottom: 6px;">
+                        <input name="subject" th:value="${n.subject}" required style="padding: 6px; font-size: 12px; margin-bottom: 6px;">
+                        <textarea name="message" th:text="${n.message}" required rows="3" style="padding: 6px; font-size: 12px; margin-bottom: 6px;"></textarea>
+                        <input type="hidden" name="type" th:value="${n.type}">
+                        <button class="btn small" type="submit">Save &amp; Queue</button>
+                      </form>
+                    </div>
+                  </details>
+
+                  <form th:if="${n.status.name() == 'FAILED'}" th:action="@{/admin/notifications/{id}/retry(id=${n.id})}" method="post">
+                    <button class="btn small secondary" type="submit">Retry</button>
+                  </form>
+
+                  <form th:unless="${n.status.name() == 'CANCELLED'}" th:action="@{/admin/notifications/{id}/delete(id=${n.id})}" method="post"
+                        data-confirm="Remove this notification record?">
+                    <button class="btn danger small" type="submit">Remove</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(notifications)}">
+              <td colspan="4" class="empty">
+                <h3>No notifications logged</h3>
+                <p>Booking event messages and system broadcasts will appear in this ledger.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

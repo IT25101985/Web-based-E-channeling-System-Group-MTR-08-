@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Write Clinical Prescription</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: doctor}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Write Clinical Prescription</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Doctor Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">DR</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">CLINICAL PRACTICE NOTE</div>
+        <h1>Write Medical Record &amp; Prescription</h1>
+        <p>Record diagnostic findings and prescribe pharmaceuticals to conclude the consultation visit.</p>
+      </div>
+      <a class="btn secondary" href="/doctor/appointments">← Cancel &amp; Return</a>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to save prescription. Check fields and try again.</div>
+
+    <div class="card" style="max-width: 800px; margin: 0 auto;">
+      <div class="card-header">
+        <div>
+          <h2 th:text="|Patient: ${appointment.patient != null ? appointment.patient.fullName : 'Patient'}|">Patient Name</h2>
+          <p th:text="|Appointment #${appointment.id} · Consultation Date: ${#temporals.format(appointment.appointmentDate, 'dd MMM yyyy · HH:mm a')}|">Appointment Info</p>
+        </div>
+        <span class="badge" th:data-status="${appointment.status}" th:text="${appointment.status}">SCHEDULED</span>
+      </div>
+
+      <div class="card-body">
+        <form th:action="@{/doctor/prescribe/{id}(id=${appointment.id})}" method="post">
+          <div class="field" style="margin-bottom: 20px;">
+            <span>Primary Clinical Diagnosis *</span>
+            <input type="text" name="diagnosis" required maxlength="255"
+                   placeholder="e.g. Acute upper respiratory tract infection, Hypertension Stage 1">
+            <small>Summary of diagnosis to be permanently stored on the patient's medical file.</small>
+          </div>
+
+          <div style="border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px;">
+            <div class="eyebrow">PHARMACEUTICAL PRESCRIPTION</div>
+            <div class="form-grid">
+              <label class="field">
+                <span>Medication / Drug Name *</span>
+                <input type="text" name="medication" required maxlength="255" placeholder="e.g. Amoxicillin 500mg, Paracetamol">
+              </label>
+
+              <label class="field">
+                <span>Dosage &amp; Instructions *</span>
+                <input type="text" name="dosage" required maxlength="255" placeholder="e.g. 1 capsule three times daily after food">
+              </label>
+
+              <label class="field">
+                <span>Treatment Duration *</span>
+                <input type="text" name="duration" required maxlength="255" placeholder="e.g. 5 Days, 2 Weeks">
+              </label>
+
+              <label class="field">
+                <span>Prescription / Drug Price (LKR) *</span>
+                <input type="number" name="price" required min="0" step="0.01" value="0" placeholder="e.g. 500.00">
+                <small>Hospital pharmacy dispensing rate.</small>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-footer" style="margin-top: 30px;">
+            <a class="btn secondary" href="/doctor/appointments">Discard</a>
+            <button class="btn" type="submit">
+              Save Medical Record &amp; Finalize Visit ✓
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

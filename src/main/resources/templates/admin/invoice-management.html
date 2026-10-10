@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Billing &amp; Invoices Ledger</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Billing &amp; Invoices</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Admin Console</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">FINANCIAL AUDIT &amp; RECEIPTS</div>
+        <h1>Billing &amp; Invoices Ledger</h1>
+        <p>Monitor patient consultation fees, track counter cash payments, and download certified invoices.</p>
+      </div>
+      <input type="search" data-filter="#invoicesTable" placeholder="Search invoices..."
+             style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 260px;">
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete invoice action.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes saved successfully.</div>
+
+    <div class="notice info">
+      Demonstration cards simulate immediate payment. Counter cash collections at the hospital reception update records to PAID status.
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table id="invoicesTable">
+          <thead>
+            <tr>
+              <th>Invoice Ref</th>
+              <th>Patient &amp; Appointment</th>
+              <th>Payable Amount</th>
+              <th>Payment Status</th>
+              <th>Administrative Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="i : ${invoices}">
+              <td>
+                <strong style="color: var(--primary-blue);" th:text="|#INV-${i.id}|">#INV-001</strong>
+              </td>
+              <td>
+                <strong th:text="${i.appointment?.patient?.fullName ?: 'Patient'}">Patient Name</strong>
+                <p th:text="|Booking #${i.appointment?.id} · Dr. ${i.appointment?.doctor?.name}|"></p>
+              </td>
+              <td>
+                <strong style="font-size: 15px; color: var(--primary-navy);" th:text="|LKR ${i.amount}|">LKR 2,500</strong>
+              </td>
+              <td>
+                <span class="badge" th:data-status="${i.status}" th:text="${i.status}">PAID</span>
+              </td>
+              <td>
+                <div class="actions">
+                  <a class="btn small secondary" th:href="@{/invoice/download/{id}(id=${i.id})}">↓ Download PDF</a>
+
+                  <details>
+                    <summary style="font-size: 12px; color: var(--primary-blue); cursor: pointer; font-weight: 600;">Status</summary>
+                    <form th:action="@{/admin/invoice/{id}/update(id=${i.id})}" method="post" style="margin-top: 8px; padding: 10px; background: #F8FAFC; border-radius: 8px;">
+                      <select name="status" style="padding: 6px; font-size: 12px; margin-bottom: 8px;">
+                        <option value="PAID" th:selected="${i.status == 'PAID'}">Paid</option>
+                        <option value="UNPAID" th:selected="${i.status == 'UNPAID'}">Unpaid</option>
+                        <option value="REFUNDED" th:selected="${i.status == 'REFUNDED'}">Refunded</option>
+                      </select>
+                      <button class="btn small" type="submit">Update</button>
+                    </form>
+                  </details>
+
+                  <form th:action="@{/admin/invoice/{id}/delete(id=${i.id})}" method="post"
+                        data-confirm="Permanently delete this invoice? Linked financial audit records will be impacted.">
+                    <button class="btn small danger" type="submit">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(invoices)}">
+              <td colspan="5" class="empty">
+                <h3>No invoice records on file</h3>
+                <p>Invoices created through patient bookings or front desk cash collection will appear here.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

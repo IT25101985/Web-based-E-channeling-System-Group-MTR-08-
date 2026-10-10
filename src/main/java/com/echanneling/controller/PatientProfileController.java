@@ -59,6 +59,7 @@ public class PatientProfileController {
 
     @Autowired
     private InvoiceService invoiceService;
+    @Autowired private com.echanneling.repository.HospitalBranchRepository branches;
 
     @GetMapping("/profile")
     public String viewProfile() {
@@ -121,7 +122,7 @@ public class PatientProfileController {
                         p.setHeartRate(hr.isEmpty() ? null : hr);
                     }
                     if (emergencyContact != null) p.setEmergencyContact(emergencyContact.isEmpty() ? null : emergencyContact);
-                    
+
                     if (rawPassword != null) {
                         p.setPassword(rawPassword);
                         userService.saveUser(p); // Hashing and saving patient credentials securely
@@ -137,7 +138,7 @@ public class PatientProfileController {
                         currentUser.setPassword(rawPassword);
                     }
                     userService.saveUser(currentUser);
-                    
+
                     String newBg = updatedUser.getBloodGroup();
                     String newBp = (bp != null && !bp.isEmpty()) ? bp : null;
                     String newHr = null;
@@ -154,13 +155,16 @@ public class PatientProfileController {
         return "redirect:/patient/dashboard?section=profile&success";
     }
 
-    @PostMapping("/delete-account")
-    public String deleteAccount(Principal principal) {
+    @PostMapping({"/deactivate-account", "/delete-account"})
+    public String deactivateAccount(Principal principal, jakarta.servlet.http.HttpServletRequest request,
+                                    jakarta.servlet.http.HttpServletResponse response) {
         if (principal != null) {
             Optional<User> optUser = userService.findByUsername(principal.getName());
-            optUser.ifPresent(user -> userService.deleteUser(user));
+            optUser.ifPresent(user -> userService.setAccountActive(user.getId(), false));
         }
-        return "redirect:/logout";
+        new org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler()
+            .logout(request, response, org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+        return "redirect:/login?inactive";
     }
 
     // Overriding / extended handling of Dashboard to add complex tracking analytics pipelines
@@ -210,6 +214,7 @@ public class PatientProfileController {
             app.setContactPhone(user.getPhoneNo());
         }
         model.addAttribute("appointment", app);
+        model.addAttribute("branches", branches.findAll());
 
         List<Doctor> doctors = doctorService.getAllDoctors();
         model.addAttribute("doctors", doctors != null ? doctors : new ArrayList<>());
@@ -226,8 +231,8 @@ public class PatientProfileController {
                 .count();
 
         // Analytical processing mapping ratio calculation logic safely avoiding division by zero
-        double attendanceRate = (totalVisits + cancelledVisits > 0) 
-                ? ((double) totalVisits / (totalVisits + cancelledVisits)) * 100 
+        double attendanceRate = (totalVisits + cancelledVisits > 0)
+                ? ((double) totalVisits / (totalVisits + cancelledVisits)) * 100
                 : 100.0;
 
         // Binding complex parameters directly to data keys for the view engine

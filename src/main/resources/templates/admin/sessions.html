@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Clinic Sessions Scheduling</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Clinic Sessions &amp; Slots</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Admin Console</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">DOCTOR AVAILABILITY ORCHESTRATION</div>
+        <h1>Clinic Sessions &amp; Time Slots</h1>
+        <p>Publish doctor consultation sessions across hospital branches to automatically generate bookable slots.</p>
+      </div>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <!-- Publish Session Form -->
+    <details class="card" open style="margin-bottom: 24px;">
+      <summary>✚ Publish New Hospital Clinic Session</summary>
+      <div class="card-body">
+        <form th:action="@{/admin/sessions/save}" method="post">
+          <div class="form-grid">
+            <label class="field">
+              <span>Hospital Branch Facility *</span>
+              <select name="branchId" required>
+                <option value="">-- Choose Hospital Branch --</option>
+                <option th:each="b : ${branches}" th:value="${b.id}" th:text="|${b.branchName} · ${b.area}|"></option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Doctor / Specialist *</span>
+              <select name="doctorId" required>
+                <option value="">-- Choose Doctor --</option>
+                <option th:each="d : ${doctors}" th:value="${d.id}" th:text="|${d.name} (${d.specialization})|"></option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Clinic Date *</span>
+              <input type="date" name="date" required>
+            </label>
+
+            <label class="field">
+              <span>Start Time *</span>
+              <input type="time" name="start" required value="09:00">
+            </label>
+
+            <label class="field">
+              <span>End Time *</span>
+              <input type="time" name="end" required value="17:00">
+            </label>
+          </div>
+
+          <div style="margin-top: 16px; font-size: 13px; color: var(--ink-muted);">
+            Each published session creates verified 1-hour consultation slots for patient reservation. Overlapping sessions for the same clinician are blocked.
+          </div>
+
+          <div class="form-footer">
+            <button class="btn" type="submit">Publish Clinic Session &amp; Generate Slots</button>
+          </div>
+        </form>
+      </div>
+    </details>
+
+    <!-- Sessions Table -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Published Clinic Sessions (<span th:text="${#lists.size(sessions)}">0</span>)</h2>
+        <input type="search" data-filter="#sessionsTable" placeholder="Search sessions..."
+               style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 260px;">
+      </div>
+
+      <div class="table-wrap">
+        <table id="sessionsTable">
+          <thead>
+            <tr>
+              <th>Doctor</th>
+              <th>Hospital Branch</th>
+              <th>Clinic Date</th>
+              <th>Session Hours</th>
+              <th>Manage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s : ${sessions}">
+              <td>
+                <strong th:text="${s.doctor?.name ?: 'Doctor'}">Doctor</strong>
+                <p style="color: var(--healthcare-teal); font-weight: 600;" th:text="${s.doctor?.specialization}"></p>
+              </td>
+              <td>
+                <strong th:text="${s.hospitalBranch?.branchName ?: 'Hospital'}">Hospital</strong>
+                <p th:text="${s.hospitalBranch?.area}"></p>
+              </td>
+              <td>
+                <strong th:text="${#temporals.format(s.slotDate, 'dd MMM yyyy')}">Date</strong>
+              </td>
+              <td>
+                <span class="badge" data-status="Scheduled" th:text="|${s.startTime} - ${s.endTime}|">09:00 - 17:00</span>
+              </td>
+              <td>
+                <form th:action="@{/admin/sessions/{id}/delete(id=${s.id})}" method="post"
+                      data-confirm="Remove this clinic session? Booked appointments under this session will be preserved or blocked according to rules.">
+                  <button class="btn small danger" type="submit">Remove</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(sessions)}">
+              <td colspan="5" class="empty">
+                <h3>No clinic sessions published</h3>
+                <p>Use the form above to schedule clinical hours for doctors.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

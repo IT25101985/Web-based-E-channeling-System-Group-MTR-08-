@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Patient Directory</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: doctor}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Patient Directory</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Doctor Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">DR</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">CLINICAL REGISTER</div>
+        <h1>My Registered Patients</h1>
+        <p>Patients who have attended or scheduled clinical visits under your care.</p>
+      </div>
+      <input type="search" data-filter="#patientsDirectoryTable" placeholder="Search by name, email, phone..."
+             style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 260px;">
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table id="patientsDirectoryTable">
+          <thead>
+            <tr>
+              <th>Patient Full Name</th>
+              <th>Email Address</th>
+              <th>Phone Number</th>
+              <th>Residential Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="p : ${patients}">
+              <td>
+                <strong th:text="${p.fullName}">Patient Name</strong>
+                <p th:text="${p.username}"></p>
+              </td>
+              <td th:text="${p.email}">patient@example.com</td>
+              <td>
+                <strong th:text="${p.phoneNo}">0771234567</strong>
+              </td>
+              <td th:text="${p.address}">Colombo, Sri Lanka</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(patients)}">
+              <td colspan="4" class="empty">
+                <h3>No patients recorded</h3>
+                <p>Patients who book consultation sessions with you will appear in this registry.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

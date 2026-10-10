@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Patient Registration</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<main class="auth">
+  <!-- Left Story Panel -->
+  <section class="auth-story">
+    <a href="/" class="brand" style="color: #FFFFFF;">
+      <span class="brand-mark">✚</span>
+      <span class="brand-text">
+        <span class="brand-title" style="color: #FFFFFF;">MediCare<span style="color: #60A5FA;">Pro</span></span>
+        <span class="brand-subtitle" style="color: #5EEAD4;">Digital Healthcare</span>
+      </span>
+    </a>
+
+    <div>
+      <div class="eyebrow" style="color: #5EEAD4;">PATIENT ENROLLMENT</div>
+      <h1>Start your healthcare journey today.</h1>
+      <p>Register once to book consultations across partner hospital branches, access medical records securely, and receive timely appointment reminders.</p>
+
+      <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #E2E8F0;">
+          <span style="color: #2DD4BF; font-weight: 800;">✓</span>
+          <span>Fast registration with verified Sri Lankan NIC</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #E2E8F0;">
+          <span style="color: #2DD4BF; font-weight: 800;">✓</span>
+          <span>Access verified specialists in Colombo, Kandy, Galle</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #E2E8F0;">
+          <span style="color: #2DD4BF; font-weight: 800;">✓</span>
+          <span>Secure records storage and counter receipt billing</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size: 12px; color: #94A3B8;">
+      MediCare Pro Healthcare Platform &bull; Group 2026-Y2-S1-MTR-08
+    </div>
+  </section>
+
+  <!-- Right Form Panel -->
+  <section class="auth-form" style="padding: 40px 32px;">
+    <div style="max-width: 540px;">
+      <div class="eyebrow">NEW PATIENT ENROLLMENT</div>
+      <h1>Create your patient account</h1>
+      <p style="margin-bottom: 20px;">Please complete your personal and contact details below.</p>
+
+      <!-- Alert & Validation Messages -->
+      <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+      <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+
+      <div th:if="${param.error != null}" class="notice error" role="alert">
+        <span th:if="${param.error[0] == 'duplicate_username'}">This username is already taken. Please choose another username.</span>
+        <span th:if="${param.error[0] == 'duplicate_email'}">This email is already registered. Please sign in or use another email.</span>
+        <span th:if="${param.error[0] == 'short_username'}">Username must be at least 4 characters long.</span>
+        <span th:if="${param.error[0] == 'weak_password'}">Password must be at least 6 characters long.</span>
+        <span th:if="${param.error[0] == 'invalid_nic'}">Invalid NIC format. Enter 12 digits (e.g. 200012345678) or 9 digits with 'V'.</span>
+        <span th:if="${param.error[0] == 'invalid_phone'}">Please enter a valid phone number (9-15 digits).</span>
+        <span th:if="${param.error[0] == 'invalid_email'}">Please enter a valid email address.</span>
+        <span th:if="${param.error[0] == 'registration_failed'}">Registration could not be completed. Please try again.</span>
+        <span th:if="${param.error[0] == 'invalid_details' or param.error[0] == 'true'}">Please check the details entered and try again.</span>
+      </div>
+
+      <form th:action="@{/register}" method="post">
+        <div class="form-grid">
+          <label class="field">
+            <span>Full Name *</span>
+            <input type="text" name="fullName" placeholder="e.g. Anura Silva" required>
+          </label>
+
+          <label class="field">
+            <span>Username *</span>
+            <input type="text" name="username" placeholder="e.g. anurasilva" required minlength="4" maxlength="50" autocomplete="username">
+          </label>
+
+          <label class="field">
+            <span>Email Address *</span>
+            <input type="email" name="email" placeholder="anura@example.com" required>
+          </label>
+
+          <label class="field">
+            <span>Phone Number *</span>
+            <input type="tel" name="phoneNo" placeholder="e.g. 0771234567" required>
+          </label>
+
+          <label class="field">
+            <span>National Identity Card (NIC) *</span>
+            <input type="text" name="nic" placeholder="e.g. 200012345678 or 123456789V" required pattern="([0-9]{9}[xXvV]|[0-9]{12})">
+            <small>Sri Lankan 9-digit + V/X or modern 12-digit format</small>
+          </label>
+
+          <label class="field">
+            <span>Residential Address *</span>
+            <input type="text" name="address" placeholder="e.g. 124 Galle Road, Colombo 03" required>
+          </label>
+
+          <label class="field" style="grid-column: 1 / -1;">
+            <span>Password (Minimum 6 characters) *</span>
+            <div style="position: relative;">
+              <input type="password" id="regPassword" name="password" placeholder="••••••••" required minlength="6" maxlength="72" autocomplete="new-password" style="padding-right: 44px;">
+              <button type="button" id="toggleRegPasswordBtn" aria-label="Toggle password visibility"
+                      style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748B; font-size: 14px;">
+                👁️
+              </button>
+            </div>
+            <small>Use at least 6 characters including letters and numbers</small>
+          </label>
+        </div>
+
+        <div class="form-footer" style="margin-top: 24px; padding-top: 0; border-top: none;">
+          <button class="btn" type="submit" style="width: 100%; justify-content: center; padding: 12px;">
+            Create Patient Account →
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-links">
+        Already registered? <a href="/login">Sign In</a>
+      </div>
+      <div style="margin-top: 14px; text-align: center; font-size: 12px; color: var(--ink-muted);">
+        <a href="/">← Return to Homepage</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const toggleBtn = document.getElementById('toggleRegPasswordBtn');
+  const passInput = document.getElementById('regPassword');
+  if (toggleBtn && passInput) {
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = passInput.type === 'password';
+      passInput.type = isPassword ? 'text' : 'password';
+      toggleBtn.textContent = isPassword ? '🔒' : '👁️';
+    });
+  }
+</script>
+</body>
+</html>

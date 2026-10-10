@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Notifications &amp; Alerts</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: __${portal}__}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Notifications Center</b></span>
+    </div>
+    <div class="top-actions">
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">N</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">COMMUNICATION FEED</div>
+        <h1>Your Notifications</h1>
+        <p>Real-time booking confirmations, schedule updates, and clinic reminders.</p>
+      </div>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <div class="grid" style="gap: 16px;">
+      <article class="card card-body" th:each="n : ${notifications}"
+               style="display: flex; flex-direction: column; gap: 10px; border-left: 4px solid var(--primary-blue);"
+               th:styleappend="${n.readAt == null ? 'background: #FFFFFF;' : 'background: #F8FAFC; border-left-color: #94A3B8;'}">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 18px;" th:text="${n.readAt == null ? '🔔' : '🔕'}">🔔</span>
+            <h3 th:text="${n.subject ?: 'MediCare Pro Notification'}" style="font-size: 16px; margin: 0; color: var(--primary-navy);">
+              Appointment Confirmed
+            </h3>
+          </div>
+          <span class="badge" th:data-status="${n.readAt == null ? 'Pending' : 'Completed'}"
+                th:text="${n.readAt == null ? 'Unread Message' : 'Read'}">Unread Message</span>
+        </div>
+
+        <p class="message-body" th:text="${n.message}" style="font-size: 13.5px; color: var(--ink-secondary); line-height: 1.6; margin: 0;"></p>
+
+        <div class="actions" style="margin-top: 6px; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+          <div style="font-size: 12px; color: var(--ink-muted);">
+            <span th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'dd MMM yyyy, HH:mm a') : 'Recent'}">Time</span>
+            &bull; <span th:text="|Delivery Status: ${n.status}|">Sent</span>
+          </div>
+
+          <form th:if="${n.readAt == null}" th:action="@{'/' + ${portal} + '/notifications/' + ${n.id} + '/read'}" method="post">
+            <button class="btn small secondary" type="submit">Mark as Read ✓</button>
+          </form>
+        </div>
+      </article>
+
+      <div class="card empty" th:if="${#lists.isEmpty(notifications)}">
+        <div style="font-size: 40px; margin-bottom: 12px;">📬</div>
+        <h3>You're all caught up!</h3>
+        <p>Appointment confirmations, clinic schedule reminders, and invoice notifications will appear here.</p>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

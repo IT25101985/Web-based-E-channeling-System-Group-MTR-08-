@@ -1,40 +1,57 @@
-# E-Channeling System
+# MediCare Pro / CareLink — E-Channeling System
 
-A professional, feature-rich web-based e-channeling management portal built with Spring Boot, designed to streamline doctor channeling operations for admins, doctors, receptionists, and patients.
+SE2030 group project, **2026-Y2-S1-MTR-08**. Spring Boot 3.1.2, Java 17+, Thymeleaf, Spring Security and JPA.
 
-## 🚀 Key Features
-- **Modern UI**: Glassmorphic dark-mode interface using Tailwind CSS.
-- **Role-Based Access**: Specialized dashboards for Admins, Doctors, and Patients.
-- **E-Channeling Management**: Real-time appointment booking, rescheduling, and status tracking.
-- **Clinical Records**: Digital prescriptions and medical history management with PDF generation.
-- **Financial Module**: Automated invoice generation and payment tracking.
-- **Feedback System**: Patient reviews and doctor rating analytics.
+Patients select a hospital, doctor and published clinic session, book appointments, view history, reschedule and cancel. Doctor, hospital, notification, feedback and billing modules share appointment records. A receptionist workspace supports desk bookings and cash collection.
 
-## 🛠️ Technology Stack
-- **Backend**: Java 17, Spring Boot 3, Spring Security, Spring Data JPA.
-- **Database**: SQL Server / MySQL (`echanneling_system`).
-- **Frontend**: Thymeleaf, Tailwind CSS, FontAwesome.
-- **Utilities**: PDFBox (for records), Twilio/JavaMail (for notifications).
+## Run the demonstration
 
-## 👥 Module Distribution & Team
+Install JDK 17 or later and set JAVA_HOME. The Maven wrapper downloads Maven and dependencies on first use.
 
-| Member (ID & Name) | Module Name | Backend Classes (Java) | Frontend Templates (HTML) |
-| :--- | :--- | :--- | :--- |
-| **IT25101975**<br>Pannila P.L.K.S | **User & Hospital Management** | `User`, `Admin`, `UserService`, `AdminController`, `AuthController`, `UserRepository`, `AdminRepository`, `SecurityConfig`, `DataInitializer` | `login.html`, `register.html`, `forgot-password.html`, `admin/users.html`, `admin/dashboard.html`, `index.html` |
-| **IT25101987**<br>Salinda L.L.S.U | **Doctor Management** | `Doctor`, `Specialization`, `DoctorService`, `DoctorProfileController`, `DoctorRestController`, `DoctorRepository`, `Cardiology`, `Pediatrics` | `admin/doctor-management.html`, `doctor/dashboard.html` |
-| **IT25101972**<br>Kulasuriya I.M.G.H.N | **Patient Management** | `Patient`, `PatientService`, `PatientProfileController`, `PatientRepository` | `patient/profile.html`, `doctor/patient-list.html` |
-| **IT25101985**<br>Dhanukshan S. | **Appointment Management** | `Appointment`, `Schedule`, `AppointmentService`, `PatientBookingController`, `DoctorScheduleController`, `AppointmentRepository`, `ScheduleRepository` | `patient/book-appointment.html`, `patient/history.html`, `admin/appointments.html`, `doctor/view-appointments.html` |
-| **IT25101980**<br>Ariyawansha N.S.K | **Clinical Records & Notifications** | `MedicalRecord`, `Prescription`, `MedicalRecordService`, `MedicalRecordRepository`, `PrescriptionRepository`, `PDFGenerator`, `PdfService` | `doctor/records.html`, `doctor/write-prescription.html`, `doctor/edit-record.html`, `patient/view-record.html` |
-| **IT25101979**<br>Metaramba M.K.K.N | **Payments & Feedback Management** | `Invoice`, `Feedback`, `InvoiceService`, `FeedbackService`, `PaymentController`, `InvoiceRepository`, `FeedbackRepository`, `CardPayment`, `CashPayment`, `Payment`, `RatingService` | `admin/invoice-management.html`, `admin/review-management.html`, `patient/payment-success.html` |
+```powershell
+.\mvnw.cmd test
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"
+```
 
-## ⚙️ Setup Instructions
-1. **Database**: Create a database named `echanneling_system` (or run `echanneling_schema.sql`).
-2. **Configuration**: Update `src/main/resources/application.properties` with your database credentials.
-3. **Build**: Run `./mvnw clean install`.
-4. **Run**: Run `./mvnw spring-boot:run`.
-5. **Access**: Open `http://localhost:8080` in your browser.
+Open http://localhost:8080. The demo profile uses a separate H2 database in data/; it does not connect to SQL Server.
 
-## 🔒 Default Credentials (After Init)
-- **Admin**: `admin` / `admin123`
-- **Doctor**: `doctor` / `doc123`
-- **Patient**: `patient` / `pat123`
+| Role | Username | Demo password |
+| --- | --- | --- |
+| Administrator | admin | admin123 |
+| Doctor | drsmith | doctor123 |
+| Patient | dhanu | patient123 |
+| Receptionist | reception | Reception@123 |
+
+These are demonstration accounts. Email sending is disabled by default in demo mode.
+Alternatively, `.\run.ps1 -Profile demo -Build` tests, packages and starts the application.
+
+## Use SQL Server
+
+The default profile uses SQL Server. Copy application-local.properties.example to application-local.properties and supply your own connection settings. The local file is ignored by Git. Configure an existing SQL Server database, then run:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+The default configuration uses Hibernate schema updates and legacy-account repair on startup. Back up an existing database first. database/finalization-sqlserver.sql is an optional additive migration for an existing CareLink schema, not a fresh database creation script; review it before applying it manually.
+
+## Verification
+
+```powershell
+.\mvnw.cmd test
+.\mvnw.cmd package
+```
+
+Integration tests use isolated H2 databases with mail delivery and scheduled notifications disabled. The SQL Server smoke test is opt-in using `-Dcarelink.sqlserver=true`; it requires your configured database. See [the integration record](docs/INTEGRATION.md) for this revision's actual results.
+
+## Modules and workflow
+
+- Appointment work: PatientBookingController, BookingService, AppointmentService, appointment/availability repositories and booking tests.
+- Leader integration: connect team modules, resolve paths, maintain configuration, run regression tests and prepare release merges.
+- Existing branch histories and authorship are retained. Integration commits do not imply sole authorship of imported modules.
+
+Workflow: **Appoinment_Management → def → main**. Other module branches merge into def for integration. See [CONTRIBUTING.md](CONTRIBUTING.md) and [PROJECT_GUIDE.md](PROJECT_GUIDE.md).
+
+## Current limits
+
+Card checkout is simulated. SMS delivery and password-reset emails are not implemented. External SMTP requires configuration; sent means the SMTP server accepted the message. H2 tests do not verify live SQL Server, real payments or real mailbox delivery.

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Notification Templates</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Notification Templates</b></span>
+    </div>
+    <div class="top-actions">
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">PATIENT &amp; CLINIC MESSAGING</div>
+        <h1>Notification Templates</h1>
+        <p>Customize automated SMS and email notifications delivered during appointment lifecycle events.</p>
+      </div>
+      <a href="/admin/notifications" class="btn secondary">Delivery History Log →</a>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <div class="notice info">
+      Available dynamic tags: <strong>{name}</strong>, <strong>{patient}</strong>, <strong>{doctor}</strong>, <strong>{hospital}</strong>, <strong>{date}</strong>, <strong>{reference}</strong>.
+    </div>
+
+    <div class="grid two-col" style="margin-top: 20px;">
+      <article class="card card-body" th:each="t : ${templates}" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span class="badge" data-status="Scheduled" th:text="${t.eventType}">EVENT</span>
+            <span style="font-size: 12px; color: var(--ink-muted);">Automated Trigger</span>
+          </div>
+
+          <h2 th:text="${t.eventType}" style="font-size: 17px; margin-bottom: 16px; color: var(--primary-navy);">Event Name</h2>
+
+          <form th:action="@{/admin/notifications/templates/{type}(type=${t.eventType})}" method="post">
+            <label class="field" style="margin-bottom: 14px;">
+              <span>Message Subject *</span>
+              <input name="subject" required maxlength="150" th:value="${t.subject}">
+            </label>
+
+            <label class="field" style="margin-bottom: 16px;">
+              <span>Message Body Template *</span>
+              <textarea name="body" rows="6" required maxlength="2000" th:text="${t.body}"></textarea>
+            </label>
+
+            <div class="form-footer" style="padding-top: 0; border-top: none; justify-content: flex-end;">
+              <button class="btn small" type="submit">Save Template</button>
+            </div>
+          </form>
+        </div>
+
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+          <form th:action="@{/admin/notifications/templates/{type}/reset(type=${t.eventType})}" method="post"
+                data-confirm="Reset this message template back to factory default?">
+            <button class="btn secondary small" type="submit">Restore Default Template</button>
+          </form>
+        </div>
+      </article>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

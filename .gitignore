@@ -6,3 +6,6 @@
 *.log
 *.rar
 *.zip
+*.bak
+*.iml
+/src/main/java/out/

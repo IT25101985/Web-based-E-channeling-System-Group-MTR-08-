@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Medical Records Archive</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: doctor}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Medical Records Archive</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Doctor Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">DR</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">CLINICAL ARCHIVE</div>
+        <h1>Clinical Medical Records</h1>
+        <p>Comprehensive history of patient consultations, diagnoses, and authorized prescriptions.</p>
+      </div>
+      <input type="search" data-filter="#medicalRecordsTable" placeholder="Search diagnoses, patients..."
+             style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 260px;">
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.updated != null}" class="notice" role="status">Medical record diagnosis updated successfully.</div>
+    <div th:if="${param.archived != null}" class="notice info" role="status">Record safely archived. Historical data retained.</div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table id="medicalRecordsTable">
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Consultation Date</th>
+              <th>Diagnosis Summary</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${records}">
+              <td>
+                <strong th:text="${r.patient?.fullName ?: 'Patient'}">Patient Name</strong>
+                <p th:text="|Record ID #REC-${r.id}|"></p>
+              </td>
+              <td th:text="${#temporals.format(r.recordDate, 'dd MMM yyyy · HH:mm')}">Date</td>
+              <td style="max-width: 420px; white-space: normal;">
+                <p style="margin: 0; color: var(--ink-primary); line-height: 1.5;" th:text="${r.diagnosis}">Diagnosis</p>
+              </td>
+              <td>
+                <div class="actions">
+                  <a class="btn small secondary" th:href="@{/doctor/record/{id}/edit(id=${r.id})}">Edit Diagnosis</a>
+                  <form th:action="@{/doctor/record/{id}/archive(id=${r.id})}" method="post"
+                        data-confirm="Archive this medical record? Archived records remain securely retained.">
+                    <button class="btn small secondary" type="submit">Archive</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(records)}">
+              <td colspan="4" class="empty">
+                <h3>No medical records recorded yet</h3>
+                <p>Prescriptions and clinical diagnoses completed in consultation will appear here.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

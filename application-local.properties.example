@@ -1,4 +1,15 @@
-# Copy to application-local.properties; do not commit real credentials.
-DB_URL=jdbc:sqlserver://localhost:1433;databaseName=echanneling_system;encrypt=true;trustServerCertificate=true
-DB_USERNAME=sa
-DB_PASSWORD=replace-with-your-local-password
+# Copy to application-local.properties, which is ignored by Git.
+# Use Spring property names; DB_URL/DB_USERNAME/DB_PASSWORD are not read by this application.
+spring.datasource.url=jdbc:sqlserver://localhost;instanceName=SQLEXPRESS;databaseName=echanneling_system;encrypt=true;trustServerCertificate=true
+spring.datasource.username=your-local-sql-login
+spring.datasource.password=replace-with-your-local-password
+
+# Optional SMTP delivery. Enable only after configuring a test mailbox.
+app.mail.enabled=false
+# app.mail.from=your-verified-sender@example.com
+# spring.mail.host=your-smtp-host
+# spring.mail.port=587
+# spring.mail.username=your-smtp-username
+# spring.mail.password=your-smtp-password
+# spring.mail.properties.mail.smtp.auth=true
+# spring.mail.properties.mail.smtp.starttls.enable=true

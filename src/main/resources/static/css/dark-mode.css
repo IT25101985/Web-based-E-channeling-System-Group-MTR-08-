@@ -1,0 +1,102 @@
+/* ==========================================================================
+   MediCare Pro — Dark Mode Overrides & Token Mappings
+   ========================================================================== */
+
+:root {
+  --bg-primary: #ffffff;
+  --text-primary: #1e293b;
+  --card-bg: #ffffff;
+  --border-color: #f1f5f9;
+}
+
+.dark-mode {
+  --bg-canvas: #090E17 !important;
+  --panel: #0F172A !important;
+  --panel-muted: #1E293B !important;
+  --panel-header: #131E33 !important;
+  --ink-primary: #F8FAFC !important;
+  --ink-secondary: #94A3B8 !important;
+  --ink-muted: #64748B !important;
+  --border: #1E293B !important;
+  --border-subtle: #172338 !important;
+  --primary-navy: #F8FAFC !important;
+  --light-blue: #132238 !important;
+  --bg-primary: #0f172a;
+  --text-primary: #f1f5f9;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+}
+
+body.dark-mode, .dark-mode body {
+  background-color: var(--bg-canvas) !important;
+  color: var(--ink-primary) !important;
+  background-image: none !important;
+}
+
+.dark-mode .sidebar {
+  background: #0D1524 !important;
+  border-right-color: #1E293B !important;
+}
+
+.dark-mode .topbar {
+  background: rgba(13, 21, 36, 0.92) !important;
+  border-bottom-color: #1E293B !important;
+}
+
+.dark-mode .card {
+  background: #0F172A !important;
+  border-color: #1E293B !important;
+}
+
+.dark-mode .card-header {
+  background: #131E33 !important;
+  border-bottom-color: #1E293B !important;
+}
+
+.dark-mode thead th {
+  background: #131E33 !important;
+  border-bottom-color: #1E293B !important;
+  color: #94A3B8 !important;
+}
+
+.dark-mode tbody td {
+  border-bottom-color: #172338 !important;
+  color: #E2E8F0 !important;
+}
+
+.dark-mode tbody tr:hover {
+  background-color: #17243B !important;
+}
+
+.dark-mode .stat {
+  background: #0F172A !important;
+  border-color: #1E293B !important;
+}
+
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+  background-color: #090E17 !important;
+  color: #F8FAFC !important;
+  border-color: #1E293B !important;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+  color: #64748B !important;
+}
+
+.dark-mode .booking-stepper {
+  background: #0F172A !important;
+  border-color: #1E293B !important;
+}
+
+.dark-mode .step-num {
+  background: #1E293B !important;
+  color: #94A3B8 !important;
+}
+
+.dark-mode .workspace-note {
+  background: #132238 !important;
+  border-color: #1E293B !important;
+}

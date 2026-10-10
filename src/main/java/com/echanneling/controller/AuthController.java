@@ -28,6 +28,9 @@ public class AuthController {
     @Autowired
     private DoctorService doctorService;
 
+    @Autowired
+    private com.echanneling.service.HospitalBranchService hospitalBranchService;
+
     // --- OOP Helper Method (Encapsulating Login Status Check) ---
     // This reusable method checks if a user is currently logged in or not
     private boolean isUserLoggedIn(Authentication authentication) {
@@ -50,6 +53,8 @@ public class AuthController {
                 return "redirect:/admin/dashboard";
             } else if ("ROLE_DOCTOR".equals(role)) {
                 return "redirect:/doctor/dashboard";
+            } else if ("ROLE_RECEPTIONIST".equals(role)) {
+                return "redirect:/reception/dashboard";
             }
         }
         // If the user is neither Admin nor Doctor, send them to Patient dashboard
@@ -62,6 +67,7 @@ public class AuthController {
             model.addAttribute("username", principal.getName());
         }
         model.addAttribute("doctors", doctorService.getAllDoctors());
+        model.addAttribute("branches", hospitalBranchService.getAllBranches());
         return "index";
     }
 
