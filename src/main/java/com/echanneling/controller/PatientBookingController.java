@@ -17,6 +17,7 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/patient")
 public class PatientBookingController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PatientBookingController.class);
 
     @Autowired
     private UserService userService;
@@ -64,6 +65,13 @@ public class PatientBookingController {
             return "redirect:/patient/dashboard?section=history";
         } catch (IllegalArgumentException e) {
             flash.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            flash.addFlashAttribute("errorMessage", "The appointment could not be updated. Check your appointment and try again.");
+            return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
+        } catch (RuntimeException e) {
+            log.error("Appointment save failed", e);
+            flash.addFlashAttribute("errorMessage", "Could not save your appointment. Please try again.");
             return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
         }
     }
