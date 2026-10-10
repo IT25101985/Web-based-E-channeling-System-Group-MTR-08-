@@ -1,88 +1,59 @@
-package com.echanneling.entity;
+package com.echanneling.service;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import org.springframework.format.annotation.DateTimeFormat;
+import com.echanneling.entity.AvailabilitySlot;
+import com.echanneling.entity.Doctor;
+import com.echanneling.repository.AvailabilitySlotRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
-@Entity
-public class Appointment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Service
+public class AvailabilitySlotService {
 
-    @Version
-    private Long version;
+    @Autowired
+    private AvailabilitySlotRepository slotRepository;
 
-    @ManyToOne
-    private Doctor doctor;
-
-    @ManyToOne
-    private HospitalBranch hospitalBranch;
-
-    public HospitalBranch getHospitalBranch() { return hospitalBranch; }
-    public void setHospitalBranch(HospitalBranch hospitalBranch) { this.hospitalBranch = hospitalBranch; }
-
-    @ManyToOne
-    private User patient;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime appointmentDate;
-    private String contactPhone;
-    private String contactEmail;
-    private String status; // SCHEDULED, COMPLETED, CANCELLED
-
-    // Additional fields for database reporting/display
-    private String doctorName;
-    private String patientName;
-    private String date;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Doctor getDoctor() { return doctor; }
-    public void setDoctor(Doctor doctor) { this.doctor = doctor; }
-
-    public User getPatient() { return patient; }
-    public void setPatient(User patient) { this.patient = patient; }
-
-    public String getDoctorName() { return doctorName; }
-    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
-
-    public String getPatientName() { return patientName; }
-    public void setPatientName(String patientName) { this.patientName = patientName; }
-
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
-
-    public LocalDateTime getAppointmentDate() { return appointmentDate; }
-
-    /**
-     * Encapsulation demo: Simple validation
-     */
-    public void setAppointmentDate(LocalDateTime date) {
-        this.appointmentDate = date;
+    public AvailabilitySlot save(AvailabilitySlot slot) {
+        return slotRepository.save(slot);
     }
 
-    public String getContactPhone() { return contactPhone; }
-    public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
+    public List<AvailabilitySlot> getSlotsByDoctor(Doctor doctor) {
+        return slotRepository.findByDoctor(doctor);
+    }
 
-    public String getContactEmail() { return contactEmail; }
-    public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
+    public List<AvailabilitySlot> getAvailableSlotsByDate(LocalDate date) {
+        return slotRepository.findBySlotDateAndIsActive(date, true);
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    /**
+     * Atomic booking with double-booking prevention (synchronized)
+     * Returns true if booking succeeded, false if slot is full
+     */
+    @Transactional
+    public synchronized boolean bookSlot(Long slotId) {
+        Optional<AvailabilitySlot> opt = slotRepository.findById(slotId);
+        if (opt.isPresent()) {
+            AvailabilitySlot slot = opt.get();
+            if (slot.getBookedCount() < slot.getMaxPatients()) {
+                slot.setBookedCount(slot.getBookedCount() + 1);
+                if (slot.getBookedCount().equals(slot.getMaxPatients())) {
+                    slot.setIsActive(false); // Mark full
+                }
+                slotRepository.save(slot);
+                return true; // Booking successful
+            }
+        }
+        return false; // Slot full - double-booking prevented
+    }
 
-    @PrePersist
-    @PreUpdate
-    public void populateNames() {
-        if (doctor != null) {
-            this.doctorName = doctor.getName();
-        }
-        if (patient != null) {
-            this.patientName = patient.getFullName();
-        }
-        if (appointmentDate != null) {
-            this.date = appointmentDate.toLocalDate().toString();
-        }
+    public Optional<AvailabilitySlot> getById(Long id) {
+        return slotRepository.findById(id);
+    }
+
+    public void delete(Long id) {
+        slotRepository.deleteById(id);
     }
 }
