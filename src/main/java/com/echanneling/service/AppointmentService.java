@@ -51,6 +51,7 @@ public class AppointmentService {
     @org.springframework.transaction.annotation.Transactional
     public void deleteAppointment(Appointment appointment) {
         Long id = appointment.getId();
+        jdbc.update("DELETE FROM feedback WHERE appointment_id = ?", id);
         jdbc.update("DELETE FROM notifications WHERE appointment_id = ?", id);
         jdbc.update("DELETE FROM prescription WHERE medical_record_id IN (SELECT id FROM medical_record WHERE appointment_id = ?)", id);
         jdbc.update("DELETE FROM medical_record WHERE appointment_id = ?", id);

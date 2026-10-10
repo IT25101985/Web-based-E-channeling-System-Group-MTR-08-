@@ -45,6 +45,8 @@ public class BookingService {
 
     @Transactional
     public Appointment book(User patient, Appointment submitted) {
+        if (patient == null || !patient.isActive() || !"ROLE_PATIENT".equals(patient.getRole()))
+            throw new IllegalArgumentException("Choose an active patient account.");
         if (submitted.getDoctor() == null || submitted.getDoctor().getId() == null || submitted.getAppointmentDate() == null || submitted.getHospitalBranch() == null || submitted.getHospitalBranch().getId() == null)
             throw new IllegalArgumentException("Choose a hospital, doctor, date and available time.");
         // Lock the doctor's database row until commit, including concurrent requests on other app instances.
@@ -56,7 +58,7 @@ public class BookingService {
             if (booking.getPatient() == null || !Objects.equals(booking.getPatient().getId(), patient.getId()))
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN);
             if (!"SCHEDULED".equals(booking.getStatus())) throw new IllegalArgumentException("Only scheduled appointments can be rescheduled.");
-            if (!Objects.equals(booking.getDoctor().getId(), doctor.getId()))
+            if (booking.getDoctor() != null && !Objects.equals(booking.getDoctor().getId(), doctor.getId()))
                 throw new IllegalArgumentException("Keep the same doctor when rescheduling. Cancel and make a new booking to change doctors.");
         }
         HospitalBranch branch=branches.findById(submitted.getHospitalBranch().getId()).orElseThrow(()->new IllegalArgumentException("Hospital is no longer available."));
