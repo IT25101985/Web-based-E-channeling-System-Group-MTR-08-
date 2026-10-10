@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Hospital Branches Management</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Hospital Facilities &amp; Branches</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Admin Console</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">HOSPITAL INFRASTRUCTURE</div>
+        <h1>Hospital Branches &amp; Facilities</h1>
+        <p>Manage hospital clinic locations, branch addresses, and direct emergency hotline numbers.</p>
+      </div>
+      <a class="btn" href="/admin/sessions">Publish Clinic Sessions →</a>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete request. Please verify inputs.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <!-- Add Hospital Branch Form -->
+    <details class="card" style="margin-bottom: 24px;">
+      <summary>✚ Add New Hospital Branch Location</summary>
+      <div class="card-body">
+        <form th:action="@{/admin/branches/add}" method="post">
+          <div class="form-grid">
+            <label class="field">
+              <span>Hospital Facility / Branch Name *</span>
+              <input type="text" name="branchName" required placeholder="e.g. Asiri Central Hospital">
+            </label>
+            <label class="field">
+              <span>Geographic District / Area *</span>
+              <input type="text" name="area" required placeholder="e.g. Colombo, Kandy, Galle, Jaffna">
+            </label>
+            <label class="field">
+              <span>Full Physical Address *</span>
+              <input type="text" name="address" required placeholder="e.g. 114 Norris Canal Road, Colombo 10">
+            </label>
+            <label class="field">
+              <span>Contact Hotline *</span>
+              <input type="tel" name="contactNumber" required placeholder="e.g. 0114665500">
+            </label>
+          </div>
+          <div class="form-footer">
+            <button class="btn" type="submit">Register Hospital Facility</button>
+          </div>
+        </form>
+      </div>
+    </details>
+
+    <!-- Branch Cards Grid -->
+    <div class="grid three-col">
+      <div class="card card-body" th:each="b : ${branches}" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: var(--teal-soft); color: var(--healthcare-teal); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+              🏥
+            </div>
+            <span class="badge" th:text="${b.area}">Colombo</span>
+          </div>
+
+          <h2 style="font-size: 18px; margin-bottom: 4px; color: var(--primary-navy);" th:text="${b.branchName}">Branch Name</h2>
+          <p style="font-size: 13px; color: var(--ink-secondary); margin-bottom: 12px;" th:text="${b.address}">Address</p>
+          <p style="font-size: 13px; font-weight: 700; color: var(--primary-blue);" th:text="|Hotline: ${b.contactNumber}|">Hotline</p>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; margin-top: 16px;">
+          <details style="margin-bottom: 10px;">
+            <summary style="font-size: 12.5px; font-weight: 600; cursor: pointer; color: var(--primary-blue);">
+              Edit Facility Details
+            </summary>
+            <form th:action="@{/admin/branches/{id}/update(id=${b.id})}" method="post" style="margin-top: 10px;">
+              <div class="form-grid" style="grid-template-columns: 1fr; gap: 8px;">
+                <label class="field">
+                  <span style="font-size: 11px;">Branch Name</span>
+                  <input type="text" name="branchName" th:value="${b.branchName}" required style="padding: 6px; font-size: 12px;">
+                </label>
+                <label class="field">
+                  <span style="font-size: 11px;">District Area</span>
+                  <input type="text" name="area" th:value="${b.area}" required style="padding: 6px; font-size: 12px;">
+                </label>
+                <label class="field">
+                  <span style="font-size: 11px;">Address</span>
+                  <input type="text" name="address" th:value="${b.address}" required style="padding: 6px; font-size: 12px;">
+                </label>
+                <label class="field">
+                  <span style="font-size: 11px;">Hotline</span>
+                  <input type="tel" name="contactNumber" th:value="${b.contactNumber}" required style="padding: 6px; font-size: 12px;">
+                </label>
+              </div>
+              <div style="margin-top: 10px;">
+                <button class="btn small" type="submit">Save Changes</button>
+              </div>
+            </form>
+          </details>
+
+          <form th:action="@{/admin/branches/{id}/delete(id=${b.id})}" method="post"
+                data-confirm="Delete this hospital branch? Existing clinic sessions and appointments must be moved first.">
+            <button class="btn small danger" type="submit">Remove Branch</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card empty" th:if="${#lists.isEmpty(branches)}" style="grid-column: 1 / -1;">
+        <h3>No hospital branches registered</h3>
+        <p>Register your hospital facility network using the form above.</p>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
