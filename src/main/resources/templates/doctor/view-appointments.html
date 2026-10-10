@@ -1,1 +1,100 @@
-<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CareLink | Healthcare, connected</title><link rel="stylesheet" href="/css/app.css"><script src="/js/theme.js"></script><script src="/js/app.js" defer></script></head><body><a class="skip-link" href="#main">Skip to content</a><aside th:replace="~{fragments/navigation :: doctor}"></aside><div class="app"><header class="topbar"><div class="actions"><button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button><span class="crumb">Workspace &nbsp; / &nbsp; <b>My appointments</b></span></div><div class="top-actions"><span class="live">Doctor portal</span><button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle colour theme">◐</button><span class="avatar" sec:authentication="name">CL</span></div></header><main class="content" id="main"><div class="page-heading"><div><div class="eyebrow">YOUR CARELINK WORKSPACE</div><h1>My appointments</h1><p>Your patient visits and consultation history.</p></div></div><div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div><div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div><div th:if="${param.error != null}" class="notice error" role="alert">The request could not be completed. Check your details and try again. </div><div id="actionNotice" class="notice" role="status" hidden>Changes saved successfully.</div><div class="card"><div class="table-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date & time</th><th>Status</th><th>Action</th></tr></thead><tbody><tr th:each="a : ${appointments}"><td><strong th:text="${a.patientName ?: (a.patient != null ? a.patient.fullName : 'Patient')}"></strong><p th:text="${a.contactEmail}"></p></td><td th:text="${a.doctorName ?: (a.doctor != null ? a.doctor.name : 'Doctor')}"></td><td th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy · HH:mm') : 'Not set'}"></td><td><span class="badge" th:data-status="${a.status}" th:text="${a.status}">Status</span></td><td><a class="btn small secondary" th:href="@{/doctor/consultations(appointmentId=${a.id})}">View consultation ↗</a></td></tr><tr th:if="${#lists.isEmpty(appointments)}"><td colspan="5" class="empty">No records yet. New activity will appear here.</td></tr></tbody></table></div></div><footer class="footer-note">CareLink · Healthcare, connected. &nbsp; All appointment times are local hospital time.</footer></main></div></body></html>
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Doctor Consultation Schedule</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: doctor}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>My Consultation Schedule</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Doctor Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">DR</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">CLINICAL DIARY</div>
+        <h1>My Appointments Schedule</h1>
+        <p>Review booked patient consultations, open clinical rooms, and record prescriptions.</p>
+      </div>
+      <div class="actions">
+        <input type="search" data-filter="#doctorScheduleTable" placeholder="Filter patients..."
+               style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 240px;">
+      </div>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete request. Please verify details.</div>
+    <div th:if="${param.success != null}" class="notice" role="status">Consultation completed and prescription saved successfully.</div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table id="doctorScheduleTable">
+          <thead>
+            <tr>
+              <th>Booking Ref &amp; Patient</th>
+              <th>Contact Details</th>
+              <th>Date &amp; Time</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="a : ${appointments}">
+              <td>
+                <strong th:text="|#${a.id} - ${a.patientName ?: (a.patient != null ? a.patient.fullName : 'Patient')}|">#001 - Patient</strong>
+                <p th:text="${a.hospitalBranch != null ? a.hospitalBranch.branchName : 'Main Hospital'}">Branch</p>
+              </td>
+              <td>
+                <span th:text="${a.contactPhone}">0771234567</span>
+                <p th:text="${a.contactEmail}">email@example.com</p>
+              </td>
+              <td>
+                <strong th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy') : 'Unset'}">Date</strong>
+                <p th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'HH:mm a') : ''}"></p>
+              </td>
+              <td>
+                <span class="badge" th:data-status="${a.status}" th:text="${a.status}">SCHEDULED</span>
+              </td>
+              <td>
+                <div class="actions">
+                  <a class="btn small secondary" th:href="@{/doctor/consultations(appointmentId=${a.id})}">Consultation Room ↗</a>
+                  <a th:if="${a.status == 'SCHEDULED'}" class="btn small" th:href="@{/doctor/prescribe/{id}(id=${a.id})}">Prescribe →</a>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appointments)}">
+              <td colspan="5" class="empty">
+                <h3>No appointments on your schedule</h3>
+                <p>Consultation visits reserved by patients will appear in this diary.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

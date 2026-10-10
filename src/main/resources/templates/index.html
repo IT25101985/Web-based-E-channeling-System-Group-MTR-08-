@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Sri Lanka National E-Channeling Platform</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/home.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/home.js" defer></script>
+</head>
+<body class="care-home">
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<!-- 1. Global Top Info Bar with Hotline & Multi-Language Switcher -->
+<div class="home-ribbon">
+  <div class="home-container">
+    <div class="ribbon-badges">
+      <span class="ribbon-dot"></span>
+      <span data-i18n="ribbon_text">SLMC Accredited Specialists &bull; Islandwide Hospitals &bull; Counter Cash Payments</span>
+    </div>
+    <div class="ribbon-right">
+      <a href="tel:1990" class="ribbon-hotline" title="Call National Healthcare Hotline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span data-i18n="ribbon_hotline">Hotline: 1990 (24/7)</span>
+      </a>
+      <div class="lang-switch" role="group" aria-label="Language Selector">
+        <button type="button" class="lang-btn active" data-lang="en">English</button>
+        <button type="button" class="lang-btn" data-lang="si">සිංහල</button>
+        <button type="button" class="lang-btn" data-lang="ta">தமிழ்</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Floating Glassmorphism Sticky Navbar -->
+<header class="home-header" id="homeHeader">
+  <div class="floating-nav-wrapper">
+    <nav class="floating-navbar" aria-label="Main Navigation">
+      <!-- Left: Logo & Compact Healthcare Badge -->
+      <a href="/" class="brand" aria-label="MediCare Pro">
+        <span class="brand-mark" aria-hidden="true">✚</span>
+        <span class="brand-text">
+          <span class="brand-title">MediCare<span>Pro</span></span>
+          <span class="brand-subtitle">Digital Healthcare</span>
+        </span>
+      </a>
+
+      <!-- Center: Main Navigation with More Dropdown -->
+      <ul class="home-nav-links" id="homeNavLinks" role="menubar">
+        <li role="none"><a href="#" class="nav-link active" role="menuitem" data-i18n="nav_home">Home</a></li>
+        <li role="none"><a href="#search-section" class="nav-link" role="menuitem" data-i18n="nav_find_doctors">Find Doctors</a></li>
+        <li role="none"><a href="#specialties" class="nav-link" role="menuitem" data-i18n="nav_specializations">Specialties</a></li>
+        <li role="none"><a href="#hospitals" class="nav-link" role="menuitem" data-i18n="nav_hospitals">Hospitals</a></li>
+        <li role="none"><a href="#how-it-works" class="nav-link" role="menuitem" data-i18n="nav_how_it_works">How It Works</a></li>
+        <li class="nav-dropdown" role="none">
+          <button type="button" class="nav-link nav-dropdown-btn" id="moreDropdownBtn" aria-haspopup="true" aria-expanded="false" role="menuitem">
+            <span data-i18n="nav_more">More</span>
+            <svg class="chevron-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="dropdown-menu" id="moreDropdownMenu" role="menu" aria-labelledby="moreDropdownBtn">
+            <a href="#available-today" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item-icon">⚡</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title" data-i18n="nav_available">Available Today</span>
+                <span class="dropdown-item-desc">Immediate doctor channeling</span>
+              </div>
+            </a>
+            <a href="#why-choose-us" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item-icon">🛡️</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title" data-i18n="nav_why_us">Why Choose Us</span>
+                <span class="dropdown-item-desc">SLMC certified &amp; verified</span>
+              </div>
+            </a>
+            <a href="#faqs" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item-icon">❓</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title" data-i18n="nav_faqs">FAQs</span>
+                <span class="dropdown-item-desc">Booking &amp; payment answers</span>
+              </div>
+            </a>
+            <a href="#about" class="dropdown-item" role="menuitem">
+              <span class="dropdown-item-icon">📞</span>
+              <div class="dropdown-item-content">
+                <span class="dropdown-item-title" data-i18n="nav_about">About &amp; Contact</span>
+                <span class="dropdown-item-desc">24/7 National hotline</span>
+              </div>
+            </a>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Right: Action Links & Book CTA -->
+      <div class="home-nav-actions">
+        <a href="/login" sec:authorize="!isAuthenticated()" class="home-signin" data-i18n="nav_sign_in">Sign In</a>
+        <a href="/patient/dashboard" sec:authorize="isAuthenticated()" class="home-signin">
+          <span sec:authentication="name">Patient</span>
+        </a>
+        <a href="/patient/dashboard?section=booking" class="btn-gradient-book">
+          <span data-i18n="nav_book_cta">Book Appointment</span>
+          <span class="btn-arrow" aria-hidden="true">→</span>
+        </a>
+        <button type="button" class="home-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileSlidePanel">
+          <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+          </span>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- Mobile Slide-In Panel & Overlay Backdrop -->
+<div class="mobile-menu-backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
+<aside class="mobile-slide-panel" id="mobileSlidePanel" aria-label="Mobile Navigation" aria-hidden="true">
+  <div class="mobile-panel-header">
+    <div class="brand">
+      <span class="brand-mark">✚</span>
+      <span class="brand-text">
+        <span class="brand-title">MediCare<span>Pro</span></span>
+        <span class="brand-subtitle">Digital Healthcare</span>
+      </span>
+    </div>
+    <button type="button" class="mobile-close-btn" id="mobileNavClose" aria-label="Close menu">&times;</button>
+  </div>
+  <div class="mobile-panel-body">
+    <nav class="mobile-nav-links">
+      <a href="#" class="mobile-nav-link active" data-i18n="nav_home">Home</a>
+      <a href="#search-section" class="mobile-nav-link" data-i18n="nav_find_doctors">Find Doctors</a>
+      <a href="#specialties" class="mobile-nav-link" data-i18n="nav_specializations">Specialties</a>
+      <a href="#hospitals" class="mobile-nav-link" data-i18n="nav_hospitals">Hospitals</a>
+      <a href="#how-it-works" class="mobile-nav-link" data-i18n="nav_how_it_works">How It Works</a>
+      <div class="mobile-divider"></div>
+      <a href="#available-today" class="mobile-nav-link" data-i18n="nav_available">⚡ Available Today</a>
+      <a href="#why-choose-us" class="mobile-nav-link" data-i18n="nav_why_us">🛡️ Why Choose Us</a>
+      <a href="#faqs" class="mobile-nav-link" data-i18n="nav_faqs">❓ FAQs</a>
+      <a href="#about" class="mobile-nav-link" data-i18n="nav_about">📞 About &amp; Contact</a>
+    </nav>
+  </div>
+  <div class="mobile-panel-footer">
+    <a href="/login" sec:authorize="!isAuthenticated()" class="mobile-signin-btn" data-i18n="nav_sign_in">Sign In</a>
+    <a href="/patient/dashboard" sec:authorize="isAuthenticated()" class="mobile-signin-btn">
+      <span sec:authentication="name">Patient Portal</span>
+    </a>
+    <a href="/patient/dashboard?section=booking" class="btn-gradient-book mobile-full-btn">
+      <span data-i18n="nav_book_cta">Book Appointment</span>
+      <span class="btn-arrow">→</span>
+    </a>
+    <div class="mobile-hotline-strip">
+      <span>📞 24/7 Hotline:</span>
+      <a href="tel:1990">1990 (Toll-Free)</a>
+    </div>
+  </div>
+</aside>
+
+<main id="main">
+
+  <!-- =========================================================================
+       SECTION 1: HERO & EQUAL-HEIGHT SEARCH BAR
+       ========================================================================= -->
+  <!-- =========================================================================
+       SECTION 1: HERO SECTION — EXACT APPROVED REFERENCE DESIGN
+       ========================================================================= -->
+  <section class="home-hero-section" id="search-section">
+    <!-- Ambient 3D Decorative Crosses -->
+    <span class="hero-bg-cross cross-top-left" aria-hidden="true">+</span>
+    <span class="hero-bg-cross cross-top-right" aria-hidden="true">+</span>
+    <span class="hero-bg-cross cross-mid-right" aria-hidden="true">+</span>
+
+    <div class="home-container home-hero-grid">
+      <!-- LEFT CONTENT (56%): Heading, Search Panel, Specialties, Trust Indicators -->
+      <div class="home-hero-content">
+        <!-- Top Pill Badge -->
+        <div class="home-hero-badge">
+          <span class="badge-dot"></span>
+          <span data-i18n="hero_badge">SRI LANKA'S DIGITAL HEALTHCARE PLATFORM</span>
+        </div>
+
+        <!-- Main Heading -->
+        <h1 class="hero-main-heading">
+          Your Health Deserves<br>
+          the <span class="text-gradient-cyan">Best Care.</span>
+        </h1>
+
+        <!-- Subtitle Description -->
+        <p class="hero-sub" data-i18n="hero_sub">
+          Find trusted Sri Lankan specialists and book verified clinic appointments across the island in under 60 seconds.
+        </p>
+
+        <!-- Glassmorphic Search Panel -->
+        <div class="hero-search-card">
+          <!-- Search Tabs -->
+          <div class="hero-search-tabs" role="tablist">
+            <button type="button" class="search-tab-btn active" id="tabDoctor" data-tab="doctor" role="tab" aria-selected="true">
+              <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Find a Doctor</span>
+            </button>
+            <button type="button" class="search-tab-btn" id="tabHospital" data-tab="hospital" role="tab" aria-selected="false">
+              <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M12 17v4"/></svg>
+              <span>Find a Hospital</span>
+            </button>
+            <button type="button" class="search-tab-btn" id="tabBooking" data-tab="booking" role="tab" aria-selected="false">
+              <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Book an Appointment</span>
+            </button>
+          </div>
+
+          <!-- Doctor Search Form -->
+          <form class="hero-search-form" id="heroSearchForm" role="search" aria-label="Doctor Search">
+            <!-- Doctor Name -->
+            <div class="search-field-wrap">
+              <label for="heroDoctorSearch">Doctor Name</label>
+              <div class="input-with-icon">
+                <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="heroDoctorSearch" placeholder="Search doctor name..." autocomplete="off">
+              </div>
+            </div>
+
+            <!-- Specialization -->
+            <div class="search-field-wrap">
+              <label for="heroSpecialtySelect">Specialization</label>
+              <div class="input-with-icon">
+                <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                <select id="heroSpecialtySelect">
+                  <option value="">All Specialties</option>
+                  <option value="Cardiology">Cardiology</option>
+                  <option value="Dermatology">Dermatology</option>
+                  <option value="Pediatrics">Paediatrics</option>
+                  <option value="Dental">Dentistry</option>
+                  <option value="Gynecology">Gynaecology</option>
+                  <option value="Ophthalmology">Ophthalmology</option>
+                  <option value="General Physician">General Medicine</option>
+                  <option value="Orthopedics">Orthopedics</option>
+                  <option value="Neurology">Neurology</option>
+                  <option value="ENT Surgery">ENT Surgery</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Location -->
+            <div class="search-field-wrap">
+              <label for="heroLocationSelect">Location</label>
+              <div class="input-with-icon">
+                <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <select id="heroLocationSelect">
+                  <option value="">All Locations</option>
+                  <option th:each="b : ${branches}" th:value="${b.area}" th:text="|${b.branchName} (${b.area})|"></option>
+                  <option th:if="${#lists.isEmpty(branches)}" value="Colombo">Colombo Central Hospital</option>
+                  <option th:if="${#lists.isEmpty(branches)}" value="Kandy">Kandy General Hospital</option>
+                  <option th:if="${#lists.isEmpty(branches)}" value="Galle">Galle Hospital Branch</option>
+                  <option th:if="${#lists.isEmpty(branches)}" value="Jaffna">Jaffna Healthcare</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="hero-cta-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span data-i18n="btn_search_doctors">Search Doctors</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Popular Specialties Selection Row (7 Icon Cards) -->
+        <div class="hero-specialties-row">
+          <div class="hero-specialties-title">Popular Specialties</div>
+          <div class="specialties-cards-flex">
+            <!-- 1. Cardiology -->
+            <button type="button" class="spec-card-btn" data-specialty="Cardiology" title="Cardiology Specialists">
+              <div class="spec-card-icon icon-cardio">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </div>
+              <span class="spec-card-name">Cardiology</span>
+            </button>
+
+            <!-- 2. Dermatology -->
+            <button type="button" class="spec-card-btn" data-specialty="Dermatology" title="Dermatology Specialists">
+              <div class="spec-card-icon icon-derma">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              </div>
+              <span class="spec-card-name text-orange">Dermatology</span>
+            </button>
+
+            <!-- 3. Paediatrics -->
+            <button type="button" class="spec-card-btn" data-specialty="Pediatrics" title="Paediatrics Specialists">
+              <div class="spec-card-icon icon-paed">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/></svg>
+              </div>
+              <span class="spec-card-name">Paediatrics</span>
+            </button>
+
+            <!-- 4. Dentistry -->
+            <button type="button" class="spec-card-btn" data-specialty="Dental" title="Dental Specialists">
+              <div class="spec-card-icon icon-dent">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4c-3 0-5 2-5 5 0 4 2 8 2 11 0 1 1 2 2 2s1-1 1-2c0-3 1-5 1-5s1 2 1 5c0 1 1 2 1 2s2-1 2-2c0-3 2-7 2-11 0-3-2-5-5-5z"/></svg>
+              </div>
+              <span class="spec-card-name text-cyan">Dentistry</span>
+            </button>
+
+            <!-- 5. Gynaecology -->
+            <button type="button" class="spec-card-btn" data-specialty="Gynecology" title="Gynaecology Specialists">
+              <div class="spec-card-icon icon-gynae">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><line x1="12" y1="13" x2="12" y2="21"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+              </div>
+              <span class="spec-card-name">Gynaecology</span>
+            </button>
+
+            <!-- 6. Ophthalmology -->
+            <button type="button" class="spec-card-btn" data-specialty="Ophthalmology" title="Eye Specialists">
+              <div class="spec-card-icon icon-opht">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+              <span class="spec-card-name">Ophthalmology</span>
+            </button>
+
+            <!-- 7. View All Specialties -->
+            <a href="#specialties" class="spec-card-btn spec-card-all" title="Browse all departments">
+              <div class="spec-card-icon icon-all">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="7" r="2.5"/><circle cx="7" cy="17" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>
+              </div>
+              <span class="spec-card-name text-blue">View All<br>Specialties</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Trust Indicators Beneath Specialties (3 Horizontal Items) -->
+        <div class="hero-trust-indicators">
+          <!-- 1. SLMC Verified Doctors -->
+          <div class="trust-indicator-item">
+            <div class="trust-icon-wrap icon-blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </div>
+            <div class="trust-text">
+              <strong>SLMC Verified Doctors</strong>
+              <span>Qualified &amp; trusted specialists</span>
+            </div>
+          </div>
+
+          <!-- 2. Instant Appointment Booking -->
+          <div class="trust-indicator-item">
+            <div class="trust-icon-wrap icon-cyan">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div class="trust-text">
+              <strong>Instant Appointment Booking</strong>
+              <span>Book in under 60 seconds</span>
+            </div>
+          </div>
+
+          <!-- 3. Transparent Consultation Fees -->
+          <div class="trust-indicator-item">
+            <div class="trust-icon-wrap icon-purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <div class="trust-text">
+              <strong>Transparent Consultation Fees</strong>
+              <span>No hidden charges</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT VISUAL (44%): Doctor Image + Curved Portal + 4 Floating Glassmorphic Badges -->
+      <div class="home-hero-visual">
+        <div class="doctor-portal-frame">
+          <div class="portal-curved-arc"></div>
+          <div class="portal-image-container">
+            <img class="doctor-hero-img" src="/images/carelink/doctor_hero.jpg" alt="Doctor consultant MediCare Pro Sri Lanka" width="768" height="1024" loading="eager">
+          </div>
+
+          <!-- Floating Badge 1: Top-Left (SLMC Verified Specialists) -->
+          <div class="floating-badge badge-slmc">
+            <div class="badge-icon-box green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="badge-content">
+              <strong>SLMC Verified<br>Specialists</strong>
+              <small>Trusted by Sri Lankans <span class="badge-arrow">›</span></small>
+            </div>
+          </div>
+
+          <!-- Floating Badge 2: Mid-Left (Instant Booking) -->
+          <div class="floating-badge badge-instant">
+            <div class="badge-icon-box blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+            </div>
+            <div class="badge-content">
+              <strong>Instant Booking</strong>
+              <small>In under 60 seconds <span class="badge-arrow">›</span></small>
+            </div>
+          </div>
+
+          <!-- Floating Badge 3: Mid-Right (500+ Doctors) -->
+          <div class="floating-badge badge-doctors">
+            <div class="badge-icon-box darkblue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="badge-content">
+              <strong>500+ Doctors</strong>
+              <small>Across Sri Lanka <span class="badge-arrow">›</span></small>
+            </div>
+          </div>
+
+          <!-- Floating Badge 4: Bottom-Right (Quality Healthcare Across Sri Lanka) -->
+          <div class="floating-badge badge-island">
+            <div class="badge-island-map">
+              <svg width="32" height="44" viewBox="0 0 100 135" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M48 6C55 10 65 24 66 38C67 52 75 70 68 90C63 104 54 125 45 128C38 130 32 120 28 106C22 86 24 68 28 50C31 36 40 18 48 6Z" fill="url(#mapGradHero)"/>
+                <circle cx="34" cy="74" r="5" fill="#00D2FF"/>
+                <circle cx="34" cy="74" r="2.5" fill="#FFFFFF"/>
+                <circle cx="50" cy="62" r="4.5" fill="#00D2FF"/>
+                <circle cx="50" cy="62" r="2" fill="#FFFFFF"/>
+                <circle cx="38" cy="98" r="4" fill="#00D2FF"/>
+                <circle cx="38" cy="98" r="2" fill="#FFFFFF"/>
+                <circle cx="48" cy="28" r="4" fill="#00D2FF"/>
+                <circle cx="48" cy="28" r="2" fill="#FFFFFF"/>
+                <defs>
+                  <linearGradient id="mapGradHero" x1="25" y1="6" x2="70" y2="130" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#38BDF8"/>
+                    <stop offset="1" stop-color="#2563EB"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="badge-content">
+              <strong>Quality Healthcare</strong>
+              <small>Across Sri Lanka <span class="badge-arrow">›</span></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 2: POPULAR SPECIALIZATIONS (8 Icon Cards)
+       ========================================================================= -->
+  <section class="home-specialties-section" id="specialties">
+    <div class="home-container">
+      <div class="home-section-header flex-between">
+        <div>
+          <div class="section-eyebrow" data-i18n="eyebrow_specialties">CLINICAL DEPARTMENTS</div>
+          <h2 data-i18n="title_specialties">Popular Specializations</h2>
+          <p data-i18n="sub_specialties">Consult verified consultants specialized in key health domains.</p>
+        </div>
+        <a href="#search-section" class="btn-nav-book" style="background: transparent; color: var(--home-blue); border: 1.5px solid var(--home-blue); padding: 8px 16px;">
+          View All Specializations →
+        </a>
+      </div>
+
+      <div class="specialty-grid-8">
+        <!-- 1. Cardiology -->
+        <div class="specialty-card-item" data-specialty="Cardiology">
+          <div>
+            <div class="specialty-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <h3>Cardiology</h3>
+            <p>Heart care, hypertension, and ECG diagnostics.</p>
+          </div>
+          <span class="specialty-count-badge">Consultants Available →</span>
+        </div>
+
+        <!-- 2. Dermatology -->
+        <div class="specialty-card-item" data-specialty="Dermatology">
+          <div>
+            <div class="specialty-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+            </div>
+            <h3>Dermatology</h3>
+            <p>Skin disorders, allergy care, and aesthetic health.</p>
+          </div>
+          <span class="specialty-count-badge">Consultants Available →</span>
+        </div>
+
+        <!-- 3. Pediatrics -->
+        <div class="specialty-card-item" data-specialty="Pediatrics">
+          <div>
+            <div class="specialty-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5v3a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z"/><path d="M4.5 14.5A7.5 7.5 0 0 0 12 22a7.5 7.5 0 0 0 7.5-7.5"/></svg>
+            </div>
+            <h3>Pediatrics</h3>
+            <p>Child healthcare, immunizations, and growth checkups.</p>
+          </div>
+          <span class="specialty-count-badge">Consultants Available →</span>
+        </div>
+
+        <!-- 4. General Medicine -->
+        <div class="specialty-card-item" data-specialty="General Physician">
+          <div>
+            <div class="specialty-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+            </div>
+            <h3>General Medicine</h3>
+            <p>Primary diagnosis, fevers, and health checkups.</p>
+          </div>
+          <span class="specialty-count-badge">Consultants Available →</span>
+        </div>
+
+        <!-- 5. Orthopedics -->
+        <div class="specialty-card-item" data-specialty="Orthopedics">
+          <div>
+            <div class="specialty-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a4 4 0 0 0 0-8z"/></svg>
+            </div>
+            <h3>Orthopedics</h3>
+            <p>Joints, bone fractures, spine care, and sports injuries.</p>
+          </div>
+          <span class="specialty-count-badge">Consultants Available →</span>
+        </div>
+
+        <!-- 6. Neurology -->
+        <div class="specialty-card-item" data-specialty="Neurology">
+          <div>
+            <div class="specialty-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <h3>Neurology</h3>
+            <p>Brain disorders, nerve pain, stroke, and migraine care.</p>
+          </div>
+          <span class="specialty-count-badge">Consultants Available →</span>
+        </div>
+
+        <!-- 7. ENT Surgery -->
+        <div class="specialty-card-item" data-specialty="ENT Surgery">
+          <div>
+            <div class="specialty-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            </div>
+            <h3>ENT Surgery</h3>
+            <p>Ear infections, sinus relief, and throat diagnostics.</p>
+          </div>
+          <span class="specialty-count-badge">Consultants Available →</span>
+        </div>
+
+        <!-- 8. Gynecology -->
+        <div class="specialty-card-item" data-specialty="Gynecology">
+          <div>
+            <div class="specialty-icon-circle">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><line x1="12" y1="15" x2="12" y2="21"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+            </div>
+            <h3>Gynecology</h3>
+            <p>Maternal healthcare, fertility, and wellness.</p>
+          </div>
+          <span class="specialty-count-badge">Consultants Available →</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 3: AVAILABLE TODAY (Doctor Cards with Next Available Slot)
+       ========================================================================= -->
+  <section class="home-available-section" id="available-today">
+    <div class="home-container">
+      <div class="home-section-header flex-between">
+        <div>
+          <div class="section-eyebrow" data-i18n="eyebrow_available">INSTANT CHANNELING</div>
+          <h2 data-i18n="title_available">Available Today &bull; Immediate Booking</h2>
+          <p data-i18n="sub_available">Inspect verified consultants with published clinic sessions and reserve your slot.</p>
+        </div>
+        <a href="/patient/dashboard?section=booking" class="btn-nav-book">
+          Open Booking Desk →
+        </a>
+      </div>
+
+      <div class="doctor-cards-grid" id="availableDoctorsGrid">
+        <article class="doc-card" th:each="d, stat : ${doctors}"
+                 th:data-doctor-name="${d.name}"
+                 th:data-specialty="${d.specialization}"
+                 th:data-experience="${d.experience ?: 'Senior Consultant'}"
+                 th:data-location="${d.user != null and d.user.address != null ? d.user.address : 'Colombo Central Hospital'}"
+                 th:data-phone="${d.user != null and d.user.phoneNo != null ? d.user.phoneNo : '+94 11 234 5678'}"
+                 th:data-fee="${d.consultationFee != null ? 'LKR ' + #numbers.formatDecimal(d.consultationFee, 1, 'COMMA', 0, 'POINT') : 'Hospital rate'}">
+          <div>
+            <div class="doc-card-top">
+              <div class="doc-avatar-wrap">
+                <span th:text="${#strings.substring(d.name, 0, 1)}">D</span>
+                <img th:attr="data-portrait=${d.user != null ? d.user.profileImage : ''}"
+                     th:alt="|Photo of ${d.name}|" loading="lazy" style="opacity: 0;">
+              </div>
+              <div class="doc-meta">
+                <h3 th:text="${d.name}">Dr. Specialist Name</h3>
+                <span class="doc-spec-pill" th:text="${d.specialization}">Specialization</span>
+              </div>
+            </div>
+
+            <div class="doc-details">
+              <div class="doc-detail-line">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span th:text="${d.user != null and d.user.address != null ? d.user.address : 'Colombo Central Hospital'}">Colombo Hospital</span>
+              </div>
+              <div class="doc-detail-line">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span th:text="${d.clinicHours != null ? d.clinicHours : '09:00 AM - 05:00 PM'}">Published Sessions</span>
+              </div>
+              <div>
+                <span class="doc-slot-tag">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Next: Today 05:00 PM
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="doc-card-bottom">
+            <div class="doc-fee-box">
+              <small>Consultation</small>
+              <strong th:text="${d.consultationFee != null ? 'LKR ' + #numbers.formatDecimal(d.consultationFee, 1, 'COMMA', 0, 'POINT') : 'LKR 2,500'}">LKR 2,500</strong>
+            </div>
+            <div class="doc-actions">
+              <button type="button" class="btn-doc-profile btn-view-profile">Profile</button>
+              <a href="/patient/dashboard?section=booking" class="btn-doc-book">Book Now</a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div id="doctorsEmptyNotice" class="card empty" style="display: none; margin-top: 24px; text-align: center; padding: 32px; background: #fff; border-radius: 16px; border: 1px solid var(--home-border);">
+        <h3 style="color: var(--home-navy);">No doctors found</h3>
+        <p style="color: #64748B;">Try another specialization, keyword or hospital location.</p>
+        <button type="button" class="chip-btn" id="btnClearFilters" style="margin-top: 10px;">Clear All Filters</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 4: TOP HOSPITALS
+       ========================================================================= -->
+  <section class="home-hospitals-section" id="hospitals">
+    <div class="home-container">
+      <div class="home-section-header">
+        <div class="section-eyebrow" data-i18n="eyebrow_hospitals">ISLANDWIDE NETWORK</div>
+        <h2 data-i18n="title_hospitals">Top Accredited Hospitals</h2>
+        <p data-i18n="sub_hospitals">Consultations take place at certified partner hospital branches across Sri Lanka.</p>
+      </div>
+
+      <div class="hospitals-cards-grid">
+        <div class="hosp-card" th:each="b : ${branches}">
+          <div>
+            <div class="hosp-card-header">
+              <span class="hosp-area-badge" th:text="${b.area}">Colombo</span>
+              <svg class="hosp-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6v4"/><path d="M10 8h4"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
+            </div>
+            <h3 th:text="${b.branchName}">Asiri Central Hospital</h3>
+            <p class="address" th:text="${b.address}">114 Norris Canal Road, Colombo 10</p>
+          </div>
+          <div class="hosp-card-footer">
+            <a th:href="|tel:${b.contactNumber}|" class="hosp-hotline-link" th:text="|📞 ${b.contactNumber}|">0114665500</a>
+            <a href="/patient/dashboard?section=booking" class="btn-doc-profile" style="text-decoration: none;">Select Branch →</a>
+          </div>
+        </div>
+
+        <!-- Fallback Cards if Database has no initial branches -->
+        <div class="hosp-card" th:if="${#lists.isEmpty(branches)}">
+          <div>
+            <div class="hosp-card-header">
+              <span class="hosp-area-badge">Colombo</span>
+              <svg class="hosp-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M12 6v4"/><path d="M10 8h4"/></svg>
+            </div>
+            <h3>Colombo Central Hospital</h3>
+            <p class="address">124 Galle Road, Colombo 03, Western Province</p>
+          </div>
+          <div class="hosp-card-footer">
+            <a href="tel:0112345678" class="hosp-hotline-link">📞 011 234 5678</a>
+            <a href="/patient/dashboard?section=booking" class="btn-doc-profile" style="text-decoration: none;">Select Branch →</a>
+          </div>
+        </div>
+        <div class="hosp-card" th:if="${#lists.isEmpty(branches)}">
+          <div>
+            <div class="hosp-card-header">
+              <span class="hosp-area-badge">Kandy</span>
+              <svg class="hosp-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M12 6v4"/><path d="M10 8h4"/></svg>
+            </div>
+            <h3>Kandy General Hospital Branch</h3>
+            <p class="address">45 Peradeniya Road, Kandy, Central Province</p>
+          </div>
+          <div class="hosp-card-footer">
+            <a href="tel:0812233445" class="hosp-hotline-link">📞 081 223 3445</a>
+            <a href="/patient/dashboard?section=booking" class="btn-doc-profile" style="text-decoration: none;">Select Branch →</a>
+          </div>
+        </div>
+        <div class="hosp-card" th:if="${#lists.isEmpty(branches)}">
+          <div>
+            <div class="hosp-card-header">
+              <span class="hosp-area-badge">Galle</span>
+              <svg class="hosp-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M12 6v4"/><path d="M10 8h4"/></svg>
+            </div>
+            <h3>Galle National Healthcare Center</h3>
+            <p class="address">12 Karapitiya Hospital Road, Galle, Southern Province</p>
+          </div>
+          <div class="hosp-card-footer">
+            <a href="tel:0912245566" class="hosp-hotline-link">📞 091 224 5566</a>
+            <a href="/patient/dashboard?section=booking" class="btn-doc-profile" style="text-decoration: none;">Select Branch →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 5: HOW IT WORKS (3 Steps Only)
+       ========================================================================= -->
+  <section class="home-how-section" id="how-it-works">
+    <div class="home-container">
+      <div class="home-section-header center">
+        <div class="section-eyebrow" data-i18n="eyebrow_how">QUICK 60-SECOND PROCESS</div>
+        <h2 data-i18n="title_how">How It Works</h2>
+        <p style="margin: 0 auto;" data-i18n="sub_how">Book your doctor consultation in three straightforward, transparent steps.</p>
+      </div>
+
+      <div class="how-steps-grid">
+        <div class="how-step-card">
+          <div class="step-num-bubble">01</div>
+          <h3 data-i18n="step1_title">1. Search Doctor</h3>
+          <p data-i18n="step1_desc">Search by medical specialty, doctor name, or hospital location across Sri Lanka.</p>
+        </div>
+
+        <div class="how-step-card">
+          <div class="step-num-bubble">02</div>
+          <h3 data-i18n="step2_title">2. Pick a Slot</h3>
+          <p data-i18n="step2_desc">Choose your convenient date and select an available 1-hour clinic time slot.</p>
+        </div>
+
+        <div class="how-step-card">
+          <div class="step-num-bubble">03</div>
+          <h3 data-i18n="step3_title">3. Confirm &amp; Attend</h3>
+          <p data-i18n="step3_desc">Get your instant reference number and pay transparently via cash at the hospital counter.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 6: WHY CHOOSE US (4 Benefits with Line Icons)
+       ========================================================================= -->
+  <section class="home-benefits-section" id="why-choose-us">
+    <div class="home-container">
+      <div class="home-section-header center">
+        <div class="section-eyebrow" data-i18n="eyebrow_why">PLATFORM ADVANTAGES</div>
+        <h2 data-i18n="title_why">Why Choose MediCare Pro</h2>
+        <p style="margin: 0 auto;" data-i18n="sub_why">Engineered for absolute reliability, patient trust, and hospital transparency.</p>
+      </div>
+
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 data-i18n="b1_title">Zero Double Booking</h3>
+          <p data-i18n="b1_desc">Hardware-level database locking ensures your selected time slot is instantly reserved and protected.</p>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <h3 data-i18n="b2_title">Transparent Counter Cash</h3>
+          <p data-i18n="b2_desc">No hidden platform markups. Settle consultation fees directly at the hospital reception counter.</p>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <h3 data-i18n="b3_title">Real-Time SMS &amp; Alerts</h3>
+          <p data-i18n="b3_desc">Instant booking reference confirmation delivered to your mobile phone with queue reminders.</p>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon-box">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 data-i18n="b4_title">SLMC Verified Doctors</h3>
+          <p data-i18n="b4_desc">100% of medical consultants are credentialed by the Sri Lanka Medical Council.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 7: PATIENT TESTIMONIALS
+       ========================================================================= -->
+  <section class="home-testimonials-section">
+    <div class="home-container">
+      <div class="home-section-header center">
+        <div class="section-eyebrow" data-i18n="eyebrow_testi">PATIENT STORIES</div>
+        <h2 data-i18n="title_testi">Trusted by Sri Lankan Families</h2>
+        <p style="margin: 0 auto;" data-i18n="sub_testi">Read authentic feedback from patients who booked specialists through MediCare Pro.</p>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div>
+            <div class="testimonial-stars">★★★★★</div>
+            <p>"Booking a cardiologist for my mother took less than a minute. We chose the counter cash option and received the SMS reference instantly."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar">NP</div>
+            <div class="author-info">
+              <strong>Nimali Perera</strong>
+              <small>Colombo Central Hospital Visit</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div>
+            <div class="testimonial-stars">★★★★★</div>
+            <p>"No more calling hospital hotlines during busy hours. I selected the exact evening clinic slot and attended my consultation on time."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar">KF</div>
+            <div class="author-info">
+              <strong>Kavinda Fernando</strong>
+              <small>Kandy General Branch Patient</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div>
+            <div class="testimonial-stars">★★★★★</div>
+            <p>"The prescription was saved right into my portal dashboard after the appointment. Very convenient for purchasing follow-up medicines."</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar">SS</div>
+            <div class="author-info">
+              <strong>Suresh Shanmugam</strong>
+              <small>Galle Healthcare Branch Visit</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 8: FAQS ACCORDION (7 Questions)
+       ========================================================================= -->
+  <section class="home-faq-section" id="faqs">
+    <div class="home-container">
+      <div class="home-section-header center">
+        <div class="section-eyebrow" data-i18n="eyebrow_faqs">COMMON QUESTIONS</div>
+        <h2 data-i18n="title_faqs">Frequently Asked Questions</h2>
+        <p style="margin: 0 auto;" data-i18n="sub_faqs">Clear answers about booking, payments, cancellation, and hospital visits.</p>
+      </div>
+
+      <div class="faq-accordion-wrap">
+        <details class="faq-item" open>
+          <summary data-i18n="faq1_q">1. How quickly can I book an appointment?</summary>
+          <div class="faq-body" data-i18n="faq1_a">
+            You can find a doctor, select an available date, choose a time slot, and confirm your booking in under 60 seconds with no complex steps or lengthy forms.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary data-i18n="faq2_q">2. How does the Counter Cash payment method work?</summary>
+          <div class="faq-body" data-i18n="faq2_a">
+            Your appointment slot is immediately locked upon booking. Arrive at the hospital 15 minutes before your consultation, present your Booking Reference ID at the reception counter, settle the consultation fee in cash, and collect your official receipt.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary data-i18n="faq3_q">3. Can I book an appointment for an elderly parent or someone else?</summary>
+          <div class="faq-body" data-i18n="faq3_a">
+            Yes. When confirming the appointment details, you can enter the patient's full name, NIC/Passport, and contact number so the booking is issued under their name.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary data-i18n="faq4_q">4. Can I reschedule or cancel my appointment?</summary>
+          <div class="faq-body" data-i18n="faq4_a">
+            Yes. Log into your Patient Portal, open "My Appointments", and click "Cancel" or "Reschedule". The slot will be automatically released back to the hospital schedule.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary data-i18n="faq5_q">5. What should I bring when I attend the hospital?</summary>
+          <div class="faq-body" data-i18n="faq5_a">
+            Please bring your National Identity Card (NIC) or passport, your Booking Reference ID (sent via SMS or visible in your portal), and any past medical records or test reports.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary data-i18n="faq6_q">6. How do I receive my booking confirmation?</summary>
+          <div class="faq-body" data-i18n="faq6_a">
+            Immediately upon reservation, your screen displays the Booking Reference ID, and an automated SMS confirmation is delivered to your registered mobile phone number.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary data-i18n="faq7_q">7. Are all doctors certified by the Sri Lanka Medical Council (SLMC)?</summary>
+          <div class="faq-body" data-i18n="faq7_a">
+            Yes. Every specialist on MediCare Pro is verified with the Sri Lanka Medical Council (SLMC) and holds active practicing privileges at accredited hospital facilities.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 9: FINAL CTA BANNER & FOOTER
+       ========================================================================= -->
+  <div class="home-container home-cta-wrap">
+    <div class="home-cta-banner">
+      <h2 data-i18n="cta_title">Ready to Book Your Doctor Consultation?</h2>
+      <p data-i18n="cta_desc">Join thousands of Sri Lankan patients who reserve verified hospital appointments with zero waiting time.</p>
+      <div class="cta-btn-group">
+        <a href="/patient/dashboard?section=booking" class="btn-cta-primary" data-i18n="cta_btn_book">Book Appointment Now →</a>
+        <a href="/login" class="btn-cta-secondary" data-i18n="cta_btn_portal">Sign In to Patient Portal</a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Doctor Quick Preview Modal with Fee Breakdown -->
+<div class="doctor-modal-backdrop" id="doctorProfileModal" role="dialog" aria-modal="true" aria-labelledby="modalDoctorName">
+  <div class="doctor-modal-window">
+    <button type="button" class="modal-close-btn" id="closeDoctorModal" aria-label="Close modal">✕</button>
+    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 16px;">
+      <div style="width: 60px; height: 60px; border-radius: 14px; background: linear-gradient(135deg, var(--home-blue), var(--home-teal)); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800;">👨‍⚕️</div>
+      <div>
+        <h3 id="modalDoctorName" style="font-family: var(--font-heading); font-size: 19px; margin: 0 0 4px; color: var(--home-navy);">Doctor Name</h3>
+        <div id="modalDoctorSpecialty" style="color: var(--home-blue); font-weight: 700; font-size: 13px;">Specialization</div>
+      </div>
+    </div>
+
+    <!-- Official Credentials & Practice -->
+    <div style="font-size: 13px; color: var(--home-text-sub); margin-bottom: 14px;">
+      <div><strong>SLMC Registration:</strong> <span id="modalDoctorSLMC">SLMC-MBBS-Verified</span></div>
+      <div><strong>Hospital:</strong> <span id="modalDoctorAddress">Colombo Central Hospital</span></div>
+      <div><strong>Experience:</strong> <span id="modalDoctorExp">Senior Consultant</span></div>
+      <div><strong>Languages:</strong> English, සිංහල, தமிழ்</div>
+    </div>
+
+    <!-- Transparent Fee Breakdown -->
+    <div class="fee-breakdown-box">
+      <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Transparent Fee Structure</div>
+      <div class="fee-row">
+        <span>Doctor Consultation Fee</span>
+        <strong id="modalFeeDoc">LKR 2,000</strong>
+      </div>
+      <div class="fee-row">
+        <span>Hospital Facility Fee</span>
+        <span>LKR 500</span>
+      </div>
+      <div class="fee-row total">
+        <span>Total Payable (at counter)</span>
+        <span id="modalDoctorFee" style="color: var(--home-blue);">LKR 2,500</span>
+      </div>
+    </div>
+
+    <a id="modalBookLink" href="/patient/dashboard?section=booking" class="btn-cta-primary" style="width: 100%; box-sizing: border-box;">
+      Continue to Slot Booking →
+    </a>
+  </div>
+</div>
+
+<!-- Mobile Sticky Bottom Bar (Search & Call 1990) -->
+<aside class="mobile-sticky-bar" aria-label="Mobile Quick Actions">
+  <a href="#search-section" class="mobile-sticky-btn primary">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span data-i18n="mob_search">Search Doctors</span>
+  </a>
+  <a href="tel:1990" class="mobile-sticky-btn secondary">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    <span data-i18n="mob_call">Hotline 1990</span>
+  </a>
+</aside>
+
+<!-- Footer -->
+<footer class="home-footer" id="about">
+  <div class="home-container">
+    <div class="footer-grid-4">
+      <div class="footer-col">
+        <a href="/" class="brand" style="margin-bottom: 14px;">
+          <span class="brand-mark">✚</span>
+          <span class="brand-text">
+            <span class="brand-title" style="color: #FFFFFF;">MediCare<span style="color: #60A5FA;">Pro</span></span>
+            <span class="brand-subtitle">Digital Healthcare</span>
+          </span>
+        </a>
+        <p style="font-size: 13px; color: #94A3B8; line-height: 1.6; max-width: 320px;">
+          Sri Lanka's national web-based e-channeling network connecting verified medical specialists and patients with instant slot reservations.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Specializations</h4>
+        <ul>
+          <li><a href="#specialties">Cardiology</a></li>
+          <li><a href="#specialties">Dermatology</a></li>
+          <li><a href="#specialties">Pediatrics</a></li>
+          <li><a href="#specialties">General Medicine</a></li>
+          <li><a href="#specialties">Orthopedics</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Hospital Branches</h4>
+        <ul>
+          <li><a href="#hospitals">Colombo Central</a></li>
+          <li><a href="#hospitals">Kandy General</a></li>
+          <li><a href="#hospitals">Galle National</a></li>
+          <li><a href="#hospitals">Jaffna Healthcare</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Support &amp; Helpline</h4>
+        <ul>
+          <li><a href="tel:1990">📞 Hotline: 1990 (Toll-Free)</a></li>
+          <li><a href="mailto:support@medicarepro.lk">✉️ support@medicarepro.lk</a></li>
+          <li><a href="/login">Patient Workspace</a></li>
+          <li><a href="#faqs">Frequently Asked Questions</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom-bar">
+      <div>&copy; 2026 MediCare Pro &bull; Group 2026-Y2-S1-MTR-08. Certified Sri Lanka E-Channeling Network.</div>
+      <div>Accredited by the Sri Lanka Medical Council (SLMC) &bull; All Rights Reserved.</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

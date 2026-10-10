@@ -1,1 +1,194 @@
-<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CareLink | Healthcare, connected</title><link rel="stylesheet" href="/css/app.css"><script src="/js/theme.js"></script><script src="/js/app.js" defer></script></head><body><a class="skip-link" href="#main">Skip to content</a><aside th:replace="~{fragments/navigation :: doctor}"></aside><div class="app"><header class="topbar"><div class="actions"><button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button><span class="crumb">Workspace &nbsp; / &nbsp; <b>Doctor overview</b></span></div><div class="top-actions"><span class="live">Doctor portal</span><button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle colour theme">◐</button><span class="avatar" sec:authentication="name">CL</span></div></header><main class="content" id="main"><div class="page-heading"><div><div class="eyebrow">YOUR CARELINK WORKSPACE</div><h1>Doctor overview</h1><p>A focused workspace for your day in care.</p></div></div><div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div><div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div><div th:if="${param.error != null}" class="notice error" role="alert">The request could not be completed. Check your details and try again. </div><div id="actionNotice" class="notice" role="status" hidden>Changes saved successfully.</div><div th:if="${doctor != null}"><div class="welcome"><div><div class="eyebrow">YOUR CLINICAL WORKSPACE</div><h2 th:text="|Welcome, ${doctor.name}|"></h2><p>Review your appointments, record consultations and stay connected with your patients.</p></div><div class="welcome-art">+</div></div><div class="grid stats"><div class="card stat"><div class="stat-top">Today’s appointments<span class="stat-symbol">▦</span></div><strong th:text="${todayPatientsCount ?: 0}">0</strong><small>All visits scheduled for today</small></div><div class="card stat"><div class="stat-top">Scheduled visits<span class="stat-symbol">◷</span></div><strong th:text="${pendingReportsCount ?: 0}">0</strong><small>Appointments awaiting consultation</small></div><div class="card stat"><div class="stat-top">Average rating<span class="stat-symbol">☆</span></div><strong th:text="${averageRating ?: 0}">0</strong><small>Approved patient feedback</small></div><div class="card stat"><div class="stat-top">Consultation fee<span class="stat-symbol">↗</span></div><strong th:text="${doctor != null ? 'LKR ' + doctor.consultationFee : 'Not set'}">0</strong><small>Your current consultation fee</small></div></div><div class="card"><div class="card-header"><h2>Recent appointments</h2><a class="btn ghost" href="/doctor/appointments">View all ↗</a></div><div class="table-wrap"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date & time</th><th>Status</th><th>Action</th></tr></thead><tbody><tr th:each="a : ${recentAppointments}"><td><strong th:text="${a.patientName ?: (a.patient != null ? a.patient.fullName : 'Patient')}"></strong><p th:text="${a.contactEmail}"></p></td><td th:text="${a.doctorName ?: (a.doctor != null ? a.doctor.name : 'Doctor')}"></td><td th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy · HH:mm') : 'Not set'}"></td><td><span class="badge" th:data-status="${a.status}" th:text="${a.status}">Status</span></td><td><a class="btn small secondary" th:href="@{/doctor/consultations(appointmentId=${a.id})}">View consultation ↗</a></td></tr><tr th:if="${#lists.isEmpty(recentAppointments)}"><td colspan="5" class="empty">No records yet. New activity will appear here.</td></tr></tbody></table></div></div><div class="section-gap"><details><summary>Edit clinical profile</summary><div class="card-body"><form th:action="@{/doctor/profile}" method="post" ><div class="form-grid"><label class="field">Specialization<input type="text" name="specialization" th:value="${doctor.specialization}" required ></label><label class="field">Experience<input type="text" name="experience" th:value="${doctor.experience}" required ></label><label class="field">Clinic hours<input type="text" name="clinicHours" th:value="${doctor.clinicHours}" required ></label></div><div class="form-footer"><button class="btn">Save changes</button></div></form></div></details><details><summary>Update consultation fee</summary><div class="card-body"><form th:action="@{/doctor/update-fee}" method="post" ><div class="form-grid"><label class="field">Fee (LKR)<input type="number" name="fee" th:value="${doctor.consultationFee}" required min="1" step="0.01"></label></div><div class="form-footer"><button class="btn">Save changes</button></div></form></div></details></div></div><div th:if="${doctor == null}" class="notice error">Your doctor profile has not been linked. Please contact the administrator.</div><footer class="footer-note">CareLink · Healthcare, connected. &nbsp; All appointment times are local hospital time.</footer></main></div></body></html>
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Clinical Workstation</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: doctor}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Doctor Clinical Portal</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Clinic Duty Active</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">DR</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">DOCTOR CLINICAL WORKSTATION</div>
+        <h1>Doctor Overview</h1>
+        <p>Focused daily schedule, patient queue, and clinical consultation records.</p>
+      </div>
+      <a class="btn" href="/doctor/appointments">View Full Schedule →</a>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete request. Please verify details.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <div th:if="${doctor != null}">
+      <!-- Doctor Welcome & Overview -->
+      <div class="welcome">
+        <div>
+          <div class="eyebrow">CLINICAL SESSION ACTIVE</div>
+          <h2 th:text="|Welcome, ${doctor.name}|">Welcome, Doctor</h2>
+          <p th:text="|Specialist in ${doctor.specialization} &bull; Practice Hours: ${doctor.clinicHours}|">Clinical specialty and schedule</p>
+          <div class="actions" style="margin-top: 14px;">
+            <a class="btn teal" href="/doctor/consultations">Open Consultation Room →</a>
+            <a class="btn secondary" href="/doctor/records">Prescriptions Archive</a>
+          </div>
+        </div>
+        <div class="welcome-art">✚</div>
+      </div>
+
+      <!-- Doctor KPI Stats Grid -->
+      <div class="grid stats">
+        <div class="stat">
+          <div class="stat-top">Today's Patients <span class="stat-symbol">👥</span></div>
+          <strong th:text="${todayPatientsCount ?: 0}">0</strong>
+          <small>Scheduled for today</small>
+        </div>
+        <div class="stat">
+          <div class="stat-top">Upcoming Consultations <span class="stat-symbol">📅</span></div>
+          <strong th:text="${pendingReportsCount ?: 0}">0</strong>
+          <small>Future booked visits</small>
+        </div>
+        <div class="stat">
+          <div class="stat-top">Patient Rating <span class="stat-symbol">★</span></div>
+          <strong th:text="${averageRating ?: '5.0'}">5.0</strong>
+          <small th:text="|From ${totalReviews} verified reviews|">From verified feedback</small>
+        </div>
+        <div class="stat">
+          <div class="stat-top">Consultation Fee <span class="stat-symbol">LKR</span></div>
+          <strong th:text="${doctor != null ? 'LKR ' + #numbers.formatDecimal(doctor.consultationFee, 1, 'COMMA', 0, 'POINT') : 'N/A'}">LKR 2,500</strong>
+          <small>Standard consultation rate</small>
+        </div>
+      </div>
+
+      <!-- Queue and Profile Grid -->
+      <div class="grid two-col">
+        <!-- Recent Appointments Queue -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Recent Patient Queue</h2>
+              <p>Direct access to patient medical records and prescription writing</p>
+            </div>
+            <a class="btn ghost small" href="/doctor/appointments">All Schedule →</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Patient Details</th>
+                  <th>Consultation Time</th>
+                  <th>Status</th>
+                  <th>Clinical Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="a : ${recentAppointments}">
+                  <td>
+                    <strong th:text="${a.patientName ?: (a.patient != null ? a.patient.fullName : 'Patient')}">Patient Name</strong>
+                    <p th:text="${a.contactEmail}">email@example.com</p>
+                  </td>
+                  <td>
+                    <strong th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy') : 'Date unset'}">Date</strong>
+                    <p th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'HH:mm a') : ''}"></p>
+                  </td>
+                  <td>
+                    <span class="badge" th:data-status="${a.status}" th:text="${a.status}">SCHEDULED</span>
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <a th:if="${a.status == 'SCHEDULED'}" class="btn small"
+                         th:href="@{/doctor/prescribe/{id}(id=${a.id})}">Prescribe →</a>
+                      <a class="btn small secondary" th:href="@{/doctor/consultations(appointmentId=${a.id})}">Room ↗</a>
+                    </div>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(recentAppointments)}">
+                  <td colspan="4" class="empty">
+                    <h3>No pending consultations</h3>
+                    <p>New patient appointments booked for your sessions will appear in this queue.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Verified Reviews & Profile Photo -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Verified Reviews Card -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Verified Patient Feedback</h2>
+                <p>Moderated patient reviews from completed visits</p>
+              </div>
+              <span class="badge" data-status="Completed" th:text="|★ ${averageRating} / 5|">★ 5.0</span>
+            </div>
+            <div class="card-body" style="max-height: 280px; overflow-y: auto;">
+              <div th:each="rev : ${reviews}" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <strong style="color: var(--primary-navy);" th:text="${rev.patient?.fullName ?: 'Verified Patient'}">Patient</strong>
+                  <span style="color: #F59E0B; font-weight: 700; font-size: 13px;" th:text="|★ ${rev.rating} / 5|">★ 5</span>
+                </div>
+                <p style="font-size: 13px; color: var(--ink-secondary); margin: 0;" th:text="${rev.comments}">Review comment</p>
+              </div>
+              <div class="empty" th:if="${#lists.isEmpty(reviews)}" style="padding: 24px;">
+                <p>No verified patient reviews published yet.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Photo Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Doctor Profile Picture</h2>
+            </div>
+            <div class="card-body">
+              <form th:action="@{/doctor/update-picture}" method="post">
+                <label class="field">
+                  <span>Profile Image URL</span>
+                  <input type="text" name="imageUrl" th:value="${profileImage}" placeholder="e.g. photo-1559839734-2b71ea197ec2 or full URL">
+                  <small>Paste an image filename from assets or a web URL.</small>
+                </label>
+                <div class="form-footer" style="padding-top: 14px; margin-top: 14px;">
+                  <button class="btn small" type="submit">Update Portrait</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${doctor == null}" class="card empty">
+      <h3>Doctor account not linked</h3>
+      <p>This user account is not associated with an active Doctor profile. Please contact the hospital administrator.</p>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

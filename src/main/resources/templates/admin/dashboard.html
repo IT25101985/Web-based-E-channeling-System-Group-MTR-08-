@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Hospital Administration &amp; Intelligence</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Hospital Enterprise Console</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Administrator Active</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">ENTERPRISE HEALTHCARE PLATFORM</div>
+        <h1>Hospital Overview &amp; Operations</h1>
+        <p>Real-time operational metrics, clinical personnel, and system-wide appointment health.</p>
+      </div>
+      <div class="actions">
+        <a class="btn secondary" href="/admin/export">↓ Export User Data (CSV)</a>
+        <a class="btn" href="/admin/appointments">Master Appointments Ledger →</a>
+      </div>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete action. Verify parameters.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully applied.</div>
+
+    <!-- Executive KPI Cards -->
+    <div class="grid stats">
+      <div class="stat">
+        <div class="stat-top">Total Bookings <span class="stat-symbol">📅</span></div>
+        <strong th:text="${totalAppointments}">0</strong>
+        <small th:text="|Today: ${todayCount} visits scheduled|">Recorded visits</small>
+      </div>
+
+      <div class="stat">
+        <div class="stat-top">Registered Patients <span class="stat-symbol">👥</span></div>
+        <strong th:text="${patientsCount}">0</strong>
+        <small>Verified patient accounts</small>
+      </div>
+
+      <div class="stat">
+        <div class="stat-top">Active Specialists <span class="stat-symbol">👨‍⚕️</span></div>
+        <strong th:text="${doctorsCount}">0</strong>
+        <small>Across hospital departments</small>
+      </div>
+
+      <div class="stat">
+        <div class="stat-top">Counter Revenue <span class="stat-symbol">💳</span></div>
+        <strong th:text="${'LKR ' + estimatedRevenue}">LKR 0</strong>
+        <small>Settled invoice revenue</small>
+      </div>
+    </div>
+
+    <!-- Operational Activity Overview -->
+    <div class="grid two-col">
+      <!-- Recent Appointments -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Recent Hospital Appointments</h2>
+            <p>Live stream of incoming and confirmed patient bookings</p>
+          </div>
+          <a class="btn ghost small" href="/admin/appointments">All Bookings →</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Patient Details</th>
+                <th>Doctor</th>
+                <th>Date &amp; Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="a : ${recentAppointments}">
+                <td>
+                  <strong th:text="${a.patientName ?: (a.patient != null ? a.patient.fullName : 'Patient')}">Patient</strong>
+                  <p th:text="${a.contactEmail}">email@example.com</p>
+                </td>
+                <td th:text="${a.doctorName ?: (a.doctor != null ? a.doctor.name : 'Doctor')}">Doctor</td>
+                <td>
+                  <strong th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy') : 'Unscheduled'}">Date</strong>
+                  <p th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'HH:mm a') : ''}"></p>
+                </td>
+                <td>
+                  <span class="badge" th:data-status="${a.status}" th:text="${a.status}">Status</span>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(recentAppointments)}">
+                <td colspan="4" class="empty">
+                  <h3>No recent bookings</h3>
+                  <p>New patient appointments will appear here in real time.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Shortcuts & System Status -->
+      <div class="card card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div class="eyebrow">SYSTEM ORCHESTRATION</div>
+          <h2 style="font-size: 19px; color: var(--primary-navy); margin-bottom: 12px;">Operational Workspaces</h2>
+          <p style="font-size: 13.5px; line-height: 1.6; margin-bottom: 20px;">
+            Quick navigation to critical hospital administrative controls:
+          </p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+            <a href="/admin/doctors" class="card" style="padding: 14px; text-decoration: none; border-color: var(--border);">
+              <span style="font-size: 20px;">👨‍⚕️</span>
+              <strong style="display: block; font-size: 13.5px; margin-top: 6px; color: var(--primary-navy);">Manage Doctors</strong>
+              <small style="color: var(--ink-secondary);">Specialists &amp; fees</small>
+            </a>
+            <a href="/admin/branches" class="card" style="padding: 14px; text-decoration: none; border-color: var(--border);">
+              <span style="font-size: 20px;">🏥</span>
+              <strong style="display: block; font-size: 13.5px; margin-top: 6px; color: var(--primary-navy);">Hospital Branches</strong>
+              <small style="color: var(--ink-secondary);">Facilities &amp; locations</small>
+            </a>
+            <a href="/admin/sessions" class="card" style="padding: 14px; text-decoration: none; border-color: var(--border);">
+              <span style="font-size: 20px;">⏱️</span>
+              <strong style="display: block; font-size: 13.5px; margin-top: 6px; color: var(--primary-navy);">Clinic Sessions</strong>
+              <small style="color: var(--ink-secondary);">Publish time slots</small>
+            </a>
+            <a href="/admin/invoices" class="card" style="padding: 14px; text-decoration: none; border-color: var(--border);">
+              <span style="font-size: 20px;">💳</span>
+              <strong style="display: block; font-size: 13.5px; margin-top: 6px; color: var(--primary-navy);">Billing Ledger</strong>
+              <small style="color: var(--ink-secondary);">Invoices &amp; receipts</small>
+            </a>
+          </div>
+        </div>
+
+        <div style="background: #F8FAFC; border-radius: 12px; padding: 14px; border: 1px solid var(--border); font-size: 12.5px; color: var(--ink-secondary);">
+          <strong>Status Breakdown:</strong>
+          <span th:text="|Scheduled: ${scheduledCount} · Completed: ${completedCount} · Cancelled: ${cancelledCount}|"></span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

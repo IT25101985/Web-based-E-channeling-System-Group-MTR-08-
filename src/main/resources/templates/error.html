@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Page or Resource Unavailable</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body style="background: var(--bg-canvas);">
+<main class="auth-form" style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+  <div style="max-width: 520px; text-align: center; padding: 40px 24px;">
+    <a href="/" class="brand" style="justify-content: center; margin-bottom: 24px;">
+      <span class="brand-mark">✚</span>
+      <span class="brand-text">
+        <span class="brand-title">MediCare<span>Pro</span></span>
+        <span class="brand-subtitle">Digital Healthcare</span>
+      </span>
+    </a>
+
+    <div class="eyebrow" style="margin-bottom: 12px; justify-content: center;">NAVIGATION ASSISTANCE</div>
+    <h1 style="font-size: 30px; margin-bottom: 12px; color: var(--primary-navy);">Resource or Page Unavailable</h1>
+    <p th:text="${friendlyMessage ?: 'The requested clinical page, appointment record, or portal route could not be found. It may require authenticated role credentials or has been moved.'}"
+       style="font-size: 14.5px; line-height: 1.6; margin-bottom: 32px; color: var(--ink-secondary);">
+      The requested page could not be found.
+    </p>
+
+    <div class="actions" style="justify-content: center; gap: 14px;">
+      <a class="btn" href="/dashboard" style="padding: 10px 22px;">Go to My Portal Workspace →</a>
+      <a class="btn secondary" href="/" style="padding: 10px 22px;">Return to Homepage</a>
+    </div>
+  </div>
+</main>
+</body>
+</html>

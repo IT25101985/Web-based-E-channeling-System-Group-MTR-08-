@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | People &amp; Access Management</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: admin}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>People &amp; Access Control</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Admin Console</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">USER ACCESS &amp; ROLES</div>
+        <h1>Patients &amp; Staff Access</h1>
+        <p>Manage patient credentials, hospital staff roles, account activations, and password security.</p>
+      </div>
+      <a class="btn secondary" href="/admin/export">↓ Export Users CSV</a>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete action. Verify parameters and try again.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <!-- Create Account Section -->
+    <details class="card" style="margin-bottom: 24px;">
+      <summary>✚ Provision New User Account (Staff or Patient)</summary>
+      <div class="card-body">
+        <form th:action="@{/admin/users/add}" method="post">
+          <div class="form-grid">
+            <label class="field">
+              <span>Full Name *</span>
+              <input type="text" name="fullName" required placeholder="e.g. Sunil Perera">
+            </label>
+            <label class="field">
+              <span>Username *</span>
+              <input type="text" name="username" required minlength="4" maxlength="50" placeholder="e.g. sunilp">
+            </label>
+            <label class="field">
+              <span>Email Address *</span>
+              <input type="email" name="email" required placeholder="sunil@example.com">
+            </label>
+            <label class="field">
+              <span>Initial Password *</span>
+              <input type="password" name="password" required minlength="8" maxlength="72" placeholder="Minimum 8 characters">
+            </label>
+            <label class="field">
+              <span>Phone Number *</span>
+              <input type="tel" name="phoneNo" required placeholder="e.g. 0771234567">
+            </label>
+            <label class="field">
+              <span>Address *</span>
+              <input type="text" name="address" required placeholder="Colombo, Sri Lanka">
+            </label>
+            <label class="field">
+              <span>NIC (Patients)</span>
+              <input type="text" name="nic" placeholder="e.g. 200012345678 or 123456789V">
+            </label>
+            <label class="field">
+              <span>Assigned Account Role *</span>
+              <select name="role">
+                <option value="ROLE_PATIENT">Patient</option>
+                <option value="ROLE_DOCTOR">Doctor</option>
+                <option value="ROLE_RECEPTIONIST">Receptionist</option>
+                <option value="ROLE_ADMIN">Administrator</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-footer">
+            <button class="btn" type="submit">Create User Account</button>
+          </div>
+        </form>
+      </div>
+    </details>
+
+    <!-- Users Table -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Registered Accounts (<span th:text="${#lists.size(users)}">0</span>)</h2>
+        <input type="search" data-filter="#usersTable" placeholder="Search by name, role, email..."
+               style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 280px;">
+      </div>
+
+      <div class="table-wrap">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Contact Phone</th>
+              <th>Status &amp; Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="u : ${users}">
+              <td>
+                <strong th:text="${u.fullName}">Full Name</strong>
+                <p th:text="${u.email}">email@example.com</p>
+              </td>
+              <td>
+                <strong th:text="${u.username}">username</strong>
+                <p th:text="|ID #${u.id}|"></p>
+              </td>
+              <td>
+                <span class="badge" th:data-status="${u.role}" th:text="${u.role}">ROLE_PATIENT</span>
+              </td>
+              <td>
+                <span th:text="${u.phoneNo}">0771234567</span>
+              </td>
+              <td>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <span class="badge" th:data-status="${u.active ? 'Active' : 'Inactive'}"
+                        th:text="${u.active ? 'Active Account' : 'Inactive / Suspended'}">Active</span>
+
+                  <div class="actions" style="margin-top: 4px;">
+                    <details>
+                      <summary style="font-size: 11.5px; color: var(--primary-blue); cursor: pointer; font-weight: 600;">Edit</summary>
+                      <div class="card-body" style="padding: 12px; background: #F8FAFC; border-radius: 8px; margin-top: 6px;">
+                        <form th:action="@{/admin/users/{id}/update(id=${u.id})}" method="post">
+                          <div class="form-grid" style="grid-template-columns: 1fr; gap: 8px;">
+                            <label class="field"><span style="font-size: 11px;">Full name</span><input type="text" name="fullName" th:value="${u.fullName}" required style="padding: 6px; font-size: 12px;"></label>
+                            <label class="field"><span style="font-size: 11px;">Email</span><input type="email" name="email" th:value="${u.email}" required style="padding: 6px; font-size: 12px;"></label>
+                            <label class="field"><span style="font-size: 11px;">Phone</span><input type="tel" name="phoneNo" th:value="${u.phoneNo}" style="padding: 6px; font-size: 12px;"></label>
+                            <label class="field"><span style="font-size: 11px;">Address</span><input type="text" name="address" th:value="${u.address}" required style="padding: 6px; font-size: 12px;"></label>
+                          </div>
+                          <div style="margin-top: 8px;">
+                            <button class="btn small" type="submit">Save</button>
+                          </div>
+                        </form>
+                      </div>
+                    </details>
+
+                    <details>
+                      <summary style="font-size: 11.5px; color: var(--ink-secondary); cursor: pointer; font-weight: 600;">Reset Password</summary>
+                      <div class="card-body" style="padding: 12px; background: #F8FAFC; border-radius: 8px; margin-top: 6px;">
+                        <form th:action="@{/admin/users/{id}/reset-password(id=${u.id})}" method="post">
+                          <label class="field">
+                            <span style="font-size: 11px;">New Password</span>
+                            <input type="password" name="newPassword" required minlength="8" maxlength="72" autocomplete="new-password" style="padding: 6px; font-size: 12px;">
+                          </label>
+                          <div style="margin-top: 8px;">
+                            <button class="btn small" type="submit">Update Password</button>
+                          </div>
+                        </form>
+                      </div>
+                    </details>
+
+                    <form th:if="${u.role != 'ROLE_ADMIN'}" th:action="@{/admin/users/{id}/active(id=${u.id})}" method="post"
+                          data-confirm="Change access status for this user? Historical records will be kept.">
+                      <input type="hidden" name="active" th:value="${!u.active}">
+                      <button class="btn small" th:classappend="${u.active ? 'danger' : 'secondary'}"
+                              th:text="${u.active ? 'Deactivate' : 'Reactivate'}"></button>
+                    </form>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(users)}">
+              <td colspan="5" class="empty">
+                <h3>No registered users found</h3>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

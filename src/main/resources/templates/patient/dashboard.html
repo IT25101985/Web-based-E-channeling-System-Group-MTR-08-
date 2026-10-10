@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Patient Healthcare Workspace</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<!-- Shared Patient Workspace Sidebar Fragment -->
+<aside th:replace="~{fragments/navigation :: patient}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Patient Healthcare Portal</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Verified Patient</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name" th:text="${#strings.substring(patient.fullName, 0, 1)}">P</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">YOUR HEALTHCARE WORKSPACE</div>
+        <h1>Patient Dashboard</h1>
+        <p>Manage appointments, verify clinic sessions, and inspect personal clinical records seamlessly.</p>
+      </div>
+      <a class="btn" href="/patient/dashboard?section=booking">
+        <span>✚</span> Book New Appointment
+      </a>
+    </div>
+
+    <!-- Alert and Feedback Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete request. Please verify the entered details.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs" aria-label="Patient Portal Navigation">
+      <a href="/patient/dashboard?section=dashboard" data-section="dashboard">Overview</a>
+      <a href="/patient/dashboard?section=booking" data-section="booking">Book Appointment</a>
+      <a href="/patient/dashboard?section=history" data-section="history">My Appointments &amp; Reviews</a>
+      <a href="/patient/dashboard?section=profile" data-section="profile">Health Profile &amp; Settings</a>
+    </nav>
+
+    <!-- SECTION 1: OVERVIEW -->
+    <section id="section-dashboard" class="section-content active">
+      <div class="welcome">
+        <div>
+          <div class="eyebrow">WELCOME BACK</div>
+          <h2 th:text="|Good day, ${patient.fullName}|">Good day, Patient</h2>
+          <p>MediCare Pro connects your health journey directly to certified medical specialists and partner hospital branches across Sri Lanka.</p>
+          <div class="actions" style="margin-top: 18px;">
+            <a class="btn teal" href="/patient/dashboard?section=booking">Find a Doctor &amp; Book →</a>
+            <a class="btn secondary" href="/patient/dashboard?section=history">View My Appointments</a>
+          </div>
+        </div>
+        <div class="welcome-art">✚</div>
+      </div>
+
+      <!-- KPI Statistics Grid -->
+      <div class="grid stats">
+        <div class="stat">
+          <div class="stat-top">
+            Total Appointments 
+            <span class="stat-symbol">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </span>
+          </div>
+          <strong th:text="${#lists.size(appointments)}">0</strong>
+          <small>Recorded clinical bookings</small>
+        </div>
+        <div class="stat">
+          <div class="stat-top">
+            Completed Visits 
+            <span class="stat-symbol">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          </div>
+          <strong th:text="${totalVisits}">0</strong>
+          <small th:text="|Attendance Rate: ${attendanceRate}|">Consultations attended</small>
+        </div>
+        <div class="stat">
+          <div class="stat-top">
+            Blood Pressure 
+            <span class="stat-symbol">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </span>
+          </div>
+          <strong th:text="${patient.bloodPressure ?: 'Not set'}">120/80</strong>
+          <small>Self-reported (mmHg)</small>
+        </div>
+        <div class="stat">
+          <div class="stat-top">
+            Heart Rate 
+            <span class="stat-symbol">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </span>
+          </div>
+          <strong th:text="${patient.heartRate ?: 'Not set'}">72 bpm</strong>
+          <small>Self-reported pulse rate</small>
+        </div>
+      </div>
+
+      <!-- Two Column Layout: Latest Record & Counter Cash Policy -->
+      <div class="grid two-col">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Latest Medical Consultation</h2>
+              <p>Clinical notes from your most recent doctor visit</p>
+            </div>
+            <span class="badge" data-status="Completed">Medical Record</span>
+          </div>
+          <div class="card-body" th:if="${latestRecord != null}">
+            <div style="font-size: 12px; color: var(--ink-muted); margin-bottom: 6px;"
+                 th:text="${#temporals.format(latestRecord.recordDate, 'dd MMMM yyyy, HH:mm a')}">Date</div>
+            <h3 style="font-size: 17px; color: var(--primary-navy); margin-bottom: 12px;" th:text="${latestRecord.diagnosis}">Diagnosis summary</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div th:each="rx : ${latestRecord.prescriptions}"
+                   style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;">
+                <strong style="color: var(--primary-blue);" th:text="${rx.medication}">Medication</strong>
+                <p style="margin: 2px 0 0; font-size: 12.5px;" th:text="|${rx.dosage} · Duration: ${rx.duration} · Price: LKR ${rx.price}|">Dosage details</p>
+              </div>
+            </div>
+          </div>
+          <div class="empty" th:if="${latestRecord == null}">
+            <h3>No consultation records yet</h3>
+            <p>Clinical notes and prescriptions will automatically appear here following your hospital consultation.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Payment &amp; Counter Policy</h2>
+              <p>Transparent clinic fee settlement</p>
+            </div>
+            <span class="badge" data-status="Scheduled">Information</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size: 14px; line-height: 1.6; color: var(--ink-primary); margin-bottom: 14px;">
+              MediCare Pro utilizes a transparent <strong>Counter-Cash Settlement System</strong>:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+              <div style="display: flex; gap: 10px; font-size: 13px; color: var(--ink-secondary);">
+                <span style="color: var(--primary-blue); font-weight: 800;">1.</span>
+                <span>Your appointment time slot is instantly reserved and protected against duplicate booking.</span>
+              </div>
+              <div style="display: flex; gap: 10px; font-size: 13px; color: var(--ink-secondary);">
+                <span style="color: var(--primary-blue); font-weight: 800;">2.</span>
+                <span>Please arrive at the hospital branch 15 minutes before your scheduled slot.</span>
+              </div>
+              <div style="display: flex; gap: 10px; font-size: 13px; color: var(--ink-secondary);">
+                <span style="color: var(--primary-blue); font-weight: 800;">3.</span>
+                <span>Present your Booking Reference ID at the front desk to settle fees and obtain your official receipt.</span>
+              </div>
+            </div>
+            <a class="btn secondary" href="/patient/dashboard?section=booking">Explore Active Doctors →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: 4-STAGE STREAMLINED APPOINTMENT BOOKING -->
+    <section id="section-booking" class="section-content">
+      <!-- 4-STAGE DIRECTIONAL BOOKING STEPPER -->
+      <div class="booking-stepper" id="bookingStepper">
+        <div class="step-item active" data-step="1">
+          <div class="step-num">1</div>
+          <span>Hospital &amp; Area</span>
+        </div>
+        <div class="step-divider" data-divider="1"></div>
+        <div class="step-item" data-step="2">
+          <div class="step-num">2</div>
+          <span>Select Specialist</span>
+        </div>
+        <div class="step-divider" data-divider="2"></div>
+        <div class="step-item" data-step="3">
+          <div class="step-num">3</div>
+          <span>Date &amp; Time Slot</span>
+        </div>
+        <div class="step-divider" data-divider="3"></div>
+        <div class="step-item" data-step="4">
+          <div class="step-num">4</div>
+          <span>Review &amp; Confirm</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 id="wizardStepTitle">Stage 1: Choose Hospital Branch</h2>
+            <p id="wizardStepDesc">Filter location and select an accredited hospital facility.</p>
+          </div>
+          <span class="badge" data-status="Scheduled" id="wizardBadge">Real-Time Scheduling</span>
+        </div>
+
+        <div class="card-body">
+          <form th:action="@{/patient/book-appointment}" th:object="${appointment}" method="post" id="bookingForm"
+                th:data-initial-time="${appointment.appointmentDate != null ? appointment.appointmentDate.toString() : ''}">
+            <input type="hidden" th:field="*{id}">
+
+            <!-- PANE 1: HOSPITAL & AREA -->
+            <div class="step-pane active" id="stepPane1" data-pane="1">
+              <div class="form-grid">
+                <label class="field">
+                  <span>1. Filter Location / Area</span>
+                  <input type="search" id="areaFilter" placeholder="e.g. Colombo, Kandy, Galle..." aria-describedby="areaHelp">
+                  <small id="areaHelp">Type an area name to filter hospital branches.</small>
+                </label>
+
+                <label class="field">
+                  <span>2. Select Hospital Branch *</span>
+                  <select name="hospitalBranch.id" id="selectedBranchId" required>
+                    <option value="">-- Choose Hospital Branch --</option>
+                    <option th:each="b : ${branches}" th:value="${b.id}" th:data-area="${b.area}"
+                            th:selected="${appointment.hospitalBranch != null and appointment.hospitalBranch.id == b.id}"
+                            th:text="|${b.branchName} · ${b.area}|"></option>
+                  </select>
+                  <small>The hospital facility where you will attend the consultation.</small>
+                </label>
+              </div>
+
+              <div class="actions" style="margin-top: 24px; justify-content: flex-end;">
+                <button type="button" class="btn wizard-next-btn" data-target="2">
+                  Proceed to Specialist Selection →
+                </button>
+              </div>
+            </div>
+
+            <!-- PANE 2: SPECIALIST & DOCTOR -->
+            <div class="step-pane" id="stepPane2" data-pane="2">
+              <div class="form-grid">
+                <label class="field">
+                  <span>3. Medical Specialization</span>
+                  <select id="specializationFilter">
+                    <option value="">All Medical Specializations</option>
+                  </select>
+                  <small>Optionally filter active specialists by department.</small>
+                </label>
+
+                <label class="field">
+                  <span>4. Select Doctor / Consultant *</span>
+                  <select name="doctor.id" id="selectedDoctorId" required
+                          th:data-selected="${appointment.doctor != null ? appointment.doctor.id : ''}" disabled>
+                    <option value="">Choose a hospital branch first</option>
+                  </select>
+                  <small id="doctorStatus">Choose a hospital branch above to load active doctors.</small>
+                </label>
+              </div>
+
+              <div class="actions" style="margin-top: 24px; justify-content: space-between;">
+                <button type="button" class="btn secondary wizard-prev-btn" data-target="1">
+                  ← Back to Hospital
+                </button>
+                <button type="button" class="btn wizard-next-btn" data-target="3">
+                  Choose Date &amp; Time Slot →
+                </button>
+              </div>
+            </div>
+
+            <!-- PANE 3: DATE & CLINIC SLOT -->
+            <div class="step-pane" id="stepPane3" data-pane="3">
+              <div class="form-grid">
+                <label class="field">
+                  <span>5. Consultation Date *</span>
+                  <input type="date" id="datePicker" required
+                         th:value="${appointment.appointmentDate != null ? #temporals.format(appointment.appointmentDate, 'yyyy-MM-dd') : ''}">
+                  <small>Choose an upcoming date to verify doctor sessions.</small>
+                </label>
+
+                <label class="field">
+                  <span>6. Available Consultation Slot *</span>
+                  <select id="timeSelect" name="appointmentDate" required disabled>
+                    <option value="">Choose a doctor and date first</option>
+                  </select>
+                  <small id="slotStatus" role="status">Real-time availability will be verified.</small>
+                </label>
+              </div>
+
+              <!-- Interactive Slot Chips Container for Micro-interaction -->
+              <div id="slotChipsContainer" style="margin-top: 16px;"></div>
+
+              <div class="actions" style="margin-top: 24px; justify-content: space-between;">
+                <button type="button" class="btn secondary wizard-prev-btn" data-target="2">
+                  ← Back to Specialist
+                </button>
+                <button type="button" class="btn wizard-next-btn" data-target="4">
+                  Review &amp; Contact Details →
+                </button>
+              </div>
+            </div>
+
+            <!-- PANE 4: REVIEW & CONTACT DETAILS -->
+            <div class="step-pane" id="stepPane4" data-pane="4">
+              <!-- Live Booking Review Card -->
+              <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;">
+                <div class="eyebrow" style="margin-bottom: 8px;">APPOINTMENT SUMMARY PREVIEW</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                  <div>
+                    <span style="font-size: 11.5px; color: var(--ink-muted); text-transform: uppercase; font-weight: 700;">Hospital Branch</span>
+                    <strong style="display: block; font-size: 14px; color: var(--primary-navy);" id="reviewBranch">—</strong>
+                  </div>
+                  <div>
+                    <span style="font-size: 11.5px; color: var(--ink-muted); text-transform: uppercase; font-weight: 700;">Specialist</span>
+                    <strong style="display: block; font-size: 14px; color: var(--primary-blue);" id="reviewDoctor">—</strong>
+                  </div>
+                  <div>
+                    <span style="font-size: 11.5px; color: var(--ink-muted); text-transform: uppercase; font-weight: 700;">Scheduled Date</span>
+                    <strong style="display: block; font-size: 14px; color: var(--primary-navy);" id="reviewDate">—</strong>
+                  </div>
+                  <div>
+                    <span style="font-size: 11.5px; color: var(--ink-muted); text-transform: uppercase; font-weight: 700;">Time Slot</span>
+                    <strong style="display: block; font-size: 14px; color: var(--healthcare-teal);" id="reviewTime">—</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 18px; padding: 12px 16px; background: #FFFFFF; border: 1px solid var(--border); border-radius: 10px;">
+                <span style="display: block; font-size: 12px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 8px;">Booking Recipient</span>
+                <div style="display: flex; gap: 20px; font-size: 13.5px; font-weight: 600;">
+                  <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="radio" name="bookingFor" id="bookMyself" value="self" checked>
+                    <span>For Myself</span>
+                  </label>
+                  <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="radio" name="bookingFor" id="bookOther" value="other">
+                    <span>For Someone Else (Family Member / Parent)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <label class="field">
+                  <span>Patient Full Name *</span>
+                  <input type="text" name="patientName" id="inputPatientName"
+                         th:value="${appointment.patientName ?: (patient != null ? patient.fullName : '')}"
+                         required placeholder="e.g. Nimali Perera">
+                  <small>As written in National Identity Card (NIC) or Passport.</small>
+                </label>
+
+                <label class="field">
+                  <span>Contact Phone Number (+94) *</span>
+                  <input type="tel" name="contactPhone" th:value="${appointment.contactPhone}" required
+                         placeholder="e.g. 0771234567 or +94771234567" pattern="^(\+94|0)[0-9]{9}$"
+                         title="Please enter a valid 10-digit Sri Lankan mobile number (e.g. 0771234567)">
+                  <small>Instant SMS reference number will be delivered to this number.</small>
+                </label>
+
+                <label class="field">
+                  <span>Contact Email Address *</span>
+                  <input type="email" name="contactEmail" th:value="${appointment.contactEmail}" required
+                         placeholder="patient@example.com">
+                  <small>Official receipt copy and calendar invites will be sent here.</small>
+                </label>
+
+                <label class="field">
+                  <span>Payment Settlement Choice *</span>
+                  <select name="settlementType" style="height: 44px; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600;">
+                    <option value="cash">Counter Cash — Settle at hospital desk (Recommended)</option>
+                    <option value="card">Card Payment — Instant settlement</option>
+                  </select>
+                  <small>No platform surcharge. Pay exact hospital rate.</small>
+                </label>
+              </div>
+
+              <div style="margin-top: 16px; padding: 12px 14px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 12.5px; color: #166534; display: flex; align-items: center; gap: 8px;">
+                <span>🔒</span>
+                <span>Safe &amp; Confidential: Patient data is protected and verified with SLMC hospital accreditation guidelines.</span>
+              </div>
+
+              <div class="actions" style="margin-top: 24px; justify-content: space-between;">
+                <button type="button" class="btn secondary wizard-prev-btn" data-target="3">
+                  ← Back to Slot
+                </button>
+                <button class="btn" id="confirmBooking" type="submit" style="padding: 12px 28px;">
+                  Confirm &amp; Reserve Appointment →
+                </button>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: MY APPOINTMENTS & FEEDBACK -->
+    <section id="section-history" class="section-content">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>My Appointments History</h2>
+            <p>Track scheduled visits, download receipts, or submit feedback after consultation.</p>
+          </div>
+          <input type="search" data-filter="#patientAppointmentsTable" placeholder="Search appointments..."
+                 style="padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 280px;">
+        </div>
+
+        <div class="table-wrap">
+          <table id="patientAppointmentsTable">
+            <thead>
+              <tr>
+                <th>Booking Ref</th>
+                <th>Doctor &amp; Hospital</th>
+                <th>Date &amp; Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="a : ${appointments}">
+                <td>
+                  <strong th:text="|#${a.id}|">#001</strong>
+                  <p th:text="${a.patientName ?: (a.patient != null ? a.patient.fullName : 'Patient')}"></p>
+                </td>
+                <td>
+                  <strong th:text="${a.doctorName ?: (a.doctor != null ? a.doctor.name : 'Doctor')}">Doctor</strong>
+                  <p th:text="${a.hospitalBranch != null ? a.hospitalBranch.branchName : 'General Clinic'}">Hospital</p>
+                </td>
+                <td>
+                  <strong th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy') : 'Date unset'}"></strong>
+                  <p th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'HH:mm a') : ''}"></p>
+                </td>
+                <td>
+                  <span class="badge" th:data-status="${a.status}" th:text="${a.status}">SCHEDULED</span>
+                </td>
+                <td>
+                  <div class="actions">
+                    <a th:if="${a.status == 'SCHEDULED'}" class="btn small secondary"
+                       th:href="@{/patient/appointment/{id}/reschedule(id=${a.id})}">Reschedule</a>
+
+                    <form th:if="${a.status == 'SCHEDULED'}" th:action="@{/patient/appointment/{id}/cancel(id=${a.id})}"
+                          method="post" data-confirm="Are you sure you want to cancel this appointment? This action will release your reserved slot.">
+                      <button class="btn small danger" type="submit">Cancel</button>
+                    </form>
+
+                    <a th:if="${recordMap.containsKey(a.id)}" class="btn small secondary"
+                       th:href="@{/patient/appointment/{id}/record(id=${a.id})}">View Record ↗</a>
+
+                    <a th:if="${invoiceMap.containsKey(a.id)}" class="btn small secondary"
+                       th:href="@{/invoice/download/{id}(id=${invoiceMap.get(a.id).id})}">Download Invoice ↓</a>
+
+                    <span th:if="${!invoiceMap.containsKey(a.id) and a.status == 'SCHEDULED'}" class="badge" data-status="Pending">
+                      Pending at Counter
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(appointments)}">
+                <td colspan="5" class="empty">
+                  <h3>No appointments scheduled</h3>
+                  <p>You currently do not have any active or past medical appointments.</p>
+                  <a class="btn section-gap" href="/patient/dashboard?section=booking" style="margin-top: 14px;">Book Your First Appointment</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Feedback Submission for Completed Appointments -->
+      <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+          <div>
+            <h2>Share Feedback for Completed Consultations</h2>
+            <p>Help other patients find accredited specialists with your verified rating</p>
+          </div>
+          <span class="badge" data-status="Completed">Patient Experience</span>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/feedback/add}" method="post">
+            <div class="form-grid">
+              <label class="field">
+                <span>Select Completed Appointment *</span>
+                <select name="appointmentId" required>
+                  <option value="">-- Choose your completed visit --</option>
+                  <option th:each="a : ${appointments}" th:if="${a.status == 'COMPLETED'}" th:value="${a.id}"
+                          th:text="|Visit #${a.id} with ${a.doctor.name} on ${#temporals.format(a.appointmentDate, 'dd MMM yyyy')}|">
+                  </option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Doctor Rating (1 - 5 Stars) *</span>
+                <select name="rating" required>
+                  <option value="5">★★★★★ - Excellent (5 / 5)</option>
+                  <option value="4">★★★★☆ - Very Good (4 / 5)</option>
+                  <option value="3">★★★☆☆ - Average (3 / 5)</option>
+                  <option value="2">★★☆☆☆ - Needs Improvement (2 / 5)</option>
+                  <option value="1">★☆☆☆☆ - Poor (1 / 5)</option>
+                </select>
+              </label>
+
+              <label class="field" style="grid-column: 1 / -1;">
+                <span>Your Review &amp; Comments (Optional)</span>
+                <textarea name="comments" maxlength="1000" rows="3"
+                          placeholder="Tell us about the doctor's attentiveness, clinic punctuality, and overall care..."></textarea>
+              </label>
+            </div>
+            <div class="form-footer">
+              <button class="btn" type="submit">Submit Doctor Review</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: HEALTH PROFILE & SETTINGS -->
+    <section id="section-profile" class="section-content">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Personal &amp; Clinical Profile</h2>
+            <p>Ensure your contact and vital information are accurate for clinical consultations.</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <form th:action="@{/patient/profile}" method="post">
+            <div class="form-grid">
+              <label class="field">
+                <span>Full Name *</span>
+                <input type="text" name="fullName" th:value="${patient.fullName}" required>
+              </label>
+
+              <label class="field">
+                <span>Primary Phone Number *</span>
+                <input type="tel" name="phoneNo" th:value="${patient.phoneNo}" required>
+              </label>
+
+              <label class="field">
+                <span>Residential Address *</span>
+                <input type="text" name="address" th:value="${patient.address}" required>
+              </label>
+
+              <label class="field">
+                <span>Blood Group</span>
+                <select name="bloodGroup">
+                  <option value="" th:selected="${patient.bloodGroup == null or patient.bloodGroup == ''}">Not Specified</option>
+                  <option value="A+" th:selected="${patient.bloodGroup == 'A+'}">A+</option>
+                  <option value="A-" th:selected="${patient.bloodGroup == 'A-'}">A-</option>
+                  <option value="B+" th:selected="${patient.bloodGroup == 'B+'}">B+</option>
+                  <option value="B-" th:selected="${patient.bloodGroup == 'B-'}">B-</option>
+                  <option value="AB+" th:selected="${patient.bloodGroup == 'AB+'}">AB+</option>
+                  <option value="AB-" th:selected="${patient.bloodGroup == 'AB-'}">AB-</option>
+                  <option value="O+" th:selected="${patient.bloodGroup == 'O+'}">O+</option>
+                  <option value="O-" th:selected="${patient.bloodGroup == 'O-'}">O-</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Blood Pressure (Self-reported)</span>
+                <input type="text" name="bloodPressure" th:value="${patient.bloodPressure}" placeholder="e.g. 120/80">
+              </label>
+
+              <label class="field">
+                <span>Heart Rate (Pulse bpm)</span>
+                <input type="text" name="heartRate" th:value="${patient.heartRate}" placeholder="e.g. 72 bpm">
+              </label>
+
+              <label class="field">
+                <span>Emergency Contact Phone</span>
+                <input type="tel" name="emergencyContact" th:value="${patient.emergencyContact}" placeholder="e.g. 0719876543">
+              </label>
+
+              <label class="field">
+                <span>Update Password (Optional)</span>
+                <input type="password" name="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Leave blank to keep current">
+              </label>
+            </div>
+
+            <div class="form-footer">
+              <button class="btn" type="submit">Save Profile Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 24px; border-color: var(--error-border);">
+        <div class="card-header" style="background: var(--error-bg);">
+          <div>
+            <h2 style="color: var(--error);">Account Security &amp; Access</h2>
+            <p style="color: #991B1B;">Deactivating your account will suspend portal login credentials</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <p style="font-size: 13.5px; line-height: 1.6; color: var(--ink-secondary);">
+            Deactivating your account will disable login access. Your historical medical consultations, clinical records, and billing receipts remain securely archived with the hospital network.
+          </p>
+          <div style="margin-top: 16px;">
+            <form th:action="@{/patient/deactivate-account}" method="post"
+                  data-confirm="Are you sure you want to deactivate your account? Contact the hospital desk to restore access.">
+              <button class="btn danger" type="submit">Deactivate Account</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

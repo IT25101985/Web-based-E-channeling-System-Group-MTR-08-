@@ -1,1 +1,143 @@
-<!DOCTYPE html><html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CareLink | Healthcare, connected</title><link rel="stylesheet" href="/css/app.css"><script src="/js/theme.js"></script><script src="/js/app.js" defer></script></head><body><a class="skip-link" href="#main">Skip to content</a><aside th:replace="~{fragments/navigation :: doctor}"></aside><div class="app"><header class="topbar"><div class="actions"><button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button><span class="crumb">Workspace &nbsp; / &nbsp; <b>Consultation room</b></span></div><div class="top-actions"><span class="live">Doctor portal</span><button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle colour theme">◐</button><span class="avatar" sec:authentication="name">CL</span></div></header><main class="content" id="main"><div class="page-heading"><div><div class="eyebrow">YOUR CARELINK WORKSPACE</div><h1>Consultation room</h1><p>Everything you need for a well-documented patient visit.</p></div></div><div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div><div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div><div th:if="${param.error != null}" class="notice error" role="alert">The request could not be completed. Check your details and try again. </div><div id="actionNotice" class="notice" role="status" hidden>Changes saved successfully.</div><div th:if="${appointment == null}" class="card empty"><h2>Your consultation room is ready.</h2><p>Select a scheduled appointment when a patient is ready.</p><a class="btn section-gap" href="/doctor/appointments">View appointments</a></div><div th:if="${appointment != null}" class="grid two-col"><div class="card"><div class="card-header"><h2>Consultation details</h2><span class="badge" th:data-status="${appointment.status}" th:text="${appointment.status}">Status</span></div><div class="card-body stack"><div><small>Patient</small><h2 th:text="${appointment.patient.fullName}"></h2></div><div><small>Appointment time</small><p th:text="${#temporals.format(appointment.appointmentDate, 'dd MMM yyyy · HH:mm')}"></p></div><div><small>Contact</small><p th:text="${appointment.contactPhone}"></p><p th:text="${appointment.contactEmail}"></p></div><a th:if="${appointment.status == 'SCHEDULED'}" class="btn" th:href="@{/doctor/prescribe/{id}(id=${appointment.id})}">Write prescription →</a></div></div><div class="card card-body"><div class="eyebrow">CONTINUITY OF CARE</div><h2>Keep every visit connected.</h2><p class="section-gap">Complete the diagnosis and medication instructions to save a medical record and finish this appointment.</p><a class="btn secondary section-gap" href="/doctor/records">View medical records</a></div></div><footer class="footer-note">CareLink · Healthcare, connected. &nbsp; All appointment times are local hospital time.</footer></main></div></body></html>
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Clinical Consultation Workspace</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: doctor}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Active Consultation Room</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Doctor Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">DR</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">CLINICAL WORKSTATION</div>
+        <h1>Consultation Room</h1>
+        <p>Real-time patient evaluation, clinical history inspection, and prescription management.</p>
+      </div>
+      <a class="btn secondary" href="/doctor/appointments">← Back to Schedule</a>
+    </div>
+
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete consultation request. Check details and try again.</div>
+
+    <!-- When no active appointment is chosen -->
+    <div th:if="${appointment == null}" class="card empty" style="padding: 60px 24px;">
+      <div style="font-size: 48px; margin-bottom: 16px;">🩺</div>
+      <h2>Your consultation desk is ready</h2>
+      <p>Select a patient from your appointment schedule to initiate consultation notes and prescription entry.</p>
+      <a class="btn section-gap" href="/doctor/appointments" style="margin-top: 16px;">View Today's Appointment Schedule</a>
+    </div>
+
+    <!-- Active Consultation Details -->
+    <div th:if="${appointment != null}" class="grid two-col">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Active Patient Details</h2>
+            <p th:text="|Appointment Booking Reference #${appointment.id}|">Booking #001</p>
+          </div>
+          <span class="badge" th:data-status="${appointment.status}" th:text="${appointment.status}">SCHEDULED</span>
+        </div>
+
+        <div class="card-body">
+          <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+            <div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #2563EB, #14B8A6); color: white; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800;">
+              👤
+            </div>
+            <div>
+              <h2 style="font-size: 20px; color: var(--primary-navy); margin-bottom: 4px;"
+                  th:text="${appointment.patient != null ? appointment.patient.fullName : 'Patient Name'}">Patient</h2>
+              <div style="font-size: 13px; color: var(--ink-secondary);">
+                <span th:text="|NIC: ${appointment.patient != null and appointment.patient.nic != null ? appointment.patient.nic : 'Verified'}|"></span> &bull;
+                <span th:text="${appointment.contactPhone}"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 24px;">
+            <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 12px;">
+              <small style="color: var(--ink-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Consultation Date &amp; Time</small>
+              <strong style="color: var(--primary-navy); font-size: 14px;"
+                      th:text="${#temporals.format(appointment.appointmentDate, 'dd MMM yyyy · HH:mm a')}">Date</strong>
+            </div>
+
+            <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 12px;">
+              <small style="color: var(--ink-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Hospital Branch</small>
+              <strong style="color: var(--primary-navy); font-size: 14px;"
+                      th:text="${appointment.hospitalBranch != null ? appointment.hospitalBranch.branchName : 'Main Hospital'}">Colombo Central</strong>
+            </div>
+
+            <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 12px;">
+              <small style="color: var(--ink-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Blood Group</small>
+              <strong style="color: var(--primary-navy); font-size: 14px;"
+                      th:text="${patient != null and patient.bloodGroup != null ? patient.bloodGroup : 'Not recorded'}">O+</strong>
+            </div>
+
+            <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 12px;">
+              <small style="color: var(--ink-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Self-Reported Vitals</small>
+              <strong style="color: var(--primary-navy); font-size: 14px;"
+                      th:text="${patient != null ? (patient.bloodPressure ?: '120/80') + ' | ' + (patient.heartRate ?: '72 bpm') : 'Standard'}">120/80 | 72 bpm</strong>
+            </div>
+          </div>
+
+          <div th:if="${appointment.status == 'SCHEDULED'}" style="margin-top: 10px;">
+            <a class="btn" th:href="@{/doctor/prescribe/{id}(id=${appointment.id})}" style="width: 100%; justify-content: center; padding: 12px;">
+              Write Prescription &amp; Complete Visit →
+            </a>
+          </div>
+          <div th:if="${appointment.status != 'SCHEDULED'}" style="text-align: center; color: var(--ink-muted); font-size: 13px;">
+            This consultation is already marked as <strong th:text="${appointment.status}">COMPLETED</strong>.
+          </div>
+        </div>
+      </div>
+
+      <!-- Clinical Continuity & Historical Prescriptions -->
+      <div class="card card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div class="eyebrow">CONTINUITY OF CARE</div>
+          <h2 style="font-size: 19px; color: var(--primary-navy); margin-bottom: 12px;">Clinical Documentation Guidelines</h2>
+          <p style="font-size: 13.5px; line-height: 1.6; margin-bottom: 16px;">
+            Complete diagnostic evaluation and medication instructions to save an immutable clinical medical record and finalize this appointment.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: var(--ink-secondary);">
+            <div>✓ Enter primary diagnosis summary clearly</div>
+            <div>✓ Record pharmaceutical medication with dosage units and duration</div>
+            <div>✓ Marking visit complete notifies both patient and hospital pharmacy</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
+          <a class="btn secondary" href="/doctor/records" style="width: 100%; justify-content: center;">
+            Inspect Past Medical Records Archive →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>

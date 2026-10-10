@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Patient Clinical Record</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<aside th:replace="~{fragments/navigation :: patient}"></aside>
+
+<div class="app">
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Clinical Records</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Patient Portal</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">CL</span>
+    </div>
+  </header>
+
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">CLINICAL PRACTICE NOTE</div>
+        <h1>Consultation Medical Record</h1>
+        <p>Specialist diagnosis summary and authorized prescribed medications.</p>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" onclick="window.print()">🖨️ Print Clinical Summary</button>
+        <a class="btn" href="/patient/dashboard?section=history">← Return to Appointments</a>
+      </div>
+    </div>
+
+    <!-- Record Card -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <div>
+          <h2 th:text="|Medical Record #REC-${record.id}|">Medical Record #REC-001</h2>
+          <p th:text="|Consultation Date: ${#temporals.format(record.recordDate, 'dd MMMM yyyy · HH:mm a')}|">Date</p>
+        </div>
+        <span class="badge" data-status="Completed">Official Clinical Record</span>
+      </div>
+
+      <div class="card-body">
+        <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 28px;">
+          <div class="eyebrow">PHYSICIAN DIAGNOSIS</div>
+          <h2 style="font-size: 20px; color: var(--primary-navy); margin-top: 6px; margin-bottom: 0;" th:text="${record.diagnosis}">
+            Patient presents with mild respiratory congestion...
+          </h2>
+        </div>
+
+        <div class="eyebrow">PRESCRIBED MEDICATIONS &amp; DOSAGE</div>
+        <div class="table-wrap" style="margin-top: 8px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Medication</th>
+                <th>Dosage &amp; Instructions</th>
+                <th>Duration</th>
+                <th>Price (LKR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="rx : ${record.prescriptions}">
+                <td>
+                  <strong style="color: var(--primary-blue);" th:text="${rx.medication}">Amoxicillin 500mg</strong>
+                </td>
+                <td th:text="${rx.dosage}">1 tablet after meals (3 times daily)</td>
+                <td th:text="${rx.duration}">5 Days</td>
+                <td>
+                  <strong th:text="${'LKR ' + rx.price}">LKR 650.00</strong>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(record.prescriptions)}">
+                <td colspan="4" class="empty">
+                  <h3>No prescriptions recorded</h3>
+                  <p>No pharmaceutical medications were attached to this consultation note.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
