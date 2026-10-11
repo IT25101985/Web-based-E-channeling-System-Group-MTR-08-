@@ -410,11 +410,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const bookMyself = document.getElementById('bookMyself');
   const bookOther = document.getElementById('bookOther');
   const patientNameInput = document.getElementById('inputPatientName');
-  let myDefaultName = patientNameInput ? patientNameInput.value : '';
+  let myDefaultName = patientNameInput ? patientNameInput.dataset.selfName : '';
+  const recipientNic = document.getElementById('recipientNic');
+  const recipientNicField = document.getElementById('recipientNicField');
 
   if (bookMyself && bookOther && patientNameInput) {
     bookOther.addEventListener('change', () => {
       if (bookOther.checked) {
+        patientNameInput.readOnly = false;
+        if (recipientNic) recipientNic.required = true;
+        if (recipientNicField) recipientNicField.style.display = '';
         patientNameInput.value = '';
         patientNameInput.placeholder = 'Enter family member full name';
         patientNameInput.focus();
@@ -422,6 +427,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     bookMyself.addEventListener('change', () => {
       if (bookMyself.checked) {
+        patientNameInput.readOnly = true;
+        if (recipientNic) recipientNic.required = false;
+        if (recipientNicField) recipientNicField.style.display = 'none';
         patientNameInput.value = myDefaultName;
         patientNameInput.placeholder = 'e.g. Nimali Perera';
       }

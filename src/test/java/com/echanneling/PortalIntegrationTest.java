@@ -29,6 +29,8 @@ class PortalIntegrationTest {
     @Autowired MedicalRecordRepository records;
     @Autowired HospitalBranchRepository branches;
     @Autowired BookingService bookings;
+    @Autowired com.echanneling.service.AppointmentService appointmentService;
+    @Autowired NotificationRepository notifications;
 
     @Test void publicPagesRenderAndAnonymousCannotDownloadInvoices() throws Exception {
         for (String path : new String[]{"/", "/login", "/register", "/forgot-password"}) mvc.perform(get(path)).andExpect(status().isOk());
@@ -94,12 +96,14 @@ class PortalIntegrationTest {
         mvc.perform(post("/register").with(csrf()).param("id",original.getId().toString()).param("username","newpatient").param("password","Patient@123").param("fullName","New Patient").param("email","newpatient@example.com").param("nic","200012345678").param("phoneNo","0771234567").param("address","Colombo").param("role","ROLE_ADMIN")).andExpect(status().is3xxRedirection());
         assertEquals(hash,users.findByUsername("admin").orElseThrow().getPassword());assertEquals("ROLE_PATIENT",users.findByUsername("newpatient").orElseThrow().getRole());
     }
-    @Test void cancellationDeletionCleansDependencies() throws Exception {
+    @Test void cancellationArchivePreservesHistory() throws Exception {
         Appointment a=bookings.book(users.findByUsername("dhanu").orElseThrow(),newBooking());
         mvc.perform(post("/patient/appointment/"+a.getId()+"/cancel").with(user("dhanu").roles("PATIENT")).with(csrf())).andExpect(status().is3xxRedirection());
         assertEquals("CANCELLED",a.getStatus());
         mvc.perform(post("/patient/appointment/"+a.getId()+"/delete").with(user("dhanu").roles("PATIENT")).with(csrf())).andExpect(status().is3xxRedirection());
-        assertTrue(appointments.findById(a.getId()).isEmpty());
+        assertTrue(appointments.findById(a.getId()).orElseThrow().isHiddenByPatient());
+        assertFalse(appointmentService.patientHistory(a.getPatient(), 0).stream().anyMatch(item -> item.getId().equals(a.getId())));
+        assertFalse(notifications.findByAppointmentId(a.getId()).isEmpty());
     }
     @Test void realLoginChecksTheStoredPassword() throws Exception {
         mvc.perform(post("/login").with(csrf()).param("username","admin").param("password","admin123")).andExpect(redirectedUrl("/dashboard"));

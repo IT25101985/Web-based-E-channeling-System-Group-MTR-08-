@@ -55,3 +55,8 @@ Workflow: **Appoinment_Management → def → main**. Other module branches merg
 ## Current limits
 
 Card checkout is simulated. SMS delivery and password-reset emails are not implemented. External SMTP requires configuration; sent means the SMTP server accepted the message. H2 tests do not verify live SQL Server, real payments or real mailbox delivery.
+
+
+## Appointment Booking update
+
+See [Dhanukshan's appointment update guide](docs/APPOINTMENT_UPDATES.md) for family bookings, conflict protection, archived history, checkout handoff and the lecture design-pattern examples. Existing SQL Server installations can use `database/appointment-updates-sqlserver.sql`.

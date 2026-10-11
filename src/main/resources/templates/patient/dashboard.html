@@ -77,7 +77,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </span>
           </div>
-          <strong th:text="${#lists.size(appointments)}">0</strong>
+          <strong th:text="${appointmentTotal}">0</strong>
           <small>Recorded clinical bookings</small>
         </div>
         <div class="stat">
@@ -331,11 +331,11 @@
                 <span style="display: block; font-size: 12px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 8px;">Booking Recipient</span>
                 <div style="display: flex; gap: 20px; font-size: 13.5px; font-weight: 600;">
                   <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-                    <input type="radio" name="bookingFor" id="bookMyself" value="self" checked>
+                    <input type="radio" name="bookingFor" id="bookMyself" value="self" th:checked="${!appointment.forSomeoneElse}" th:disabled="${appointment.id != null}">
                     <span>For Myself</span>
                   </label>
                   <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-                    <input type="radio" name="bookingFor" id="bookOther" value="other">
+                    <input type="radio" name="bookingFor" id="bookOther" value="other" th:checked="${appointment.forSomeoneElse}" th:disabled="${appointment.id != null}">
                     <span>For Someone Else (Family Member / Parent)</span>
                   </label>
                 </div>
@@ -346,8 +346,15 @@
                   <span>Patient Full Name *</span>
                   <input type="text" name="patientName" id="inputPatientName"
                          th:value="${appointment.patientName ?: (patient != null ? patient.fullName : '')}"
-                         required placeholder="e.g. Nimali Perera">
-                  <small>As written in National Identity Card (NIC) or Passport.</small>
+                         required maxlength="150" th:readonly="${appointment.id != null or !appointment.forSomeoneElse}" th:attr="data-self-name=${patient.fullName}" placeholder="e.g. Nimali Perera">
+                  <small>As written on the attending patient's identity document. Recipient details stay fixed when rescheduling.</small>
+                </label>
+                <label class="field" id="recipientNicField" th:style="${appointment.forSomeoneElse ? '' : 'display:none'}">
+                  <span>Attending Patient NIC *</span>
+                  <input name="recipientNic" id="recipientNic" th:value="${appointment.recipientNic}"
+                         pattern="([0-9]{9}[xXvV]|[0-9]{12})" maxlength="12"
+                         th:required="${appointment.forSomeoneElse}" th:readonly="${appointment.id != null}">
+                  <small>Family bookings currently support patients with a Sri Lankan NIC. For other identity documents, contact reception.</small>
                 </label>
 
                 <label class="field">
@@ -355,23 +362,23 @@
                   <input type="tel" name="contactPhone" th:value="${appointment.contactPhone}" required
                          placeholder="e.g. 0771234567 or +94771234567" pattern="^(\+94|0)[0-9]{9}$"
                          title="Please enter a valid 10-digit Sri Lankan mobile number (e.g. 0771234567)">
-                  <small>Instant SMS reference number will be delivered to this number.</small>
+                  <small>The hospital may contact you on this number. SMS delivery is not enabled.</small>
                 </label>
 
                 <label class="field">
                   <span>Contact Email Address *</span>
                   <input type="email" name="contactEmail" th:value="${appointment.contactEmail}" required
                          placeholder="patient@example.com">
-                  <small>Official receipt copy and calendar invites will be sent here.</small>
+                  <small>Check your portal for confirmations and receipts. Email alerts require the hospital email service to be enabled.</small>
                 </label>
 
-                <label class="field">
+                <label class="field" th:if="${appointment.id == null}">
                   <span>Payment Settlement Choice *</span>
                   <select name="settlementType" style="height: 44px; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600;">
                     <option value="cash">Counter Cash — Settle at hospital desk (Recommended)</option>
-                    <option value="card">Card Payment — Instant settlement</option>
+                    <option th:if="${demoCardEnabled}" value="card">Demonstration Card — No real charge</option>
                   </select>
-                  <small>No platform surcharge. Pay exact hospital rate.</small>
+                  <small>Continue to checkout to confirm this choice. Cash remains unpaid until reception collects it.</small>
                 </label>
               </div>
 
@@ -451,9 +458,8 @@
                     <a th:if="${invoiceMap.containsKey(a.id)}" class="btn small secondary"
                        th:href="@{/invoice/download/{id}(id=${invoiceMap.get(a.id).id})}">Download Invoice ↓</a>
 
-                    <span th:if="${!invoiceMap.containsKey(a.id) and a.status == 'SCHEDULED'}" class="badge" data-status="Pending">
-                      Pending at Counter
-                    </span>
+                    <a th:if="${!invoiceMap.containsKey(a.id) and a.status != 'CANCELLED'}" class="btn small"
+                       th:href="@{/pay(appointmentId=${a.id})}">Continue to Checkout</a>
                   </div>
                 </td>
               </tr>
@@ -469,6 +475,11 @@
         </div>
       </div>
 
+      <div class="actions" style="margin-top:16px">
+        <a class="btn secondary" th:if="${historyPage > 0}" th:href="@{/patient/dashboard(section=history,page=${historyPage - 1})}">Previous</a>
+        <span th:text="|Page ${historyPage + 1}|"></span>
+        <a class="btn secondary" th:if="${historyHasNext}" th:href="@{/patient/dashboard(section=history,page=${historyPage + 1})}">Next</a>
+      </div>
       <!-- Feedback Submission for Completed Appointments -->
       <div class="card" style="margin-top: 24px;">
         <div class="card-header">
