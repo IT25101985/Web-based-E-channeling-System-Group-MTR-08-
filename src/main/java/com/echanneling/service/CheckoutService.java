@@ -11,6 +11,7 @@ import java.util.Map;
 /** Strategy context: delegates payment behavior to the selected, injected strategy. */
 @Service
 public class CheckoutService {
+    @org.springframework.beans.factory.annotation.Value("${app.payments.demo-card-enabled:false}") private boolean demoCards;
     private final AppointmentRepository appointments;
     private final DoctorRepository doctors;
     private final InvoiceRepository invoices;
@@ -22,6 +23,7 @@ public class CheckoutService {
     }
     @Transactional
     public Invoice checkout(Long id, String username, String type) {
+        if ("card".equals(type) && !demoCards) throw new IllegalArgumentException("Card payments are unavailable. Choose counter cash.");
         Payment payment = strategies.get(type);
         if (payment == null) throw new IllegalArgumentException("Choose card or cash.");
         Appointment initial = appointments.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -35,7 +37,7 @@ public class CheckoutService {
         if (existing.isPresent()) return existing.get();
         Invoice invoice = new Invoice();
         invoice.setAppointment(a);
-        invoice.setAmount(a.getDoctor().getConsultationFee());
+        invoice.setAmount(a.getPayableFee().doubleValue());
         payment.processPayment(invoice.getAmount());
         invoice.setPaymentMethod(type.toUpperCase(java.util.Locale.ROOT));
         invoice.setStatus("card".equals(type) ? "PAID" : "UNPAID");

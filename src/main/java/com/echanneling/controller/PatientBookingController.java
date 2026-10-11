@@ -45,7 +45,7 @@ public class PatientBookingController {
 
     @InitBinder("appointment")
     public void bookingFields(org.springframework.web.bind.WebDataBinder binder) {
-        binder.setAllowedFields("id", "doctor.id", "hospitalBranch.id", "appointmentDate", "contactEmail", "contactPhone");
+        binder.setAllowedFields("id", "doctor.id", "hospitalBranch.id", "appointmentDate", "contactEmail", "contactPhone", "bookingFor", "patientName", "recipientNic", "settlementType");
     }
 
     @PostMapping("/book-appointment")
@@ -59,9 +59,11 @@ public class PatientBookingController {
             return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
         }
         try {
-            bookingService.book(userService.findByUsername(principal.getName()).orElseThrow(), appointment);
+            Appointment saved = bookingService.book(userService.findByUsername(principal.getName()).orElseThrow(), appointment);
             flash.addFlashAttribute("successMessage", appointment.getId() != null
                     ? "Your appointment was rescheduled successfully." : "Your appointment is confirmed.");
+            if (appointment.getId() == null && appointment.getSettlementType() != null)
+                return "redirect:/pay?appointmentId=" + saved.getId();
             return "redirect:/patient/dashboard?section=history";
         } catch (IllegalArgumentException e) {
             flash.addFlashAttribute("errorMessage", e.getMessage());

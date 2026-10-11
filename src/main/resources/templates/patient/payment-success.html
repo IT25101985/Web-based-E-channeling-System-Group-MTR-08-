@@ -62,6 +62,7 @@
                th:text="${invoice.appointment != null and invoice.appointment.doctor != null ? invoice.appointment.doctor.specialization : 'Consultant'}">Specialization</div>
 
           <div style="margin-top: 10px; font-size: 13px; color: var(--ink-secondary);">
+            <div><strong>Patient:</strong> <span th:text="${invoice.appointment.patientName}"></span></div>
             <div>📅 <strong>Date &amp; Time:</strong> <span th:text="${invoice.appointment != null and invoice.appointment.appointmentDate != null ? #temporals.format(invoice.appointment.appointmentDate, 'dd MMMM yyyy · HH:mm a') : 'Scheduled Time'}">Today</span></div>
             <div>🏥 <strong>Hospital Branch:</strong> <span th:text="${invoice.appointment != null and invoice.appointment.hospitalBranch != null ? invoice.appointment.hospitalBranch.branchName : 'Hospital Facility'}">Central Branch</span></div>
             <div>💳 <strong>Total Amount:</strong> <strong style="color: var(--primary-navy);" th:text="|LKR ${invoice.amount}|">LKR 2,500</strong></div>
@@ -86,14 +87,14 @@
             <rect x="40" y="70" width="20" height="10" fill="#0B1F3A"/>
             <rect x="70" y="70" width="20" height="20" fill="#0B1F3A"/>
           </svg>
-          <div style="font-size: 10px; color: var(--ink-muted); margin-top: 4px; font-weight: 700;">SCAN AT COUNTER</div>
+          <div style="font-size: 10px; color: var(--ink-muted); margin-top: 4px; font-weight: 700;">DEMO QR — USE REFERENCE ID</div>
         </div>
       </div>
 
       <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: #1E40AF;">
-        <strong>Counter Cash Payment Guidance:</strong>
-        <p style="margin: 4px 0 0; line-height: 1.5;">
-          Please present this Reference ID or QR code at the hospital reception counter 15 minutes prior to your time slot to settle your consultation fee in cash.
+        <strong th:text="${invoice.paymentMethod == 'CARD' ? 'Card demonstration completed — no money was charged.' : invoice.status == 'PAID' ? 'Cash payment received.' : 'Counter Cash Payment Guidance:'}">Payment Guidance</strong>
+        <p th:if="${invoice.status == 'UNPAID'}" style="margin: 4px 0 0; line-height: 1.5;">
+          Please present this Reference ID at the hospital reception counter 15 minutes prior to your time slot to settle your consultation fee in cash.
         </p>
       </div>
 

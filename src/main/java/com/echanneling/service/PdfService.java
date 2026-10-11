@@ -54,7 +54,7 @@ public class PdfService implements PDFGenerator {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
 
             addTableRow(table, "Appointment ID", "#" + appointment.getId());
-            addTableRow(table, "Patient Name", appointment.getPatient().getFullName());
+            addTableRow(table, "Patient Name", appointment.getPatientName());
             addTableRow(table, "Doctor Name", appointment.getDoctor().getName());
             addTableRow(table, "Department", appointment.getDoctor().getSpecialization());
             addTableRow(table, "Date & Time", appointment.getAppointmentDate().format(formatter));
@@ -81,7 +81,7 @@ public class PdfService implements PDFGenerator {
             document.add(Chunk.NEWLINE);
             PdfPTable table = new PdfPTable(2);
             table.setWidthPercentage(100);
-            addTableRow(table, "Patient", invoice.getAppointment().getPatient().getFullName());
+            addTableRow(table, "Patient", invoice.getAppointment().getPatientName());
             addTableRow(table, "Doctor", invoice.getAppointment().getDoctor().getName());
             addTableRow(table, "Appointment", String.valueOf(invoice.getAppointment().getAppointmentDate()));
             addTableRow(table, "Amount (LKR)", String.format(java.util.Locale.US, "%,.2f", invoice.getAmount()));

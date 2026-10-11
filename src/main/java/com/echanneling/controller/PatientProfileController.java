@@ -169,7 +169,7 @@ public class PatientProfileController {
 
     // Overriding / extended handling of Dashboard to add complex tracking analytics pipelines
     @GetMapping("/dashboard")
-    public String dashboard(Principal principal, Model model, @RequestParam(value = "reschedule", required = false) Long rescheduleId) {
+    public String dashboard(Principal principal, Model model, @RequestParam(value = "reschedule", required = false) Long rescheduleId, @RequestParam(defaultValue="0") int page) {
         if (principal == null) {
             return "redirect:/login";
         }
@@ -219,16 +219,16 @@ public class PatientProfileController {
         List<Doctor> doctors = doctorService.getAllDoctors();
         model.addAttribute("doctors", doctors != null ? doctors : new ArrayList<>());
 
-        List<Appointment> appointments = appointmentService.getAppointmentsForPatient(user);
+        var history = appointmentService.patientHistory(user, page);
+        List<Appointment> appointments = history.getContent();
+        model.addAttribute("historyPage", history.getNumber());
+        model.addAttribute("historyHasNext", history.hasNext());
+        model.addAttribute("appointmentTotal", history.getTotalElements());
 
         // --- CORE ADVANCED WORKLOAD EXTENSION: DATA ANALYTICS STREAM PIPELINES ---
-        long totalVisits = appointments.stream()
-                .filter(a -> "COMPLETED".equals(a.getStatus()))
-                .count();
+        long totalVisits = appointmentService.patientStatusCount(user, "COMPLETED");
 
-        long cancelledVisits = appointments.stream()
-                .filter(a -> "CANCELLED".equals(a.getStatus()))
-                .count();
+        long cancelledVisits = appointmentService.patientStatusCount(user, "CANCELLED");
 
         // Analytical processing mapping ratio calculation logic safely avoiding division by zero
         double attendanceRate = (totalVisits + cancelledVisits > 0)

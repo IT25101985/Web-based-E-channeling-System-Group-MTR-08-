@@ -7,7 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
+import com.echanneling.patterns.observer.*;
+import com.echanneling.patterns.decorator.*;
 import java.util.*;
 import static com.echanneling.entity.Notification.NotificationStatus.*;
 import static com.echanneling.entity.Notification.NotificationType.*;
@@ -63,8 +64,13 @@ public class NotificationService {
             }
         }
         String key=type==REMINDER ? "reminder:"+a.getId()+":"+a.getAppointmentDate() : UUID.randomUUID().toString();
-        queueFor(a,a.getPatient(),a.getContactEmail(),type,key+":patient");
-        if(a.getDoctor().getUser()!=null) queueFor(a,a.getDoctor().getUser(),a.getDoctor().getUser().getEmail(),type,key+":doctor");
+        AppointmentSubject subject = new AppointmentEventSubject();
+        NotificationSink sink = (event, recipient, email, eventKey) ->
+            queueFor(event.appointment(), recipient, email, event.type(), eventKey);
+        subject.addObserver(new PatientNotificationObserver(sink));
+        subject.addObserver(new DoctorNotificationObserver(sink));
+        // Observers queue messages in the caller's transaction; SMTP is still delivered by the outbox.
+        subject.notifyObservers(new AppointmentEvent(a, type, key));
     }
     private void queueFor(Appointment a,User user,String email,Notification.NotificationType type,String eventKey) {
         if(notifications.existsByEventKey(eventKey)) return;
@@ -77,12 +83,12 @@ public class NotificationService {
         notifications.save(n);
     }
     private String render(String text,Appointment a,User user) {
-        return text.replace("{name}",Objects.toString(user.getFullName(),user.getUsername()))
-                .replace("{patient}",Objects.toString(a.getPatient().getFullName(),"Patient")).replace("{doctor}",a.getDoctor().getName())
-                .replace("{hospital}",a.getHospitalBranch()==null ? "your hospital" : a.getHospitalBranch().getBranchName())
-                .replace("{date}",a.getAppointmentDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")))
-                .replace("{reference}",a.getId().toString());
+        NotificationMessage message = new TemplateMessage(text);
+        message = new RecipientMessageDecorator(message, user);
+        message = new AppointmentMessageDecorator(message, a);
+        return message.render();
     }
+
     public NotificationTemplate template(Notification.NotificationType type) {
         return templates.findById(type).orElseGet(()->{
             NotificationTemplate t=new NotificationTemplate(); t.setEventType(type);

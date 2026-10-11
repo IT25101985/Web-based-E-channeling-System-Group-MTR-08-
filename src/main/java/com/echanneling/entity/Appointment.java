@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
+@Table(indexes={@Index(name="ix_appointment_doctor_time",columnList="doctor_id,appointmentDate"), @Index(name="ix_appointment_patient_time",columnList="patient_id,appointmentDate"), @Index(name="ix_appointment_recipient_time",columnList="recipientNic,appointmentDate")})
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +30,28 @@ public class Appointment {
     private LocalDateTime appointmentDate;
     private String contactPhone;
     private String contactEmail;
-    private String status; // SCHEDULED, COMPLETED, CANCELLED
+    private Boolean hiddenByPatient = false;
+    public boolean isHiddenByPatient() { return Boolean.TRUE.equals(hiddenByPatient); }
+    public void setHiddenByPatient(boolean value) { hiddenByPatient = value; }
+    private String status; // SCHEDULED, CHECKED_IN, COMPLETED, CANCELLED
+    private String bookingFor;
+    private String recipientNic;
+    private String settlementType;
+    @Column(precision = 19, scale = 2)
+    private java.math.BigDecimal bookedConsultationFee;
+
+    public String getBookingFor() { return bookingFor == null ? "self" : bookingFor; }
+    public void setBookingFor(String value) { bookingFor = value; }
+    public boolean isForSomeoneElse() { return "other".equals(getBookingFor()); }
+    public String getRecipientNic() { return recipientNic; }
+    public void setRecipientNic(String value) { recipientNic = value; }
+    public String getSettlementType() { return settlementType; }
+    public void setSettlementType(String value) { settlementType = value; }
+    public java.math.BigDecimal getBookedConsultationFee() { return bookedConsultationFee; }
+    public void setBookedConsultationFee(Number value) { bookedConsultationFee = com.echanneling.service.Money.amount(value); }
+    // Legacy appointments did not record an agreed fee; new bookings always do.
+    public java.math.BigDecimal getPayableFee() { return bookedConsultationFee != null ? bookedConsultationFee : com.echanneling.service.Money.amount(doctor.getConsultationFee()); }
+    public boolean isAwaitingConsultation() { return "SCHEDULED".equals(status) || "CHECKED_IN".equals(status); }
 
     // Additional fields for database reporting/display
     private String doctorName;
@@ -48,7 +70,7 @@ public class Appointment {
     public String getDoctorName() { return doctorName; }
     public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
 
-    public String getPatientName() { return patientName; }
+    public String getPatientName() { return patientName != null ? patientName : patient == null ? null : patient.getFullName(); }
     public void setPatientName(String patientName) { this.patientName = patientName; }
 
     public String getDate() { return date; }
@@ -78,7 +100,7 @@ public class Appointment {
         if (doctor != null) {
             this.doctorName = doctor.getName();
         }
-        if (patient != null) {
+        if (patient != null && (patientName == null || patientName.isBlank())) {
             this.patientName = patient.getFullName();
         }
         if (appointmentDate != null) {

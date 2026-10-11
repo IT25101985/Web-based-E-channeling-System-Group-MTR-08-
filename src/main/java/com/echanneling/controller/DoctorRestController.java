@@ -22,6 +22,7 @@ public class DoctorRestController {
         Map<Long,DoctorOption> result=new TreeMap<>();
         sessions.findByHospitalBranchIdAndIsActiveTrueAndSlotDateGreaterThanEqual(id,LocalDate.now()).stream()
             .filter(s->s.getSlotDate().atTime(s.getEndTime()).isAfter(java.time.LocalDateTime.now()))
+            .filter(s -> BookingService.isBookable(s.getDoctor()))
             .forEach(s->{var d=s.getDoctor();result.put(d.getId(),new DoctorOption(d.getId(),d.getName(),d.getSpecialization(),d.getConsultationFee()));});
         return new ArrayList<>(result.values());
     }
