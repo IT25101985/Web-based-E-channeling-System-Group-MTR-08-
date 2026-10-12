@@ -53,15 +53,14 @@ public class PatientBookingController {
                                   org.springframework.validation.BindingResult binding,
                                   Principal principal, org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
         if (principal == null) return "redirect:/login";
-        String rescheduleParam = appointment.getId() != null ? "&reschedule=" + appointment.getId() : "";
+        String rescheduleParam = (appointment != null && appointment.getId() != null) ? "&reschedule=" + appointment.getId() : "";
         if (binding.hasErrors()) {
             flash.addFlashAttribute("errorMessage", "Please check your appointment details.");
             return "redirect:/patient/dashboard?section=booking" + rescheduleParam;
         }
         try {
             Appointment saved = bookingService.book(userService.findByUsername(principal.getName()).orElseThrow(), appointment);
-            flash.addFlashAttribute("successMessage", appointment.getId() != null
-                    ? "Your appointment was rescheduled successfully." : "Your appointment is confirmed.");
+            flash.addFlashAttribute("successMessage", appointment.getId() != null ? "Your appointment was rescheduled successfully." : "Your appointment is confirmed.");
             if (appointment.getId() == null && appointment.getSettlementType() != null)
                 return "redirect:/pay?appointmentId=" + saved.getId();
             return "redirect:/patient/dashboard?section=history";

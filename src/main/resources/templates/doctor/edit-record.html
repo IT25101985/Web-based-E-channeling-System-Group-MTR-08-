@@ -43,7 +43,7 @@
       <div class="card-header">
         <div>
           <h2 th:text="|Medical Record #REC-${medicalRecord.id}|">Record #REC-001</h2>
-          <p th:text="|Patient: ${medicalRecord.patient?.fullName ?: 'Patient'}|">Patient Details</p>
+          <p th:text="|Patient: ${medicalRecord.patientName}|">Patient Details</p>
         </div>
         <span class="badge" data-status="Completed">Active Record</span>
       </div>

@@ -38,18 +38,17 @@ public class DoctorScheduleController {
 
     // 1. View Appointments (Doctor-oda schedule-ai mattum filter panni kaatta)
     @GetMapping("/appointments")
-    public String viewAppointments(Model model, Principal principal) {
+    public String viewAppointments(Model model, Principal principal, @RequestParam(defaultValue="0") int page) {
         if (principal != null) {
             String username = principal.getName();
 
             // Logged-in doctor-oda username-ku match aagura appointments mattum edukkirom
-            List<Appointment> doctorAppointments = appointmentService.getAllAppointments().stream()
-                    .filter(a -> a.getDoctor() != null &&
-                            a.getDoctor().getUser() != null &&
-                            username.equals(a.getDoctor().getUser().getUsername()))
-                    .collect(Collectors.toList());
+            var history = appointmentService.doctorHistory(username,page);
+            List<Appointment> doctorAppointments = history.getContent();
 
             model.addAttribute("appointments", doctorAppointments);
+            model.addAttribute("page", Math.max(0,page));
+            model.addAttribute("hasNext", history.hasNext());
         } else {
             model.addAttribute("appointments", new ArrayList<>());
         }
@@ -58,10 +57,12 @@ public class DoctorScheduleController {
 
     // 2. Patient List (System-la irukkura patients list-ai kaatta)
     @GetMapping("/patients")
-    public String viewPatients(Model model, Principal principal) {
+    public String viewPatients(Model model, Principal principal, @RequestParam(defaultValue="0") int page) {
         if (principal != null) {
             model.addAttribute("username", principal.getName());
-            List<User> patients = appointmentService.getAllAppointments().stream().filter(a -> owns(a, principal)).map(Appointment::getPatient).filter(java.util.Objects::nonNull).distinct().toList();
+            var history = appointmentService.doctorHistory(principal.getName(), page);
+            List<Appointment> patients = history.getContent();
+            model.addAttribute("page",history.getNumber()); model.addAttribute("hasNext",history.hasNext());
             model.addAttribute("patients", patients);
         }
         return "doctor/patient-list";
@@ -69,32 +70,12 @@ public class DoctorScheduleController {
 
     // 3. Patient Records (Historical Data)
     @GetMapping("/records")
-    public String patientRecords(Model model, Principal principal) {
+    public String patientRecords(Model model, Principal principal, @RequestParam(defaultValue="0") int page) {
         if (principal != null) {
             String username = principal.getName();
-            // Fetch all appointments for this doctor to identify their patients
-            List<Appointment> doctorAppointments = appointmentService.getAllAppointments().stream()
-                    .filter(a -> a.getDoctor() != null &&
-                            a.getDoctor().getUser() != null &&
-                            username.equals(a.getDoctor().getUser().getUsername()))
-                    .collect(Collectors.toList());
-
-            // Extract unique patients
-            List<User> patients = doctorAppointments.stream()
-                    .map(Appointment::getPatient)
-                    .filter(java.util.Objects::nonNull)
-                    .distinct()
-                    .collect(Collectors.toList());
-
-            // Fetch all records for these patients (excluding archived ones)
-            List<MedicalRecord> allRecords = new ArrayList<>();
-            for (User p : patients) {
-                List<MedicalRecord> patientRecords = medicalRecordService.getRecordsByPatient(p).stream()
-                        .filter(r -> !r.isArchived() && owns(r.getAppointment(), principal))
-                        .collect(Collectors.toList());
-                allRecords.addAll(patientRecords);
-            }
-
+            var history = medicalRecordService.recordsForDoctor(username, page);
+            List<MedicalRecord> allRecords = history.getContent();
+            model.addAttribute("page",history.getNumber()); model.addAttribute("hasNext",history.hasNext());
             model.addAttribute("records", allRecords);
             model.addAttribute("username", username);
         }
@@ -109,7 +90,7 @@ public class DoctorScheduleController {
 
     // 3. Consultations (Doctor-oda schedule timing-la nadakkura consultations)
     @GetMapping("/consultations")
-    public String consultations(@RequestParam(value = "appointmentId", required = false) Long appointmentId, Model model, Principal principal) {
+    public String consultations(@RequestParam(value = "appointmentId", required = false) Long appointmentId, Model model, Principal principal, @RequestParam(defaultValue="0") int page) {
         if (principal != null) {
             String username = principal.getName();
             model.addAttribute("username", username);
@@ -119,25 +100,17 @@ public class DoctorScheduleController {
                 Optional<Doctor> optDoc = doctorService.getDoctorByUser(optUser.get());
                 if (optDoc.isPresent()) {
                     Doctor doc = optDoc.get();
-                    List<Appointment> docAppts = appointmentService.getAppointmentsForDoctor(doc);
                     Appointment activeAppt = null;
                     if (appointmentId != null) {
                         activeAppt = appointmentService.getAppointmentById(appointmentId).orElse(null);
                         requireOwner(activeAppt, principal);
                     }
-                    if (activeAppt == null) {
-                        activeAppt = docAppts.stream()
-                                .filter(a -> "SCHEDULED".equalsIgnoreCase(a.getStatus()))
-                                .findFirst().orElse(null);
-                    }
-                    if (activeAppt == null && !docAppts.isEmpty()) {
-                        activeAppt = docAppts.get(0);
-                    }
+                    if (activeAppt == null) activeAppt = appointmentService.nextConsultation(doc).orElse(null);
                     model.addAttribute("appointment", activeAppt);
-                    if (activeAppt != null && activeAppt.getPatient() != null) {
+                    if (activeAppt != null && !activeAppt.isForSomeoneElse() && activeAppt.getPatient() != null) {
                         User patientUser = activeAppt.getPatient();
                         Patient patientDetails = patientRepository.findById(patientUser.getId()).orElse(null);
-                        model.addAttribute("patient", patientDetails != null ? patientDetails : patientUser);
+                        model.addAttribute("patient", patientDetails);
                     }
                 }
             }
@@ -166,13 +139,13 @@ public class DoctorScheduleController {
                                    @RequestParam String medication,
                                    @RequestParam String dosage,
                                    @RequestParam String duration,
-                                   @RequestParam Double price, Principal principal) {
-        if (diagnosis.isBlank() || medication.isBlank() || dosage.isBlank() || duration.isBlank() || price == null || !Double.isFinite(price) || price < 0) throw new IllegalArgumentException("Complete the prescription fields");
-        Optional<Appointment> optApp = appointmentService.getAppointmentById(appointmentId);
+                                   @RequestParam java.math.BigDecimal price, Principal principal) {
+        if (diagnosis.isBlank() || medication.isBlank() || dosage.isBlank() || duration.isBlank() || price == null || price.signum() < 0) throw new IllegalArgumentException("Complete the prescription fields");
+        Optional<Appointment> optApp = appointmentService.getLockedAppointment(appointmentId);
         if (optApp.isPresent()) {
             requireOwner(optApp.get(), principal);
             Appointment app = optApp.get();
-            if (!"SCHEDULED".equals(app.getStatus()) || medicalRecordService.getRecordByAppointment(app).isPresent()) return "redirect:/doctor/appointments?error=already_processed";
+            if (!"CHECKED_IN".equals(app.getStatus()) || app.getAppointmentDate() == null || app.getAppointmentDate().toLocalDate().isAfter(com.echanneling.patterns.ClinicClock.getInstance().today()) || medicalRecordService.getRecordByAppointment(app).isPresent()) return "redirect:/doctor/appointments?error=already_processed";
 
             // Create and save medical record
             MedicalRecord record = new MedicalRecord();

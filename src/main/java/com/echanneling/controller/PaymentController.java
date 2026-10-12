@@ -70,14 +70,9 @@ public class PaymentController {
 
     // Admin: Update Payment Status (e.g. Refund)
     @PostMapping("/admin/invoice/{id}/update")
-    public String updateInvoiceStatus(@PathVariable Long id, @RequestParam String status) {
+    public String updateInvoiceStatus(@PathVariable Long id, @RequestParam String status, Principal principal) {
         if (!java.util.Set.of("PAID", "UNPAID", "REFUNDED").contains(status)) throw new IllegalArgumentException("Invalid invoice status");
-        Optional<Invoice> optInvoice = invoiceService.getInvoiceById(id);
-        if (optInvoice.isPresent()) {
-            Invoice invoice = optInvoice.get();
-            invoice.setStatus(status);
-            invoiceService.saveInvoice(invoice);
-        }
+        invoiceService.changeStatus(id,status,principal.getName());
         return "redirect:/admin/invoices";
     }
 

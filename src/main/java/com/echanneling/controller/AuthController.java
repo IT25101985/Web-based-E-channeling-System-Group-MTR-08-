@@ -61,12 +61,15 @@ public class AuthController {
         return "redirect:/patient/dashboard";
     }
 
+    @Autowired private com.echanneling.service.BookingService bookingService;
+
     @GetMapping("/")
     public String index(Model model, Principal principal) {
         if (principal != null) {
             model.addAttribute("username", principal.getName());
         }
-        model.addAttribute("doctors", doctorService.getAllDoctors());
+        model.addAttribute("doctors", doctorService.getAllDoctors().stream().filter(com.echanneling.service.BookingService::isBookable).toList());
+        model.addAttribute("todayAvailability", bookingService.todayAvailability());
         model.addAttribute("branches", hospitalBranchService.getAllBranches());
         return "index";
     }
@@ -104,22 +107,22 @@ public class AuthController {
         String cleanEmail = user.getEmail().trim().toLowerCase(java.util.Locale.ROOT);
         user.setEmail(cleanEmail);
 
-        if (userService.getAllUsers().stream().anyMatch(u -> u.getEmail() != null && cleanEmail.equalsIgnoreCase(u.getEmail().trim()))) {
+        if (userService.emailExists(cleanEmail)) {
             return "redirect:/register?error=duplicate_email";
         }
 
-        if (user.getPassword() == null || user.getPassword().length() < 6) {
+        if (!com.echanneling.service.PasswordPolicy.valid(user.getPassword())) {
             return "redirect:/register?error=weak_password";
         }
 
         if (user.getNic() != null && !user.getNic().trim().isEmpty()) {
             String cleanNic = user.getNic().replaceAll("\\s+", "");
             user.setNic(cleanNic);
-            if (!cleanNic.matches("^([0-9]{9}[x|X|v|V]|[0-9]{12})$")) {
+            if (!cleanNic.matches("^([0-9]{9}[xXvV]|[0-9]{12})$")) {
                 return "redirect:/register?error=invalid_nic";
             }
         } else {
-            user.setNic("200012345678");
+            return "redirect:/register?error=invalid_nic";
         }
 
         if (user.getPhoneNo() != null && !user.getPhoneNo().trim().isEmpty()) {
@@ -129,17 +132,17 @@ public class AuthController {
                 return "redirect:/register?error=invalid_phone";
             }
         } else {
-            user.setPhoneNo("0770000000");
+            return "redirect:/register?error=invalid_phone";
         }
 
         if (user.getFullName() == null || user.getFullName().trim().isEmpty()) {
-            user.setFullName(cleanUsername);
+            return "redirect:/register?error=invalid_name";
         } else {
             user.setFullName(user.getFullName().trim());
         }
 
         if (user.getAddress() == null || user.getAddress().trim().isEmpty()) {
-            user.setAddress("Residential Address, Sri Lanka");
+            return "redirect:/register?error=invalid_address";
         } else {
             user.setAddress(user.getAddress().trim());
         }
@@ -156,15 +159,27 @@ public class AuthController {
         }
     }
 
+    @Autowired private com.echanneling.service.PasswordRecoveryService recovery;
+
     @GetMapping("/forgot-password")
     public String forgotPasswordForm() {
         return "forgot-password";
     }
 
     @PostMapping("/forgot-password")
-    public String processForgotPassword(@RequestParam String username, @RequestParam String newPassword) {
-        // Recovery requires identity verification by a hospital administrator.
-        return "redirect:/forgot-password?contact_admin";
+    public String processForgotPassword(@RequestParam String email) {
+        recovery.request(email);
+        return "redirect:/forgot-password?requested";
+    }
+    @GetMapping("/reset-password")
+    public String resetPasswordForm(@RequestParam String token, Model model) {
+        model.addAttribute("token",token); return "reset-password";
+    }
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestParam String token,@RequestParam String newPassword,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
+        try { recovery.reset(token,newPassword); return "redirect:/login?password_reset"; }
+        catch(IllegalArgumentException ex) { flash.addFlashAttribute("errorMessage",ex.getMessage()); return "redirect:/forgot-password?invalid"; }
     }
 
     @GetMapping("/dashboard")

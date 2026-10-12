@@ -20,7 +20,7 @@ public class ActiveAccountFilter extends OncePerRequestFilter {
                                     FilterChain chain) throws ServletException, IOException {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)
-                && users.findByUsername(auth.getName()).map(u -> !u.isActive()).orElse(false)) {
+                && users.findByUsername(auth.getName()).map(u -> !u.isActive()).orElse(true)) {
             new SecurityContextLogoutHandler().logout(request, response, auth);
             response.sendRedirect(request.getContextPath() + "/login?inactive");
             return;

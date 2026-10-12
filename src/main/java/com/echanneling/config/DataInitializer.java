@@ -155,7 +155,7 @@ public class DataInitializer implements CommandLineRunner {
                 // Invoice for completed
                 Invoice inv1 = new Invoice();
                 inv1.setAppointment(a2);
-                inv1.setAmount(doc1.getConsultationFee() != null ? doc1.getConsultationFee() : 1500.0);
+                inv1.setAmount(doc1.getConsultationFee() != null ? doc1.getConsultationFee() : new java.math.BigDecimal("1500.00"));
                 inv1.setStatus("PAID");
                 invoiceRepository.save(inv1);
 
@@ -212,7 +212,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 Invoice inv2 = new Invoice();
                 inv2.setAppointment(a4);
-                inv2.setAmount(doc2.getConsultationFee() != null ? doc2.getConsultationFee() : 1200.0);
+                inv2.setAmount(doc2.getConsultationFee() != null ? doc2.getConsultationFee() : new java.math.BigDecimal("1200.00"));
                 inv2.setStatus("PAID");
                 invoiceRepository.save(inv2);
 

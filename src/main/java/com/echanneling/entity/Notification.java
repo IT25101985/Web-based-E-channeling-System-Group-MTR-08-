@@ -26,6 +26,12 @@ public class Notification {
     private Integer attempts = 0;
     private String deliveryError;
     private String eventKey;
+    private String deliveryToken;
+    private LocalDateTime deliveryLeaseUntil;
+    public String getDeliveryToken() { return deliveryToken; }
+    public void setDeliveryToken(String value) { deliveryToken = value; }
+    public LocalDateTime getDeliveryLeaseUntil() { return deliveryLeaseUntil; }
+    public void setDeliveryLeaseUntil(LocalDateTime value) { deliveryLeaseUntil = value; }
 
     public User getRecipientUser() { return recipientUser; }
     public void setRecipientUser(User v) { recipientUser=v; }

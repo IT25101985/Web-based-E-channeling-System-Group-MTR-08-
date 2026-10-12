@@ -7,10 +7,10 @@ package com.echanneling.service;
  */
 public interface Payment {
     // Strategy method - each concrete strategy implements this differently
-    String execute(Double amount);
+    String execute(java.math.BigDecimal amount);
 
     // Legacy method kept for backward compatibility
-    default void processPayment(Double amount) {
+    default void processPayment(java.math.BigDecimal amount) {
         execute(amount);
     }
 }

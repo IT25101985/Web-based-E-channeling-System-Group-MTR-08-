@@ -1,11 +1,11 @@
-# Copy to application-local.properties, which is ignored by Git.
-# Use Spring property names; DB_URL/DB_USERNAME/DB_PASSWORD are not read by this application.
+# Copy to application-local.properties; do not commit real credentials.
 spring.datasource.url=jdbc:sqlserver://localhost;instanceName=SQLEXPRESS;databaseName=echanneling_system;encrypt=true;trustServerCertificate=true
-spring.datasource.username=your-local-sql-login
+spring.datasource.username=sa
 spring.datasource.password=replace-with-your-local-password
 
-# Optional SMTP delivery. Enable only after configuring a test mailbox.
-app.mail.enabled=false
+# Email delivery (use a test mailbox for demonstrations)
+# Set these in application-local.properties or matching environment variables.
+# app.mail.enabled=true
 # app.mail.from=your-verified-sender@example.com
 # spring.mail.host=your-smtp-host
 # spring.mail.port=587
@@ -13,3 +13,9 @@ app.mail.enabled=false
 # spring.mail.password=your-smtp-password
 # spring.mail.properties.mail.smtp.auth=true
 # spring.mail.properties.mail.smtp.starttls.enable=true
+
+# DDD viva page uses the assignment schema through a separate JDBC connection.
+# Credentials default to the main SQL Server credentials. Override if needed.
+# app.viva.datasource.url=jdbc:sqlserver://localhost;instanceName=SQLEXPRESS;databaseName=IT2140_MTR08_Part02_20260927;encrypt=true;trustServerCertificate=true;loginTimeout=8
+# app.viva.datasource.username=your-local-sql-login
+# app.viva.datasource.password=your-local-password

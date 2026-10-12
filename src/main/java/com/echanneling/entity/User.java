@@ -20,6 +20,7 @@ public class User {
     private String password;
 
     @NotBlank(message = "Full name is required")
+    @Size(max=150, message="Full name is too long")
     private String fullName;
 
     private String role; // ROLE_ADMIN, ROLE_DOCTOR, ROLE_PATIENT, ROLE_RECEPTIONIST
@@ -31,7 +32,13 @@ public class User {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
+    @Size(max=254, message="Email is too long")
     private String email;
+
+    // Database-managed exception for imported duplicates; every new account uses scope 0.
+    // This is not ownership of an email. Recovery still requires exactly one match.
+    @Column(name = "email_uniqueness_scope", nullable = false, columnDefinition = "bigint default 0", insertable = false, updatable = false)
+    private Long emailUniquenessScope;
 
     @Pattern(regexp = "^\\+?[0-9\\s\\-()]{9,20}$", message = "Invalid phone number")
     private String phoneNo;
@@ -40,6 +47,11 @@ public class User {
     private String address;
     @Column(length = 10000000)
     private String profileImage;
+
+    @PrePersist @PreUpdate
+    public void normalizeEmail() {
+        if (email != null) email = email.trim().toLowerCase(java.util.Locale.ROOT);
+    }
 
     // Default constructor
     public User() {}

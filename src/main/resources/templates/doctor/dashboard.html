@@ -116,7 +116,8 @@
                   </td>
                   <td>
                     <div class="actions">
-                      <a th:if="${a.status == 'SCHEDULED'}" class="btn small"
+                      <span th:if="${a.status == 'SCHEDULED'}" class="muted">Waiting for admin check-in.</span>
+                      <a th:if="${a.status == 'CHECKED_IN'}" class="btn small"
                          th:href="@{/doctor/prescribe/{id}(id=${a.id})}">Prescribe →</a>
                       <a class="btn small secondary" th:href="@{/doctor/consultations(appointmentId=${a.id})}">Room ↗</a>
                     </div>

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CardPayment implements Payment {
     @Override
-    public String execute(Double amount) {
+    public String execute(java.math.BigDecimal amount) {
         System.out.println("Processing CARD payment of Rs. " + amount);
         return "Card payment of Rs. " + amount + " processed successfully.";
     }

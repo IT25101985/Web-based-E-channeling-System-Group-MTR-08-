@@ -155,59 +155,59 @@
     <div class="premium-card hidden lg:block">
         <table class="w-full text-left">
             <thead class="bg-slate-50 border-b border-slate-100">
-            <tr>
-                <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Medical Specialist</th>
-                <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Date & Time</th>
-                <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
-                <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
-            </tr>
+                <tr>
+                    <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Medical Specialist</th>
+                    <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Date & Time</th>
+                    <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                    <th class="px-8 py-5 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-            <tr th:each="app : ${appointments}" class="hover:bg-slate-50/50 transition-all group">
-                <td class="px-8 py-5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-all">
-                            <i class="fa-solid fa-user-md"></i>
+                <tr th:each="app : ${appointments}" class="hover:bg-slate-50/50 transition-all group">
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-all">
+                                <i class="fa-solid fa-user-md"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-900" th:text="${app.doctor.name}">Dr. Name</p>
+                                <p class="text-[10px] text-slate-500" th:text="${app.doctor.specialization}">Specialty</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-900" th:text="${app.doctor.name}">Dr. Name</p>
-                            <p class="text-[10px] text-slate-500" th:text="${app.doctor.specialization}">Specialty</p>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-8 py-5">
-                    <p class="text-sm font-bold text-slate-700" th:text="${#temporals.format(app.appointmentDate, 'MMM dd, yyyy')}">Date</p>
-                    <p class="text-[10px] text-slate-400 font-bold" th:text="${#temporals.format(app.appointmentDate, 'HH:mm')}">Time</p>
-                </td>
-                <td class="px-8 py-5">
+                    </td>
+                    <td class="px-8 py-5">
+                        <p class="text-sm font-bold text-slate-700" th:text="${#temporals.format(app.appointmentDate, 'MMM dd, yyyy')}">Date</p>
+                        <p class="text-[10px] text-slate-400 font-bold" th:text="${#temporals.format(app.appointmentDate, 'HH:mm')}">Time</p>
+                    </td>
+                    <td class="px-8 py-5">
                         <span th:class="${'px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ' +
                             (app.status == 'SCHEDULED' ? 'bg-blue-100 text-blue-600' :
                              app.status == 'COMPLETED' ? 'bg-emerald-100 text-emerald-600' :
                              'bg-rose-100 text-rose-600')}"
                               th:text="${app.status}">Status</span>
-                </td>
-                <td class="px-8 py-5 text-right">
-                    <div class="flex justify-end gap-2">
-                        <a th:if="${recordMap.get(app.id) != null}" th:href="@{/patient/appointment/{id}/record(id=${app.id})}" class="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="View Record">
-                            <i class="fa-solid fa-file-medical"></i>
-                        </a>
-                        <form th:if="${app.status == 'SCHEDULED'}" th:action="@{/patient/appointment/{id}/cancel(id=${app.id})}" method="post">
-                            <button type="submit" class="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-all" title="Cancel Appointment">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(appointments)}">
-                <td colspan="4" class="px-8 py-20 text-center">
-                    <div class="flex flex-col items-center gap-4">
-                        <i class="fa-solid fa-calendar-xmark text-5xl text-slate-200"></i>
-                        <p class="text-slate-400 font-medium">No medical history found yet.</p>
-                        <a href="/patient/book-appointment" class="text-emerald-600 font-bold hover:underline">Book an appointment now</a>
-                    </div>
-                </td>
-            </tr>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                        <div class="flex justify-end gap-2">
+                            <a th:if="${recordMap.get(app.id) != null}" th:href="@{/patient/appointment/{id}/record(id=${app.id})}" class="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="View Record">
+                                <i class="fa-solid fa-file-medical"></i>
+                            </a>
+                            <form th:if="${app.status == 'SCHEDULED'}" th:action="@{/patient/appointment/{id}/cancel(id=${app.id})}" method="post">
+                                <button type="submit" class="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-all" title="Cancel Appointment">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(appointments)}">
+                    <td colspan="4" class="px-8 py-20 text-center">
+                        <div class="flex flex-col items-center gap-4">
+                            <i class="fa-solid fa-calendar-xmark text-5xl text-slate-200"></i>
+                            <p class="text-slate-400 font-medium">No medical history found yet.</p>
+                            <a href="/patient/book-appointment" class="text-emerald-600 font-bold hover:underline">Book an appointment now</a>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>

@@ -6,8 +6,8 @@ import com.echanneling.patterns.ClinicClock;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,7 +33,7 @@ class AppointmentUpdatesIntegrationTest {
  @Autowired InvoiceRepository invoices;
  @Autowired NotificationRepository notifications;
  @Autowired MockMvc mvc;
- @MockBean JavaMailSender mail;
+ @MockitoBean JavaMailSender mail;
  User patient(){return users.findByUsername("dhanu").orElseThrow();}
  Appointment draft(Doctor doctor,String nic){
   LocalDate date=ClinicClock.getInstance().today().plusDays(21);
@@ -59,9 +59,9 @@ class AppointmentUpdatesIntegrationTest {
  }
  @Test void checkoutUsesAgreedFeeAfterDoctorPriceChanges(){
   Doctor doctor=doctors.findAll().get(0);Appointment a=booking.book(patient(),draft(doctor,null));
-  BigDecimal agreed=a.getBookedConsultationFee();doctor.setConsultationFee(9999.0);doctors.saveAndFlush(doctor);
+  BigDecimal agreed=a.getBookedConsultationFee();doctor.setConsultationFee(new BigDecimal("9999.00"));doctors.saveAndFlush(doctor);
   Invoice receipt=checkout.checkout(a.getId(),patient().getUsername(),"cash");
-  assertEquals(agreed.doubleValue(),receipt.getAmount());assertEquals("UNPAID",receipt.getStatus());
+  assertEquals(0,agreed.compareTo(receipt.getAmount()));assertEquals("UNPAID",receipt.getStatus());
  }
  @Test void archiveRetainsReceiptAndHidesOnlyPatientHistory(){
   Appointment a=booking.book(patient(),draft(doctors.findAll().get(0),null));

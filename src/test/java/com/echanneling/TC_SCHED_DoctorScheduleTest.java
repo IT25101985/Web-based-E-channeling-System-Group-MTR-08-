@@ -5,9 +5,9 @@ import com.echanneling.repository.*;
 import com.echanneling.service.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,7 +31,7 @@ class TC_SCHED_DoctorScheduleTest {
     @Autowired BookingService bookingService;
     @Autowired AppointmentService appointmentService;
     @Autowired UserRepository userRepository;
-    @MockBean JavaMailSender mail;
+    @MockitoBean JavaMailSender mail;
 
     private LocalDate futureDate() {
         LocalDate d = LocalDate.now().plusDays(50);
@@ -148,6 +148,6 @@ class TC_SCHED_DoctorScheduleTest {
             .param("branchId", branch().getId().toString())
             .param("date", futureDate().toString())
             .param("start","09:00").param("end","11:00"))
-            .andExpect(status().is3xxRedirection()).andExpect(redirectedUrlPattern("**/login"));
+            .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
     }
 }

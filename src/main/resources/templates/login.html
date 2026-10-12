@@ -58,6 +58,7 @@
       <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
       <div th:if="${param.error != null}" class="notice error" role="alert">Invalid username or password. Please verify your details.</div>
       <div th:if="${param.registered != null}" class="notice" role="status">Account created successfully! Please sign in with your credentials.</div>
+      <div th:if="${param.password_reset != null}" class="notice" role="status">Your password has been reset. Sign in with your new password.</div>
       <div th:if="${param.logout != null}" class="notice info" role="status">You have been signed out safely.</div>
       <div th:if="${param.inactive != null}" class="notice info" role="status">This account is currently inactive. Contact the hospital desk to reactivate.</div>
 

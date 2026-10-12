@@ -28,17 +28,18 @@ public class ReceptionController {
         this.bookings=bookings; this.appointmentService=appointmentService; this.checkout=checkout;
     }
     @GetMapping("/dashboard")
-    public String dashboard(Model model, @RequestParam(required=false) Long reschedule) {
+    public String dashboard(Model model, @RequestParam(required=false) Long reschedule, @RequestParam(defaultValue="0") int page) {
         Appointment selected = reschedule == null ? new Appointment() : appointments.findById(reschedule).orElseThrow();
         if (reschedule != null && !"SCHEDULED".equals(selected.getStatus()))
             throw new IllegalArgumentException("Only scheduled visits can be rescheduled.");
         model.addAttribute("appointment", selected);
         model.addAttribute("patients", users.findByRole("ROLE_PATIENT").stream().filter(User::isActive).toList());
         model.addAttribute("branches", branches.findAll());
-        model.addAttribute("appointments", appointments.findAll().stream()
-            .sorted(java.util.Comparator.comparing(Appointment::getAppointmentDate).reversed()).toList());
+        var history=appointmentService.allHistory(page);
+        model.addAttribute("appointments",history.getContent());
+        model.addAttribute("page",history.getNumber()); model.addAttribute("hasNext",history.hasNext());
         java.util.Map<Long, Invoice> invoiceMap = new java.util.HashMap<>();
-        invoices.findAll().forEach(i -> { if(i.getAppointment()!=null) invoiceMap.put(i.getAppointment().getId(),i); });
+        if(!history.isEmpty()) invoices.findByAppointmentIn(history.getContent()).forEach(i->invoiceMap.put(i.getAppointment().getId(),i));
         model.addAttribute("invoiceMap", invoiceMap);
         return "reception/dashboard";
     }

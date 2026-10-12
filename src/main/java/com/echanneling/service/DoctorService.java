@@ -23,7 +23,7 @@ public class DoctorService {
     }
 
     public Doctor saveDoctor(Doctor doctor) {
-        if (doctor.getConsultationFee() == null || !Double.isFinite(doctor.getConsultationFee()) || doctor.getConsultationFee() <= 0) throw new IllegalArgumentException("Consultation fee must be positive");
+        if (doctor.getConsultationFee() == null || doctor.getConsultationFee().signum() <= 0) throw new IllegalArgumentException("Consultation fee must be positive");
         if (doctor.getName() == null || doctor.getName().isBlank() || doctor.getSpecialization() == null || doctor.getSpecialization().isBlank()) throw new IllegalArgumentException("Doctor name and specialization are required");
         if (doctor.getClinicHours() == null || !doctor.getClinicHours().matches("(?i)^(0[1-9]|1[0-2]):[0-5][0-9] (AM|PM) - (0[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$")) throw new IllegalArgumentException("Use clinic hours such as 09:00 AM - 05:00 PM");
         String[] hours = doctor.getClinicHours().toUpperCase(java.util.Locale.ROOT).split(" - ");
