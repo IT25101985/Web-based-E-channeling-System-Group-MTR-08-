@@ -124,8 +124,7 @@ public class PatientProfileController {
                     if (emergencyContact != null) p.setEmergencyContact(emergencyContact.isEmpty() ? null : emergencyContact);
 
                     if (rawPassword != null) {
-                        p.setPassword(rawPassword);
-                        userService.saveUser(p); // Hashing and saving patient credentials securely
+                        userService.saveWithNewPassword(p, rawPassword);
                     } else {
                         patientRepository.save(p);
                     }
@@ -134,11 +133,9 @@ public class PatientProfileController {
                     currentUser.setPhoneNo(updatedUser.getPhoneNo());
                     currentUser.setAddress(updatedUser.getAddress());
                     currentUser.setProfileImage(updatedUser.getProfileImage());
-                    if (rawPassword != null) {
-                        currentUser.setPassword(rawPassword);
-                    }
-                    userService.saveUser(currentUser);
-
+                    if (rawPassword != null) userService.saveWithNewPassword(currentUser, rawPassword);
+                    else userRepository.save(currentUser);
+                    
                     String newBg = updatedUser.getBloodGroup();
                     String newBp = (bp != null && !bp.isEmpty()) ? bp : null;
                     String newHr = null;
@@ -253,7 +250,8 @@ public class PatientProfileController {
         model.addAttribute("invoiceMap", invoiceMap);
         model.addAttribute("recordMap", recordMap);
 
-        List<MedicalRecord> recentRecords = medicalRecordService.getRecentRecordsByPatient(user);
+        List<MedicalRecord> recentRecords = medicalRecordService.getRecentRecordsByPatient(user).stream()
+                .filter(r -> r.getAppointment() == null || !r.getAppointment().isForSomeoneElse()).toList();
         model.addAttribute("latestRecord", recentRecords.isEmpty() ? null : recentRecords.get(0));
 
         return "patient/dashboard";

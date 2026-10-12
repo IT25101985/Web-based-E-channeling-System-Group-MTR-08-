@@ -24,9 +24,16 @@ public class UserService {
 
     public User saveUser(User user) {
         if (user.getId() == null && userRepository.findByUsername(user.getUsername()).isPresent()) throw new IllegalArgumentException("Username already exists");
-        if (user.getPassword() != null && !user.getPassword().startsWith("$2a$") && !user.getPassword().startsWith("$2b$") && !user.getPassword().startsWith("$2y$")) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
+        if (user.getId() != null) throw new IllegalArgumentException("Use the explicit password change operation for an existing account.");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+    /** Raw user input is always encoded, even when it resembles a BCrypt hash. */
+    public User saveWithNewPassword(User user, String rawPassword) {
+        if (rawPassword == null || rawPassword.length() < 8 || rawPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
+            throw new IllegalArgumentException("Use a password of at least 8 characters and at most 72 UTF-8 bytes.");
+        user.setPassword(passwordEncoder.encode(rawPassword));
         return userRepository.save(user);
     }
 
@@ -67,7 +74,6 @@ public class UserService {
         jdbcTemplate.update("DELETE FROM availability_slots WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id);
         jdbcTemplate.update("DELETE FROM schedule WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id);
         jdbcTemplate.update("DELETE FROM doctor WHERE user_id = ?", id);
-
         jdbcTemplate.update("DELETE FROM notifications WHERE recipient_user_id = ?", id);
         userRepository.deleteById(id);
     }
