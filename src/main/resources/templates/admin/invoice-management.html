@@ -43,7 +43,7 @@
     <div id="actionNotice" class="notice" role="status" hidden>Changes saved successfully.</div>
 
     <div class="notice info">
-      Demonstration cards simulate immediate payment. Counter cash collections at the hospital reception update records to PAID status.
+      Cash payments are recorded through reception. Invoices and refund history are retained for audit.
     </div>
 
     <div class="card">
@@ -75,24 +75,11 @@
               </td>
               <td>
                 <div class="actions">
-                  <a class="btn small secondary" th:href="@{/invoice/download/{id}(id=${i.id})}">↓ Download PDF</a>
-
-                  <details>
-                    <summary style="font-size: 12px; color: var(--primary-blue); cursor: pointer; font-weight: 600;">Status</summary>
-                    <form th:action="@{/admin/invoice/{id}/update(id=${i.id})}" method="post" style="margin-top: 8px; padding: 10px; background: #F8FAFC; border-radius: 8px;">
-                      <select name="status" style="padding: 6px; font-size: 12px; margin-bottom: 8px;">
-                        <option value="PAID" th:selected="${i.status == 'PAID'}">Paid</option>
-                        <option value="UNPAID" th:selected="${i.status == 'UNPAID'}">Unpaid</option>
-                        <option value="REFUNDED" th:selected="${i.status == 'REFUNDED'}">Refunded</option>
-                      </select>
-                      <button class="btn small" type="submit">Update</button>
-                    </form>
-                  </details>
-
-                  <form th:action="@{/admin/invoice/{id}/delete(id=${i.id})}" method="post"
-                        data-confirm="Permanently delete this invoice? Linked financial audit records will be impacted.">
-                    <button class="btn small danger" type="submit">Delete</button>
+                  <a class="btn small secondary" th:href="@{/invoice/download/{id}(id=${i.id})}">Download</a>
+                  <form th:if="${i.status == 'PAID'}" th:action="@{/admin/invoice/{id}/update(id=${i.id})}" method="post" data-confirm="Record this invoice as refunded?">
+                    <input type="hidden" name="status" value="REFUNDED"><button class="btn small secondary" type="submit">Record refund</button>
                   </form>
+                  <span th:if="${i.status != 'PAID'}">Retained for audit</span>
                 </div>
               </td>
             </tr>

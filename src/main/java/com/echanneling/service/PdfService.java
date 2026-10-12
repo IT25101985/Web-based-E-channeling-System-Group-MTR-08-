@@ -23,7 +23,7 @@ public class PdfService implements PDFGenerator {
             PdfWriter.getInstance(document, out);
             document.open();
             document.add(new Paragraph("CareLink | Medical record #" + record.getId()));
-            document.add(new Paragraph("Patient: " + record.getPatient().getFullName()));
+            document.add(new Paragraph("Patient: " + record.getPatientName()));
             document.add(new Paragraph("Diagnosis: " + record.getDiagnosis()));
             for (var p : record.getPrescriptions()) document.add(new Paragraph(p.getMedication() + " | " + p.getDosage() + " | " + p.getDuration()));
             document.close();

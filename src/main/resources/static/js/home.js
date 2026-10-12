@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title_specialties: "Popular Specializations",
       sub_specialties: "Consult verified consultants specialized in key health domains.",
       eyebrow_available: "INSTANT CHANNELING",
-      title_available: "Available Today • Immediate Booking",
+      title_available: "Doctors & Today's Availability",
       sub_available: "Inspect verified consultants with published clinic sessions and reserve your slot.",
       eyebrow_hospitals: "ISLANDWIDE NETWORK",
       title_hospitals: "Top Accredited Hospitals",
@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
       b1_desc: "Hardware-level database locking ensures your selected time slot is instantly reserved and protected.",
       b2_title: "Transparent Counter Cash",
       b2_desc: "No hidden platform markups. Settle consultation fees directly at the hospital reception counter.",
-      b3_title: "Real-Time SMS & Alerts",
-      b3_desc: "Instant booking reference confirmation delivered to your mobile phone with queue reminders.",
+      b3_title: "Portal Notifications",
+      b3_desc: "View confirmations in your portal. Email requires hospital configuration; SMS is not enabled.",
       b4_title: "SLMC Verified Doctors",
       b4_desc: "100% of medical consultants are credentialed by the Sri Lanka Medical Council.",
       eyebrow_testi: "PATIENT STORIES",
@@ -131,8 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
       b1_desc: "දත්ත පද්ධතිය මගින් ඔබගේ වේලාව ක්ෂණිකව සුරක්ෂිත කෙරේ.",
       b2_title: "කවුන්ටර මුදල් ගෙවීම්",
       b2_desc: "අමතර අයකිරීම් නැත. රෝහල් පිළිගැනීමේ කවුන්ටරයෙන් සෘජුවම ගෙවන්න.",
-      b3_title: "SMS සහ දැනුම්දීම්",
-      b3_desc: "ක්ෂණික වෙන්කිරීමේ අංකය ඔබගේ දුරකථනයට කෙටි පණිවිඩයක් මගින් ලැබේ.",
+      b3_title: "ද්වාර දැනුම්දීම්",
+      b3_desc: "වෙන්කිරීම් තහවුරු කිරීම් ද්වාරයෙන් බලන්න. ඊමේල් සඳහා සේවාව සකස් කළ යුතුය. SMS සක්‍රිය නැත.",
       b4_title: "SLMC සහතිකලත් වෛද්‍යවරුන්",
       b4_desc: "සියලුම වෛද්‍යවරුන් ශ්‍රී ලංකා වෛද්‍ය සභාවේ ලියාපදිංචි වී ඇත.",
       eyebrow_testi: "රෝගීන්ගේ අදහස්",
@@ -201,8 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
       b1_desc: "தரவுத்தள பூட்டுதல் மூலம் நீங்கள் தேர்ந்தெடுத்த நேரம் உடனடியாகப் பாதுகாக்கப்படும்.",
       b2_title: "நேரடி கவுண்டர் பணம்",
       b2_desc: "மறைக்கப்பட்ட கட்டணங்கள் இல்லை. மருத்துவமனை கவுண்டரில் நேரடியாகச் செலுத்துங்கள்.",
-      b3_title: "உடனடி SMS அறிவிப்புகள்",
-      b3_desc: "முன்பதிவு குறிப்பு எண் உடனடியாக உங்கள் மொபைல் போனுக்கு SMS மூலம் அனுப்பப்படும்.",
+      b3_title: "தள அறிவிப்புகள்",
+      b3_desc: "முன்பதிவு உறுதிப்படுத்தலைத் தளத்தில் பார்க்கலாம். மின்னஞ்சல் சேவையை அமைக்க வேண்டும்; SMS இயக்கப்படவில்லை.",
       b4_title: "SLMC பதிவுபெற்ற மருத்துவர்கள்",
       b4_desc: "அனைத்து மருத்துவ நிபுணர்களும் இலங்கை மருத்துவ சபையில் பதிவு செய்யப்பட்டவர்கள்.",
       eyebrow_testi: "நோயாளிகளின் அனுபவங்கள்",
@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const docFeeStr = card.dataset.fee || 'LKR 2,500';
       const cleanFee = parseInt(docFeeStr.replace(/\D/g, ''), 10) || 2500;
-      const baseFee = Math.max(1500, cleanFee - 500);
+      const baseFee = cleanFee;
 
       if (modalDoctorName) modalDoctorName.textContent = card.dataset.doctorName || 'Doctor';
       if (modalDoctorSpecialty) modalDoctorSpecialty.textContent = card.dataset.specialty || 'General Consultant';

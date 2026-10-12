@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/app.css">
   <link rel="stylesheet" href="/css/home.css">
   <script src="/js/theme.js"></script>
-  <script src="/js/home.js" defer></script>
+  <script src="/js/home.js" defer></script><script src="/js/hospital-map.js" defer></script><link rel="stylesheet" href="/css/hospital-map.css">
 </head>
 <body class="care-home">
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -559,7 +559,7 @@
       <div class="home-section-header flex-between">
         <div>
           <div class="section-eyebrow" data-i18n="eyebrow_available">INSTANT CHANNELING</div>
-          <h2 data-i18n="title_available">Available Today &bull; Immediate Booking</h2>
+          <h2 data-i18n="title_available">Doctors &amp; Today's Availability</h2>
           <p data-i18n="sub_available">Inspect verified consultants with published clinic sessions and reserve your slot.</p>
         </div>
         <a href="/patient/dashboard?section=booking" class="btn-nav-book">
@@ -572,7 +572,7 @@
                  th:data-doctor-name="${d.name}"
                  th:data-specialty="${d.specialization}"
                  th:data-experience="${d.experience ?: 'Senior Consultant'}"
-                 th:data-location="${d.user != null and d.user.address != null ? d.user.address : 'Colombo Central Hospital'}"
+                 th:data-location="${todayAvailability.containsKey(d.id) ? todayAvailability.get(d.id).area : ''}"
                  th:data-phone="${d.user != null and d.user.phoneNo != null ? d.user.phoneNo : '+94 11 234 5678'}"
                  th:data-fee="${d.consultationFee != null ? 'LKR ' + #numbers.formatDecimal(d.consultationFee, 1, 'COMMA', 0, 'POINT') : 'Hospital rate'}">
           <div>
@@ -591,7 +591,7 @@
             <div class="doc-details">
               <div class="doc-detail-line">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span th:text="${d.user != null and d.user.address != null ? d.user.address : 'Colombo Central Hospital'}">Colombo Hospital</span>
+                <span th:text="${todayAvailability.containsKey(d.id) ? todayAvailability.get(d.id).hospital : 'Choose a hospital in the booking portal'}">Hospital</span>
               </div>
               <div class="doc-detail-line">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -600,7 +600,7 @@
               <div>
                 <span class="doc-slot-tag">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  Next: Today 05:00 PM
+                  <span th:text="${todayAvailability.containsKey(d.id) ? 'Next today: ' + #temporals.format(todayAvailability.get(d.id).time, 'hh:mm a') : 'No remaining slots today'}">Availability</span>
                 </span>
               </div>
             </div>
@@ -638,6 +638,35 @@
         <p data-i18n="sub_hospitals">Consultations take place at certified partner hospital branches across Sri Lanka.</p>
       </div>
 
+
+      <div class="hospital-map-panel" id="hospital-map" th:if="${!#lists.isEmpty(branches)}">
+        <div class="hospital-map-details">
+          <span class="section-eyebrow">PLAN YOUR VISIT</span>
+          <h3>Find your hospital</h3>
+          <p>Select a branch to explore its saved address and get directions.</p>
+          <label for="hospitalMapSelect">Hospital branch</label>
+          <select id="hospitalMapSelect">
+            <option value="">Explore Sri Lanka</option>
+            <option th:each="b : ${branches}" th:value="${b.id}" th:text="|${b.branchName} (${b.area})|"
+                    th:attr="data-name=${b.branchName},data-address=${b.address},data-area=${b.area}"></option>
+          </select>
+          <div class="hospital-map-selected" aria-live="polite" aria-atomic="true">
+            <h4 id="hospitalMapName">Our hospital network</h4>
+            <p id="hospitalMapAddress">Choose a hospital from the list or use View on map below.</p>
+          </div>
+          <div class="hospital-map-actions" id="hospitalMapActions" hidden>
+            <a id="hospitalMapDirections" class="btn-doc-profile" target="_blank" rel="noopener noreferrer">Get directions ↗</a>
+            <a id="hospitalMapExternal" target="_blank" rel="noopener noreferrer">Open in Google Maps ↗</a>
+          </div>
+          <p class="hospital-map-note">Map results use the address saved by the hospital. An internet connection is needed to display the map.</p>
+          <noscript><p>Enable JavaScript to select a branch on the map. Hospital addresses are listed below.</p></noscript>
+        </div>
+        <div class="hospital-map-view">
+          <iframe id="hospitalMapFrame" title="Hospital locations in Sri Lanka"
+                  src="https://maps.google.com/maps?q=Sri%20Lanka&amp;z=7&amp;output=embed"
+                  loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+      </div>
       <div class="hospitals-cards-grid">
         <div class="hosp-card" th:each="b : ${branches}">
           <div>
@@ -646,7 +675,7 @@
               <svg class="hosp-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6v4"/><path d="M10 8h4"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
             </div>
             <h3 th:text="${b.branchName}">Asiri Central Hospital</h3>
-            <p class="address" th:text="${b.address}">114 Norris Canal Road, Colombo 10</p>
+            <p class="address" th:text="${b.address}">114 Norris Canal Road, Colombo 10</p><button class="hospital-map-button" type="button" th:attr="data-show-hospital-map=${b.id}">View on map ↗</button>
           </div>
           <div class="hosp-card-footer">
             <a th:href="|tel:${b.contactNumber}|" class="hosp-hotline-link" th:text="|📞 ${b.contactNumber}|">0114665500</a>
@@ -766,8 +795,8 @@
           <div class="benefit-icon-box">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </div>
-          <h3 data-i18n="b3_title">Real-Time SMS &amp; Alerts</h3>
-          <p data-i18n="b3_desc">Instant booking reference confirmation delivered to your mobile phone with queue reminders.</p>
+          <h3 data-i18n="b3_title">Portal Notifications</h3>
+          <p data-i18n="b3_desc">View booking confirmations and reminders in your portal. Email delivery is available when configured; SMS is not enabled.</p>
         </div>
 
         <div class="benefit-card">
@@ -796,7 +825,7 @@
         <div class="testimonial-card">
           <div>
             <div class="testimonial-stars">★★★★★</div>
-            <p>"Booking a cardiologist for my mother took less than a minute. We chose the counter cash option and received the SMS reference instantly."</p>
+            <p>"Booking a cardiologist for my mother took less than a minute. We chose the counter cash option and viewed the reference in the portal."</p>
           </div>
           <div class="testimonial-author">
             <div class="author-avatar">NP</div>
@@ -881,14 +910,14 @@
         <details class="faq-item">
           <summary data-i18n="faq5_q">5. What should I bring when I attend the hospital?</summary>
           <div class="faq-body" data-i18n="faq5_a">
-            Please bring your National Identity Card (NIC) or passport, your Booking Reference ID (sent via SMS or visible in your portal), and any past medical records or test reports.
+            Please bring your National Identity Card (NIC) or passport, your Booking Reference ID (visible in your portal), and any past medical records or test reports.
           </div>
         </details>
 
         <details class="faq-item">
           <summary data-i18n="faq6_q">6. How do I receive my booking confirmation?</summary>
           <div class="faq-body" data-i18n="faq6_a">
-            Immediately upon reservation, your screen displays the Booking Reference ID, and an automated SMS confirmation is delivered to your registered mobile phone number.
+            After reservation, find your Booking Reference ID and confirmation in your portal. Email delivery requires the hospital email service. SMS is not enabled.
           </div>
         </details>
 
@@ -947,7 +976,7 @@
       </div>
       <div class="fee-row">
         <span>Hospital Facility Fee</span>
-        <span>LKR 500</span>
+        <span>Included</span>
       </div>
       <div class="fee-row total">
         <span>Total Payable (at counter)</span>

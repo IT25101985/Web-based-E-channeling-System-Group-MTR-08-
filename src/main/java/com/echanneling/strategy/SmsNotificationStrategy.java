@@ -10,6 +10,6 @@ public class SmsNotificationStrategy implements NotificationStrategy {
 
     @Override
     public void sendNotification(String recipient, String subject, String body) {
-        System.out.println("SMS notification sent to " + recipient + ": " + body);
+        throw new UnsupportedOperationException("SMS delivery is not configured. Use the portal notification inbox.");
     }
 }

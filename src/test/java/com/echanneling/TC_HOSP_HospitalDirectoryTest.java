@@ -5,9 +5,9 @@ import com.echanneling.repository.*;
 import com.echanneling.service.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,7 +26,7 @@ class TC_HOSP_HospitalDirectoryTest {
     @Autowired HospitalBranchService hospitalBranchService;
     @Autowired HospitalBranchRepository hospitalBranchRepository;
     @Autowired AvailabilitySlotRepository slots;
-    @MockBean JavaMailSender mail;
+    @MockitoBean JavaMailSender mail;
 
     /** TC_HOSP_001 - Search Branch by Location */
     @Test @DisplayName("TC_HOSP_001 - Search Branch by Location")

@@ -160,7 +160,7 @@
           <tbody>
             <tr th:each="a : ${appointments}">
               <td>
-                <strong th:text="|#${a.id} - ${a.patient != null ? a.patient.fullName : 'Patient'}|">#001 - Name</strong>
+                <strong th:text="|#${a.id} - ${a.patientName}|">#001 - Name</strong>
                 <p th:text="${a.contactPhone}">0771234567</p>
               </td>
               <td>
@@ -184,7 +184,7 @@
               <td>
                 <div class="actions">
                   <!-- Cash collection button -->
-                  <form th:if="${a.status == 'SCHEDULED' and (!invoiceMap.containsKey(a.id) or invoiceMap.get(a.id).status == 'UNPAID')}"
+                  <form th:if="${a.awaitingConsultation and (!invoiceMap.containsKey(a.id) or invoiceMap.get(a.id).status == 'UNPAID')}"
                         th:action="@{/reception/appointments/{id}/cash(id=${a.id})}" method="post">
                     <button class="btn small" type="submit">💵 Collect Cash &amp; Receipt</button>
                   </form>
@@ -219,7 +219,11 @@
     <footer class="footer-note">
       MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
     </footer>
-  </main>
+  <div class="actions">
+<a class="btn secondary" th:if="${page > 0}" th:href="@{/reception/dashboard(page=${page - 1})}">Previous</a>
+<span th:text="|Page ${page + 1}|"></span>
+<a class="btn secondary" th:if="${hasNext}" th:href="@{/reception/dashboard(page=${page + 1})}">Next</a>
+</div></main>
 </div>
 </body>
 </html>

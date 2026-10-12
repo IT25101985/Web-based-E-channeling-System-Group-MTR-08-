@@ -1,13 +1,13 @@
 # Dhanukshan S. - Appointment Booking updates
 
-This update is scoped to Appointment Booking and its required shared dependencies. Existing published commits and other team modules are retained. Account recovery, production configuration, the framework upgrade and separate DDD viva pages from the local workspace are not included.
+This guide describes Dhanukshan's appointment module. The current project release also includes shared startup, security, billing, doctor, hospital-map and optional DDD viva updates. Existing published commits and other team modules are retained. See MAIN_RELEASE_2026_10_13.md for current release verification.
 
 ## Behavior
 
 - Self and family bookings preserve the attending patient's name and NIC separately from the account owner.
 - Account, attending identity and doctor locks prevent concurrent overlapping reservations across doctors and family accounts.
 - Inactive doctors are excluded from booking and branch discovery.
-- The agreed consultation fee is stored as DECIMAL(19,2) on the appointment and reused at checkout/rescheduling. Existing invoice storage stays on the team's current baseline.
+- The agreed consultation fee is stored as DECIMAL(19,2) on the appointment and reused at checkout/rescheduling. Invoices also use decimal monetary values in the current release.
 - Cancelled appointments are hidden from the patient's paginated history instead of deleting financial or clinical records.
 - Booking carries its payment selection to checkout. Cash stays unpaid until collected; card simulation is explicitly enabled only in demo/test configuration.
 - Existing safe booking error messages and role/owner checks are retained.
@@ -40,9 +40,9 @@ For viva: show `BookingService.book()` first, then `NotificationService.appointm
 
 ## Existing databases
 
-`database/appointment-updates-sqlserver.sql` adds the appointment columns and attendee-lock table without changing account identities. Development schema update can also add these fields. Historical invoice values are preferred when backfilling the agreed fee; otherwise only the current doctor fee is available. Previously lost family details cannot be recovered automatically. This release does not apply the broader V003 account/production migration.
+`database/appointment-updates-sqlserver.sql` adds the appointment columns and attendee-lock table without changing account identities. Development schema update can also add these fields. Historical invoice values are preferred when backfilling the agreed fee; otherwise only the current doctor fee is available. Previously lost family details cannot be recovered automatically. For the current release, also read database/migrations/README.md and docs/INTELLIJ_SQL_SERVER_STARTUP.md.
 
-## Validation
+## Earlier appointment-only verification (historical)
 
 The GitHub checkout's own framework baseline is tested independently; the local workspace's 136-test result is not claimed as validation for this branch. Live SQL Server smoke coverage remains opt-in.
 

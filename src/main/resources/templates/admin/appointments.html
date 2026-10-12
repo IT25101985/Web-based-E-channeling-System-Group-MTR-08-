@@ -1,113 +1,118 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MediCare Pro | Master Appointments Management</title>
-    <link rel="stylesheet" href="/css/app.css">
-    <script src="/js/theme.js"></script>
-    <script src="/js/app.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MediCare Pro | Master Appointments Management</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <aside th:replace="~{fragments/navigation :: admin}"></aside>
 
 <div class="app">
-    <header class="topbar">
-        <div class="actions">
-            <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
-            <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Master Appointment Ledger</b></span>
-        </div>
-        <div class="top-actions">
-            <span class="live">Admin Console</span>
-            <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
-            <span class="avatar" sec:authentication="name">AD</span>
-        </div>
-    </header>
+  <header class="topbar">
+    <div class="actions">
+      <button class="icon-button mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <span class="crumb">MediCare Pro &nbsp;/&nbsp; <b>Master Appointment Ledger</b></span>
+    </div>
+    <div class="top-actions">
+      <span class="live">Admin Console</span>
+      <button class="icon-button" onclick="toggleGlobalTheme()" aria-label="Toggle theme">◐</button>
+      <span class="avatar" sec:authentication="name">AD</span>
+    </div>
+  </header>
 
-    <main class="content" id="main">
-        <div class="page-heading">
-            <div>
-                <div class="eyebrow">SYSTEM-WIDE SCHEDULING</div>
-                <h1>Appointments Master Ledger</h1>
-                <p>Coordinate patient clinic bookings, check-in arrivals, and oversee consultation statuses across all branches.</p>
-            </div>
-            <div class="actions">
-                <input type="search" data-filter="#adminAppointmentsTable" placeholder="Filter by patient, doctor, status..."
-                       style="padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 320px;">
-            </div>
-        </div>
+  <main class="content" id="main">
+    <div class="page-heading">
+      <div>
+        <div class="eyebrow">SYSTEM-WIDE SCHEDULING</div>
+        <h1>Appointments Master Ledger</h1>
+        <p>Coordinate patient clinic bookings, check-in arrivals, and oversee consultation statuses across all branches.</p>
+      </div>
+      <div class="actions">
+        <input type="search" data-filter="#adminAppointmentsTable" placeholder="Filter by patient, doctor, status..."
+               style="padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 320px;">
+      </div>
+    </div>
 
-        <!-- Alert Notices -->
-        <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
-        <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
-        <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete request. Please verify details.</div>
-        <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
+    <!-- Alert Notices -->
+    <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
+    <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete request. Please verify details.</div>
+    <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
 
-        <!-- Appointments Table Card -->
-        <div class="card">
-            <div class="card-header">
-                <h2>Recorded Appointments (<span th:text="${#lists.size(appointments)}">0</span>)</h2>
-                <span class="badge" data-status="Scheduled">Live Channel Ledger</span>
-            </div>
+    <!-- Appointments Table Card -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Recorded Appointments (<span th:text="${#lists.size(appointments)}">0</span>)</h2>
+        <span class="badge" data-status="Scheduled">Live Channel Ledger</span>
+      </div>
 
-            <div class="table-wrap">
-                <table id="adminAppointmentsTable">
-                    <thead>
-                    <tr>
-                        <th>Booking Ref &amp; Patient</th>
-                        <th>Doctor</th>
-                        <th>Hospital Branch</th>
-                        <th>Date &amp; Time</th>
-                        <th>Status</th>
-                        <th>Admin Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="a : ${appointments}">
-                        <td>
-                            <strong th:text="|#${a.id} - ${a.patientName ?: (a.patient != null ? a.patient.fullName : 'Patient')}|">#001 - Name</strong>
-                            <p th:text="${a.contactEmail}">email@example.com</p>
-                        </td>
-                        <td>
-                            <strong th:text="${a.doctorName ?: (a.doctor != null ? a.doctor.name : 'Doctor')}">Dr. Specialist</strong>
-                        </td>
-                        <td th:text="${a.hospitalBranch != null ? a.hospitalBranch.branchName : 'Main Hospital'}">Hospital</td>
-                        <td>
-                            <strong th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy') : 'Unset'}">Date</strong>
-                            <p th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'HH:mm a') : ''}"></p>
-                        </td>
-                        <td>
-                            <span class="badge" th:data-status="${a.status}" th:text="${a.status}">SCHEDULED</span>
-                        </td>
-                        <td>
-                            <div class="actions" th:if="${a.status == 'SCHEDULED'}">
-                                <form th:action="@{/admin/appointments/{id}/checkin(id=${a.id})}" method="post">
-                                    <button class="btn small" type="submit">Check-In / Complete ✓</button>
-                                </form>
-                                <form th:action="@{/admin/appointments/{id}/cancel(id=${a.id})}" method="post"
-                                      data-confirm="Cancel this appointment and release the clinic slot?">
-                                    <button class="btn small secondary" type="submit">Cancel</button>
-                                </form>
-                            </div>
-                            <span th:if="${a.status != 'SCHEDULED'}" style="color: var(--ink-muted); font-size: 12.5px;">Archived</span>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(appointments)}">
-                        <td colspan="6" class="empty">
-                            <h3>No appointments on record</h3>
-                            <p>New appointments booked by patients or reception desk will appear in this master ledger.</p>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      <div class="table-wrap">
+        <table id="adminAppointmentsTable">
+          <thead>
+            <tr>
+              <th>Booking Ref &amp; Patient</th>
+              <th>Doctor</th>
+              <th>Hospital Branch</th>
+              <th>Date &amp; Time</th>
+              <th>Status</th>
+              <th>Admin Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="a : ${appointments}">
+              <td>
+                <strong th:text="|#${a.id} - ${a.patientName ?: (a.patient != null ? a.patient.fullName : 'Patient')}|">#001 - Name</strong>
+                <p th:text="${a.contactEmail}">email@example.com</p>
+              </td>
+              <td>
+                <strong th:text="${a.doctorName ?: (a.doctor != null ? a.doctor.name : 'Doctor')}">Dr. Specialist</strong>
+              </td>
+              <td th:text="${a.hospitalBranch != null ? a.hospitalBranch.branchName : 'Main Hospital'}">Hospital</td>
+              <td>
+                <strong th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'dd MMM yyyy') : 'Unset'}">Date</strong>
+                <p th:text="${a.appointmentDate != null ? #temporals.format(a.appointmentDate, 'HH:mm a') : ''}"></p>
+              </td>
+              <td>
+                <span class="badge" th:data-status="${a.status}" th:text="${a.status}">SCHEDULED</span>
+              </td>
+              <td>
+                <p th:if="${a.status == 'SCHEDULED' and (a.appointmentDate == null or !a.appointmentDate.toLocalDate().equals(clinicToday))}" class="muted">Check-in is available only on the appointment date.</p>
+                <div class="actions" th:if="${a.status == 'SCHEDULED'}">
+                  <form th:if="${a.appointmentDate != null and a.appointmentDate.toLocalDate().equals(clinicToday)}" th:action="@{/admin/appointments/{id}/checkin(id=${a.id})}" method="post">
+                    <button class="btn small" type="submit">Check In ✓</button>
+                  </form>
+                  <form th:action="@{/admin/appointments/{id}/cancel(id=${a.id})}" method="post"
+                        data-confirm="Cancel this appointment and release the clinic slot?">
+                    <button class="btn small secondary" type="submit">Cancel</button>
+                  </form>
+                </div>
+                <span th:if="${a.status != 'SCHEDULED'}" style="color: var(--ink-muted); font-size: 12.5px;" th:text="${a.status == 'CHECKED_IN' ? 'Awaiting consultation' : 'Closed'}">Closed</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appointments)}">
+              <td colspan="6" class="empty">
+                <h3>No appointments on record</h3>
+                <p>New appointments booked by patients or reception desk will appear in this master ledger.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        <footer class="footer-note">
-            MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
-        </footer>
-    </main>
+    <footer class="footer-note">
+      MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
+    </footer>
+  <div class="actions">
+<a class="btn secondary" th:if="${page > 0}" th:href="@{/admin/appointments(page=${page - 1})}">Previous</a>
+<span th:text="|Page ${page + 1}|"></span>
+<a class="btn secondary" th:if="${hasNext}" th:href="@{/admin/appointments(page=${page + 1})}">Next</a>
+</div></main>
 </div>
 </body>
 </html>

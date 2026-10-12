@@ -7,6 +7,34 @@
   <link rel="stylesheet" href="/css/app.css">
   <script src="/js/theme.js"></script>
   <script src="/js/app.js" defer></script>
+  <style>
+    .branch-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 20px;
+      background: rgba(0,128,128,0.12);
+      color: var(--healthcare-teal, #0d9488);
+      margin: 2px 2px 2px 0;
+      white-space: nowrap;
+    }
+    .no-branch {
+      font-size: 11px;
+      color: var(--ink-muted, #94a3b8);
+      font-style: italic;
+    }
+    .edit-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .edit-form-grid .full-width { grid-column: 1 / -1; }
+    @media (max-width: 600px) {
+      .edit-form-grid { grid-template-columns: 1fr; }
+      .edit-form-grid .full-width { grid-column: 1; }
+    }
+  </style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -30,7 +58,7 @@
       <div>
         <div class="eyebrow">HOSPITAL MEDICAL STAFF</div>
         <h1>Doctors &amp; Specialists Management</h1>
-        <p>Register new consultants, configure clinic hours, and manage specialist fees.</p>
+        <p>Register new consultants, assign hospital branches, and manage specialist fees.</p>
       </div>
       <a class="btn" href="/admin/sessions">Manage Clinic Sessions →</a>
     </div>
@@ -39,9 +67,14 @@
     <div th:if="${errorMessage != null}" class="notice error" role="alert" th:text="${errorMessage}"></div>
     <div th:if="${successMessage != null}" class="notice" role="status" th:text="${successMessage}"></div>
     <div th:if="${param.error != null}" class="notice error" role="alert">Unable to complete request. Please verify inputs.</div>
+    <div th:if="${param.add_success != null}" class="notice" role="status">✓ Doctor registered successfully and clinic sessions generated.</div>
+    <div th:if="${param.update_success != null}" class="notice" role="status">✓ Doctor profile updated successfully.</div>
+    <div th:if="${param.reset_success != null}" class="notice" role="status">✓ Password reset successfully.</div>
     <div id="actionNotice" class="notice" role="status" hidden>Changes successfully updated.</div>
 
-    <!-- Add Doctor Section -->
+    <!-- ============================================================ -->
+    <!-- Add Doctor Section                                           -->
+    <!-- ============================================================ -->
     <details class="card" style="margin-bottom: 24px;">
       <summary>✚ Register New Specialist / Doctor</summary>
       <div class="card-body">
@@ -87,6 +120,19 @@
               <span>Consultation Fee (LKR) *</span>
               <input type="number" name="consultationFee" required min="1" step="0.01" placeholder="2500.00">
             </label>
+            <!-- Branch Dropdown — triggers auto session generation -->
+            <label class="field" style="grid-column: 1 / -1;">
+              <span>Assign to Hospital Branch (Auto-generates 30-day clinic sessions) *</span>
+              <select name="branchId" required>
+                <option value="">-- Select Hospital Branch --</option>
+                <option th:each="b : ${branches}"
+                        th:value="${b.id}"
+                        th:text="|${b.branchName} · ${b.area}|"></option>
+              </select>
+              <small style="color: var(--ink-muted); margin-top: 4px; display: block;">
+                Doctor will immediately appear in patient booking for this branch once sessions are generated.
+              </small>
+            </label>
           </div>
           <div class="form-footer">
             <button class="btn" type="submit">Complete Doctor Registration</button>
@@ -95,7 +141,9 @@
       </div>
     </details>
 
-    <!-- Doctors Directory Grid -->
+    <!-- ============================================================ -->
+    <!-- Doctors Directory Table                                       -->
+    <!-- ============================================================ -->
     <div class="card">
       <div class="card-header">
         <h2>Registered Medical Specialists (<span th:text="${#lists.size(doctors)}">0</span>)</h2>
@@ -111,36 +159,71 @@
               <th>Contact Details</th>
               <th>Clinic Hours</th>
               <th>Consultation Fee</th>
+              <th>Assigned Branches</th>
               <th>Manage</th>
             </tr>
           </thead>
           <tbody>
             <tr th:each="d : ${doctors}">
+              <!-- Doctor Info -->
               <td>
                 <strong th:text="${d.name}">Dr. Specialist Name</strong>
                 <p style="color: var(--healthcare-teal); font-weight: 600;" th:text="${d.specialization}">Specialization</p>
                 <small style="color: var(--ink-muted);" th:text="${d.experience ?: 'Senior Consultant'}"></small>
               </td>
+              <!-- Contact -->
               <td>
                 <span th:text="${d.user != null ? d.user.phoneNo : 'N/A'}">Phone</span>
                 <p th:text="${d.user != null ? d.user.email : 'N/A'}">Email</p>
               </td>
+              <!-- Clinic Hours -->
               <td>
                 <span th:text="${d.clinicHours}">09:00 AM - 05:00 PM</span>
               </td>
+              <!-- Fee -->
               <td>
                 <strong style="color: var(--primary-navy);" th:text="|LKR ${d.consultationFee}|">LKR 2,500</strong>
               </td>
+              <!-- Assigned Branches -->
               <td>
+                <th:block th:if="${doctorBranches[d.id] != null and not #lists.isEmpty(doctorBranches[d.id])}">
+                  <span class="branch-badge"
+                        th:each="bname : ${doctorBranches[d.id]}"
+                        th:text="${bname}"></span>
+                </th:block>
+                <span class="no-branch"
+                      th:if="${doctorBranches[d.id] == null or #lists.isEmpty(doctorBranches[d.id])}">
+                  No branch assigned
+                </span>
+              </td>
+              <!-- Manage Column -->
+              <td>
+                <!-- EDIT FORM -->
                 <details style="margin-bottom: 6px;">
                   <summary style="font-size: 12px; color: var(--primary-blue); cursor: pointer; font-weight: 600;">
-                    Edit Doctor
+                    ✎ Edit Doctor
                   </summary>
                   <form th:action="@{/admin/doctors/{id}/update(id=${d.id})}" method="post" style="margin-top: 10px;">
-                    <div class="form-grid" style="grid-template-columns: 1fr; gap: 8px;">
+                    <div class="edit-form-grid">
+                      <label class="field">
+                        <span style="font-size: 11px;">Full Name</span>
+                        <input type="text" name="name" th:value="${d.name}" required style="padding: 6px; font-size: 12px;">
+                      </label>
+                      <label class="field">
+                        <span style="font-size: 11px;">Email</span>
+                        <input type="email" name="email" th:value="${d.user != null ? d.user.email : ''}" style="padding: 6px; font-size: 12px;">
+                      </label>
+                      <label class="field">
+                        <span style="font-size: 11px;">Phone</span>
+                        <input type="tel" name="phoneNo" th:value="${d.user != null ? d.user.phoneNo : ''}" style="padding: 6px; font-size: 12px;">
+                      </label>
                       <label class="field">
                         <span style="font-size: 11px;">Specialization</span>
                         <input type="text" name="specialization" th:value="${d.specialization}" required style="padding: 6px; font-size: 12px;">
+                      </label>
+                      <label class="field">
+                        <span style="font-size: 11px;">Experience</span>
+                        <input type="text" name="experience" th:value="${d.experience}" style="padding: 6px; font-size: 12px;">
                       </label>
                       <label class="field">
                         <span style="font-size: 11px;">Clinic Hours</span>
@@ -150,21 +233,50 @@
                         <span style="font-size: 11px;">Consultation Fee (LKR)</span>
                         <input type="number" name="consultationFee" th:value="${d.consultationFee}" required min="1" step="0.01" style="padding: 6px; font-size: 12px;">
                       </label>
+                      <!-- Assign / Add Branch (generates more sessions) -->
+                      <label class="field full-width">
+                        <span style="font-size: 11px;">Add / Change Hospital Branch Assignment</span>
+                        <select name="branchId" style="padding: 6px; font-size: 12px;">
+                          <option value="">-- No change / Keep current --</option>
+                          <option th:each="b : ${branches}"
+                                  th:value="${b.id}"
+                                  th:text="|${b.branchName} · ${b.area}|"></option>
+                        </select>
+                        <small style="color: var(--ink-muted); margin-top: 3px; display: block; font-size: 10px;">
+                          Selecting a branch will generate 30-day clinic sessions for that branch.
+                        </small>
+                      </label>
                     </div>
-                    <div style="margin-top: 10px;">
+                    <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
                       <button class="btn small" type="submit">Save Changes</button>
                     </div>
                   </form>
                 </details>
 
+                <!-- RESET PASSWORD FORM -->
+                <details style="margin-bottom: 6px;">
+                  <summary style="font-size: 12px; color: var(--ink-muted); cursor: pointer; font-weight: 600;">
+                    🔑 Reset Password
+                  </summary>
+                  <form th:action="@{/admin/doctors/{id}/reset-password(id=${d.id})}" method="post" style="margin-top: 8px;">
+                    <label class="field">
+                      <span style="font-size: 11px;">New Password (min 8 chars)</span>
+                      <input type="password" name="newPassword" required minlength="8" maxlength="72"
+                             placeholder="New password" style="padding: 6px; font-size: 12px;">
+                    </label>
+                    <button class="btn small" type="submit" style="margin-top: 6px;">Reset</button>
+                  </form>
+                </details>
+
+                <!-- DELETE -->
                 <form th:action="@{/admin/doctors/{id}/delete(id=${d.id})}" method="post"
-                      data-confirm="Permanently delete this doctor profile? Associated appointments and sessions will be affected.">
-                  <button class="btn small danger" type="submit">Remove</button>
+                      data-confirm="Deactivate this doctor? Login and new bookings will stop. Existing records and receipts are retained.">
+                  <button class="btn small danger" type="submit">Deactivate</button>
                 </form>
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(doctors)}">
-              <td colspan="5" class="empty">
+              <td colspan="6" class="empty">
                 <h3>No doctors registered yet</h3>
                 <p>Register a specialist above to populate the clinical faculty.</p>
               </td>

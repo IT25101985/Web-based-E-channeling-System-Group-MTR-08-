@@ -9,3 +9,9 @@
 *.bak
 *.iml
 /src/main/java/out/
+
+# Nested IDE metadata and local diagnostic files
+**/.idea/
+*.class
+hs_err_pid*.log
+replay_pid*.log

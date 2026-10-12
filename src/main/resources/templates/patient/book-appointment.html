@@ -13,7 +13,7 @@
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: #f0f4f8;
-            background-image: 
+            background-image:
                 radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0, transparent 40%),
                 radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.1) 0, transparent 40%);
             min-height: 100vh;
@@ -271,7 +271,7 @@
         document.querySelectorAll('.doctor-card').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
         document.getElementById('selectedDoctorId').value = element.getAttribute('data-id');
-        
+
         // Reset schedule inputs
         document.getElementById('datePicker').value = "";
         document.getElementById('timeSelect').innerHTML = '<option value="">Reselect Date</option>';

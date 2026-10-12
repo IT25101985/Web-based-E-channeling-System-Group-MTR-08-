@@ -32,6 +32,13 @@ public class MedicalRecordService {
         return prescriptionRepository.save(prescription);
     }
 
+    public org.springframework.data.domain.Page<MedicalRecord> recordsForDoctor(String username, int page) {
+        return medicalRecordRepository.findByAppointmentDoctorUserUsernameAndArchivedFalseOrderByRecordDateDesc(username, org.springframework.data.domain.PageRequest.of(Math.max(0,page),20));
+    }
+    public List<MedicalRecord> recordsForAppointments(List<com.echanneling.entity.Appointment> appointments) {
+        return appointments.isEmpty() ? List.of() : medicalRecordRepository.findByAppointmentIn(appointments);
+    }
+    public List<MedicalRecord> latestPersonal(User patient) { return medicalRecordRepository.latestPersonal(patient, org.springframework.data.domain.PageRequest.of(0,1)); }
     public List<MedicalRecord> getRecordsByPatient(User patient) {
         return medicalRecordRepository.findByPatient(patient);
     }

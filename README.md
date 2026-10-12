@@ -1,62 +1,71 @@
-# MediCare Pro / CareLink — E-Channeling System
+# MediCare Pro - E-Channeling System
 
-SE2030 group project, **2026-Y2-S1-MTR-08**. Spring Boot 3.1.2, Java 17+, Thymeleaf, Spring Security and JPA.
+SE2030 group project **2026-Y2-S1-MTR-08**. Java 17+, Spring Boot 4.1.1, Thymeleaf, Spring Security and JPA.
 
-Patients select a hospital, doctor and published clinic session, book appointments, view history, reschedule and cancel. Doctor, hospital, notification, feedback and billing modules share appointment records. A receptionist workspace supports desk bookings and cash collection.
+Patients choose a hospital, doctor and published clinic session, book for themselves or family, reschedule, cancel and archive their history. Administrator, doctor, receptionist, notification, feedback and billing modules share these appointments.
 
-## Run the demonstration
+## Start with SQL Server
 
-Install JDK 17 or later and set JAVA_HOME. The Maven wrapper downloads Maven and dependencies on first use.
+1. Install JDK 17 or later and set JAVA_HOME. Open the repository folder containing pom.xml.
+2. Start your SQL Server instance and create/use your local echanneling_system database.
+3. Copy application-local.properties.example to application-local.properties. Set the actual SQL Server URL, username and password using the spring.datasource.* properties. This file is ignored by Git.
+4. Run the commands below. The wrapper downloads Maven and dependencies on the first online build.
 
 ```powershell
-.\mvnw.cmd test
+Copy-Item application-local.properties.example application-local.properties
+# Edit application-local.properties before starting.
+.\mvnw.cmd clean package
+java -jar target/echanneling-system-0.0.1-SNAPSHOT.jar --spring.profiles.active=sqlserver
+```
+
+Open http://localhost:8080. SQL Server is the normal project database. New databases need initial administrator/doctor/hospital/session records before appointment booking; SQL Server mode does not seed demo accounts. Existing database IDs and records are retained. For the group's existing database, use its existing local configuration and accounts.
+
+An alternative is `.\run.ps1 -Profile sqlserver -Build`.
+
+### IntelliJ
+
+Open pom.xml as a Maven project and let IntelliJ import dependencies. Select JDK 17 or later. Run `com.echanneling.EChannelingApplication` with program arguments `--spring.profiles.active=sqlserver` and the repository root as the working directory. Stop the previous application before reusing port 8080. If another application needs port 8080, use `--server.port=8081` and open http://localhost:8081.
+
+If imported accounts share an email, the startup repair preserves their usernames, IDs and linked records. Email recovery refuses ambiguous addresses. See [SQL Server startup](docs/INTELLIJ_SQL_SERVER_STARTUP.md).
+
+### Existing databases and production
+
+Development uses Hibernate schema updates and transactional legacy-data repair. Review [the migration guide](database/migrations/README.md) before manually migrating an existing database. The SQL scripts target the application schema; the separate IT2140 assignment schema is optional. The prod profile requires a migrated database, verified TLS, a dedicated database account and configured environment variables.
+
+## Optional demonstration
+
+For a separate local H2 demonstration without installing SQL Server:
+
+```powershell
 .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"
 ```
 
-Open http://localhost:8080. The demo profile uses a separate H2 database in data/; it does not connect to SQL Server.
+Demo accounts: admin / admin123, drsmith / doctor123, dhanu / patient123, reception / Reception@123. These are demo-only credentials. Demo mode uses data/carelink-demo and has email delivery disabled.
 
-| Role | Username | Demo password |
-| --- | --- | --- |
-| Administrator | admin | admin123 |
-| Doctor | drsmith | doctor123 |
-| Patient | dhanu | patient123 |
-| Receptionist | reception | Reception@123 |
-
-These are demonstration accounts. Email sending is disabled by default in demo mode.
-Alternatively, `.\run.ps1 -Profile demo -Build` tests, packages and starts the application.
-
-## Use SQL Server
-
-The default profile uses SQL Server. Copy application-local.properties.example to application-local.properties and supply your own connection settings. The local file is ignored by Git. Configure an existing SQL Server database, then run:
+## Verify
 
 ```powershell
-.\mvnw.cmd spring-boot:run
+.\mvnw.cmd clean package
 ```
 
-The default configuration uses Hibernate schema updates and legacy-account repair on startup. Back up an existing database first. database/finalization-sqlserver.sql is an optional additive migration for an existing CareLink schema, not a fresh database creation script; review it before applying it manually.
-
-## Verification
+The default suite uses isolated H2 databases, with live SQL Server checks skipped. To verify your configured SQL Server database explicitly:
 
 ```powershell
-.\mvnw.cmd test
-.\mvnw.cmd package
+.\mvnw.cmd test "-Dtest=SqlServerSmokeTest,SqlServerWorkflowTest" "-Dcarelink.sqlserver=true"
 ```
 
-Integration tests use isolated H2 databases with mail delivery and scheduled notifications disabled. The SQL Server smoke test is opt-in using `-Dcarelink.sqlserver=true`; it requires your configured database. See [the integration record](docs/INTEGRATION.md) for this revision's actual results.
+The smoke test renders existing records. The workflow test creates appointment fixtures in a transaction and rolls them back, with email and scheduled notifications disabled. See [the latest release verification](docs/MAIN_RELEASE_2026_10_13.md).
 
-## Modules and workflow
+## Appointment workflow and map
 
-- Appointment work: PatientBookingController, BookingService, AppointmentService, appointment/availability repositories and booking tests.
-- Leader integration: connect team modules, resolve paths, maintain configuration, run regression tests and prepare release merges.
-- Existing branch histories and authorship are retained. Integration commits do not imply sole authorship of imported modules.
+Booking -> cash payment collection -> administrator check-in on the appointment date -> doctor prescription -> completed appointment -> patient feedback. Future-date check-in returns a clear message. The doctor can write a prescription after check-in.
 
-Workflow: **Appoinment_Management → def → main**. Other module branches merge into def for integration. See [CONTRIBUTING.md](CONTRIBUTING.md) and [PROJECT_GUIDE.md](PROJECT_GUIDE.md).
+See [Dhanukshan's appointment guide](docs/APPOINTMENT_UPDATES.md) and [lecture design patterns](DESIGN_PATTERNS.md). The home page's Hospitals section includes a branch selector, address map and directions links. Maps use saved hospital addresses and require internet; verify the addresses in hospital management. See [hospital map](docs/HOSPITAL_MAP.md).
 
-## Current limits
+The optional administrator DDD viva page reads its bundled catalogue using a separate configured assignment database. It does not replace the appointment database and is not required for normal booking.
 
-Card checkout is simulated. SMS delivery and password-reset emails are not implemented. External SMTP requires configuration; sent means the SMTP server accepted the message. H2 tests do not verify live SQL Server, real payments or real mailbox delivery.
+## Team Git workflow
 
+**Appoinment_Management -> def -> main**. Team integration keeps published branch history and authorship. See [CONTRIBUTING.md](CONTRIBUTING.md). Local passwords, databases, IDE files, generated output and diagnostic logs stay out of Git.
 
-## Appointment Booking update
-
-See [Dhanukshan's appointment update guide](docs/APPOINTMENT_UPDATES.md) for family bookings, conflict protection, archived history, checkout handoff and the lecture design-pattern examples. Existing SQL Server installations can use `database/appointment-updates-sqlserver.sql`.
+Card checkout is a demo simulation. Production uses counter cash. Email delivery and password-recovery links require SMTP configuration; SMS delivery is not implemented.

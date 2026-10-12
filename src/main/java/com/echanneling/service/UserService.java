@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,24 +17,43 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired private org.springframework.security.core.session.SessionRegistry sessions;
+    @Autowired private com.echanneling.repository.PasswordResetRepository resets;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     public User saveUser(User user) {
         if (user.getId() == null && userRepository.findByUsername(user.getUsername()).isPresent()) throw new IllegalArgumentException("Username already exists");
         if (user.getId() != null) throw new IllegalArgumentException("Use the explicit password change operation for an existing account.");
+        PasswordPolicy.requireValid(user.getPassword());
+        user.setEmail(user.getEmail().trim().toLowerCase(java.util.Locale.ROOT));
+        if (userRepository.existsByEmailIgnoreCase(user.getEmail())) throw new IllegalArgumentException("Email already exists");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
     /** Raw user input is always encoded, even when it resembles a BCrypt hash. */
+    @Transactional
     public User saveWithNewPassword(User user, String rawPassword) {
-        if (rawPassword == null || rawPassword.length() < 8 || rawPassword.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
-            throw new IllegalArgumentException("Use a password of at least 8 characters and at most 72 UTF-8 bytes.");
-        user.setPassword(passwordEncoder.encode(rawPassword));
-        return userRepository.save(user);
+        PasswordPolicy.requireValid(rawPassword);
+        User target=userRepository.findLockedById(user.getId()).orElseThrow();
+        target.setPassword(passwordEncoder.encode(rawPassword));
+        User saved=userRepository.save(target);
+        resets.findById(user.getId()).ifPresent(reset -> reset.setUsedAt(java.time.LocalDateTime.now()));
+        // Expire sessions only after the password transaction successfully commits.
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                public void afterCommit() {
+                    for(Object principal:sessions.getAllPrincipals()) {
+                        if(principal instanceof org.springframework.security.core.userdetails.UserDetails details
+                                && user.getUsername().equals(details.getUsername()))
+                            sessions.getAllSessions(principal,false).forEach(org.springframework.security.core.session.SessionInformation::expireNow);
+                    }
+                }
+            });
+        return saved;
     }
+
+    public boolean emailExists(String email) { return userRepository.existsByEmailIgnoreCase(email); }
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -64,18 +82,7 @@ public class UserService {
 
     @Transactional
     public void deleteUserById(Long id) {
-        if (id == null) return;
-        jdbcTemplate.update("DELETE FROM notifications WHERE appointment_id IN (SELECT id FROM appointment WHERE patient_id = ? OR doctor_id IN (SELECT id FROM doctor WHERE user_id = ?))", id, id);
-        jdbcTemplate.update("DELETE FROM feedback WHERE patient_id = ? OR doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id, id);
-        jdbcTemplate.update("DELETE FROM prescription WHERE medical_record_id IN (SELECT id FROM medical_record WHERE patient_id = ? OR appointment_id IN (SELECT id FROM appointment WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)))", id, id);
-        jdbcTemplate.update("DELETE FROM invoice WHERE appointment_id IN (SELECT id FROM appointment WHERE patient_id = ? OR doctor_id IN (SELECT id FROM doctor WHERE user_id = ?))", id, id);
-        jdbcTemplate.update("DELETE FROM medical_record WHERE patient_id = ? OR appointment_id IN (SELECT id FROM appointment WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?))", id, id);
-        jdbcTemplate.update("DELETE FROM appointment WHERE patient_id = ? OR doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id, id);
-        jdbcTemplate.update("DELETE FROM availability_slots WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id);
-        jdbcTemplate.update("DELETE FROM schedule WHERE doctor_id IN (SELECT id FROM doctor WHERE user_id = ?)", id);
-        jdbcTemplate.update("DELETE FROM doctor WHERE user_id = ?", id);
-        jdbcTemplate.update("DELETE FROM notifications WHERE recipient_user_id = ?", id);
-        userRepository.deleteById(id);
+        if (id != null) setAccountActive(id, false);
     }
 
     public List<User> getAllUsers() {

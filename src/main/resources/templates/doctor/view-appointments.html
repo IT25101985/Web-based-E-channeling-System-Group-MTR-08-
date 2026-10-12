@@ -76,7 +76,8 @@
               <td>
                 <div class="actions">
                   <a class="btn small secondary" th:href="@{/doctor/consultations(appointmentId=${a.id})}">Consultation Room ↗</a>
-                  <a th:if="${a.status == 'SCHEDULED'}" class="btn small" th:href="@{/doctor/prescribe/{id}(id=${a.id})}">Prescribe →</a>
+                  <span th:if="${a.status == 'SCHEDULED'}" class="muted">Waiting for admin check-in on the appointment date.</span>
+                  <a th:if="${a.status == 'CHECKED_IN'}" class="btn small" th:href="@{/doctor/prescribe/{id}(id=${a.id})}">Prescribe →</a>
                 </div>
               </td>
             </tr>
@@ -94,7 +95,11 @@
     <footer class="footer-note">
       MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
     </footer>
-  </main>
+  <div class="actions">
+<a class="btn secondary" th:if="${page > 0}" th:href="@{/doctor/appointments(page=${page - 1})}">Previous</a>
+<span th:text="|Page ${page + 1}|"></span>
+<a class="btn secondary" th:if="${hasNext}" th:href="@{/doctor/appointments(page=${page + 1})}">Next</a>
+</div></main>
 </div>
 </body>
 </html>

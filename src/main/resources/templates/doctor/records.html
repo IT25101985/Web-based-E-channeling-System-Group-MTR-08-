@@ -56,7 +56,7 @@
           <tbody>
             <tr th:each="r : ${records}">
               <td>
-                <strong th:text="${r.patient?.fullName ?: 'Patient'}">Patient Name</strong>
+                <strong th:text="${r.patientName}">Patient Name</strong>
                 <p th:text="|Record ID #REC-${r.id}|"></p>
               </td>
               <td th:text="${#temporals.format(r.recordDate, 'dd MMM yyyy · HH:mm')}">Date</td>
@@ -87,7 +87,11 @@
     <footer class="footer-note">
       MediCare Pro Healthcare Platform &bull; Certified E-Channeling System &bull; All appointment times are local hospital time.
     </footer>
-  </main>
+  <div class="actions">
+<a class="btn secondary" th:if="${page > 0}" th:href="@{/doctor/records(page=${page - 1})}">Previous</a>
+<span th:text="|Page ${page + 1}|"></span>
+<a class="btn secondary" th:if="${hasNext}" th:href="@{/doctor/records(page=${page + 1})}">Next</a>
+</div></main>
 </div>
 </body>
 </html>

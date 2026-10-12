@@ -12,7 +12,8 @@ public class Doctor {
     private String specialization;
     private String experience;
     private String clinicHours;
-    private Double consultationFee = 500.0; // Default fee
+    @Column(precision = 19, scale = 2)
+    private java.math.BigDecimal consultationFee = new java.math.BigDecimal("500.00"); // Default fee
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -39,6 +40,6 @@ public class Doctor {
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
-    public Double getConsultationFee() { return consultationFee; }
-    public void setConsultationFee(Double consultationFee) { this.consultationFee = consultationFee; }
+    public java.math.BigDecimal getConsultationFee() { return consultationFee; }
+    public void setConsultationFee(Number consultationFee) { this.consultationFee = com.echanneling.service.Money.amount(consultationFee); }
 }
