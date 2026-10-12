@@ -106,7 +106,7 @@ public class BookingService {
                 booking.setPatientName(patient.getFullName());
                 if (patient instanceof Patient p) booking.setRecipientNic(p.getNic());
             }
-            java.math.BigDecimal fee = Money.amount(doctor.getConsultationFee());
+            java.math.BigDecimal fee = doctor.getConsultationFee();
             if (fee == null || fee.signum() <= 0)
                 throw new IllegalArgumentException("The doctor must publish a valid consultation fee before booking.");
             booking.setBookedConsultationFee(fee);

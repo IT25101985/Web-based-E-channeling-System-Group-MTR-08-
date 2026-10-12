@@ -50,7 +50,7 @@ public class Appointment {
     public java.math.BigDecimal getBookedConsultationFee() { return bookedConsultationFee; }
     public void setBookedConsultationFee(Number value) { bookedConsultationFee = com.echanneling.service.Money.amount(value); }
     // Legacy appointments did not record an agreed fee; new bookings always do.
-    public java.math.BigDecimal getPayableFee() { return bookedConsultationFee != null ? bookedConsultationFee : com.echanneling.service.Money.amount(doctor.getConsultationFee()); }
+    public java.math.BigDecimal getPayableFee() { return bookedConsultationFee != null ? bookedConsultationFee : doctor.getConsultationFee(); }
     public boolean isAwaitingConsultation() { return "SCHEDULED".equals(status) || "CHECKED_IN".equals(status); }
 
     // Additional fields for database reporting/display

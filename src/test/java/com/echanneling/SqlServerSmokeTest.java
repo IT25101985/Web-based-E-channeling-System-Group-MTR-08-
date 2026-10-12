@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,7 +28,7 @@ class SqlServerSmokeTest {
             mvc.perform(get("/admin/"+page).with(user("admin").roles("ADMIN"))).andExpect(status().isOk());
         String patient=users.findByRole("ROLE_PATIENT").get(0).getUsername();
         var result=mvc.perform(get("/patient/dashboard").with(user(patient).roles("PATIENT"))).andExpect(status().isOk()).andReturn();
-        assertTrue(result.getResponse().getContentAsString().contains("My care"));
+        assertEquals(patient, ((com.echanneling.entity.Patient) result.getModelAndView().getModel().get("patient")).getUsername());
         String doctor=users.findByRole("ROLE_DOCTOR").get(0).getUsername();
         for(String page:new String[]{"dashboard","appointments","patients","records","consultations"})
             mvc.perform(get("/doctor/"+page).with(user(doctor).roles("DOCTOR"))).andExpect(status().isOk());

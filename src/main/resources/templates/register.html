@@ -61,7 +61,7 @@
         <span th:if="${param.error[0] == 'duplicate_username'}">This username is already taken. Please choose another username.</span>
         <span th:if="${param.error[0] == 'duplicate_email'}">This email is already registered. Please sign in or use another email.</span>
         <span th:if="${param.error[0] == 'short_username'}">Username must be at least 4 characters long.</span>
-        <span th:if="${param.error[0] == 'weak_password'}">Password must be at least 6 characters long.</span>
+        <span th:if="${param.error[0] == 'weak_password'}">Password must be at least 8 characters long.</span>
         <span th:if="${param.error[0] == 'invalid_nic'}">Invalid NIC format. Enter 12 digits (e.g. 200012345678) or 9 digits with 'V'.</span>
         <span th:if="${param.error[0] == 'invalid_phone'}">Please enter a valid phone number (9-15 digits).</span>
         <span th:if="${param.error[0] == 'invalid_email'}">Please enter a valid email address.</span>
@@ -69,6 +69,7 @@
         <span th:if="${param.error[0] == 'invalid_details' or param.error[0] == 'true'}">Please check the details entered and try again.</span>
       </div>
 
+      <p th:if="${param.error}" role="alert">Please check all required details, use a valid NIC and contact information, and choose a password of at least 8 characters.</p>
       <form th:action="@{/register}" method="post">
         <div class="form-grid">
           <label class="field">
@@ -103,15 +104,15 @@
           </label>
 
           <label class="field" style="grid-column: 1 / -1;">
-            <span>Password (Minimum 6 characters) *</span>
+            <span>Password (Minimum 8 characters) *</span>
             <div style="position: relative;">
-              <input type="password" id="regPassword" name="password" placeholder="••••••••" required minlength="6" maxlength="72" autocomplete="new-password" style="padding-right: 44px;">
+              <input type="password" id="regPassword" name="password" placeholder="••••••••" required minlength="8" maxlength="72" autocomplete="new-password" style="padding-right: 44px;">
               <button type="button" id="toggleRegPasswordBtn" aria-label="Toggle password visibility"
                       style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748B; font-size: 14px;">
                 👁️
               </button>
             </div>
-            <small>Use at least 6 characters including letters and numbers</small>
+            <small>Use at least 8 characters including letters and numbers</small>
           </label>
         </div>
 

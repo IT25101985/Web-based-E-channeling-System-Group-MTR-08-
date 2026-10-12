@@ -24,7 +24,7 @@ public class SecurityConfig {
                 .csrf(org.springframework.security.config.Customizer.withDefaults())
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/register", "/login", "/forgot-password", "/error", "/css/**", "/js/**", "/images/**", "/api/doctors/*/slots", "/api/branches/*/doctors").permitAll()
+                        .requestMatchers("/", "/register", "/login", "/forgot-password", "/reset-password", "/error", "/css/**", "/js/**", "/images/**", "/api/doctors/*/slots", "/api/branches/*/doctors").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/reception/**").hasAnyRole("RECEPTIONIST", "ADMIN")
                         .requestMatchers("/doctor/**").hasRole("DOCTOR")
@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .sessionManagement(session -> session
-                        .maximumSessions(1)
+                        .maximumSessions(1).sessionRegistry(sessionRegistry())
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
@@ -48,6 +48,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Bean
+    public org.springframework.security.core.session.SessionRegistry sessionRegistry() {
+        return new org.springframework.security.core.session.SessionRegistryImpl();
+    }
+    @Bean
+    public org.springframework.security.web.session.HttpSessionEventPublisher sessionEventPublisher() {
+        return new org.springframework.security.web.session.HttpSessionEventPublisher();
+    }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

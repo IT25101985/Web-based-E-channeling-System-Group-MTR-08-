@@ -11,11 +11,25 @@ import java.util.Optional;
 public class InvoiceService {
     @Autowired
     private InvoiceRepository invoiceRepository;
+    @Autowired private com.echanneling.repository.InvoiceAuditRepository audit;
+    @org.springframework.transaction.annotation.Transactional
+    public void changeStatus(Long id,String status,String actor) {
+        Invoice invoice=invoiceRepository.lock(id).orElseThrow();
+        if(status.equals(invoice.getStatus())) return;
+        if(!"PAID".equals(invoice.getStatus()) || !"REFUNDED".equals(status))
+            throw new IllegalArgumentException("Use cash collection to record payment. Only paid invoices can be refunded.");
+        audit.save(new com.echanneling.entity.InvoiceAudit(invoice,invoice.getStatus(),status,actor));
+        invoice.setStatus(status);
+    }
 
     public Invoice saveInvoice(Invoice invoice) {
         return invoiceRepository.save(invoice);
     }
 
+    public List<Invoice> forAppointments(List<com.echanneling.entity.Appointment> appointments) {
+        return appointments.isEmpty() ? List.of() : invoiceRepository.findByAppointmentIn(appointments);
+    }
+    public java.math.BigDecimal paidRevenue() { return invoiceRepository.paidRevenue(); }
     public List<Invoice> getAllInvoices() {
         return invoiceRepository.findAll();
     }
@@ -25,7 +39,7 @@ public class InvoiceService {
     }
 
     public void deleteInvoice(Long id) {
-        invoiceRepository.deleteById(id);
+        throw new IllegalArgumentException("Invoices are retained for audit. Record a refund instead.");
     }
 
     public Optional<Invoice> getInvoiceByAppointment(com.echanneling.entity.Appointment app) {

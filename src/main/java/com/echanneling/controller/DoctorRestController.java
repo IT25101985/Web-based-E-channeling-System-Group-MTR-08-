@@ -16,13 +16,13 @@ public class DoctorRestController {
             @RequestParam(required=false) Long excludeAppointmentId) {
         return bookings.availableSlots(id,branchId,date,excludeAppointmentId);
     }
-    public record DoctorOption(Long id,String name,String specialization,Double fee) {}
+    public record DoctorOption(Long id,String name,String specialization,java.math.BigDecimal fee) {}
     @GetMapping("/api/branches/{id}/doctors")
     public List<DoctorOption> doctors(@PathVariable Long id) {
         Map<Long,DoctorOption> result=new TreeMap<>();
         sessions.findByHospitalBranchIdAndIsActiveTrueAndSlotDateGreaterThanEqual(id,LocalDate.now()).stream()
+            .filter(s->BookingService.isBookable(s.getDoctor()))
             .filter(s->s.getSlotDate().atTime(s.getEndTime()).isAfter(java.time.LocalDateTime.now()))
-            .filter(s -> BookingService.isBookable(s.getDoctor()))
             .forEach(s->{var d=s.getDoctor();result.put(d.getId(),new DoctorOption(d.getId(),d.getName(),d.getSpecialization(),d.getConsultationFee()));});
         return new ArrayList<>(result.values());
     }

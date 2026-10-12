@@ -29,7 +29,7 @@ public class NotificationService {
         Notification n=notifications.findLockedById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         if(n.getRecipientUser()==null || !n.getRecipientUser().getUsername().equals(username))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        n.setReadAt(LocalDateTime.now());
+        n.setReadAt(com.echanneling.patterns.ClinicClock.getInstance().now());
     }
     @Transactional public void saveManual(Long id,String recipient,String subject,String message,Notification.NotificationType type) {
         if(recipient==null || !recipient.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$") || recipient.length()>254
@@ -40,7 +40,7 @@ public class NotificationService {
         if(n.getStatus()==SENT || n.getStatus()==CANCELLED || n.getAppointment()!=null)
             throw new IllegalArgumentException("Only unsent manual messages can be edited.");
         n.setRecipient(recipient.trim()); n.setSubject(subject.trim()); n.setMessage(message.trim()); n.setType(type);
-        n.setRecipientUser(users.findAll().stream().filter(u->u.getEmail()!=null && recipient.equalsIgnoreCase(u.getEmail().trim())).findFirst().orElse(null));
+        n.setRecipientUser(users.findByEmailIgnoreCase(recipient.trim()).orElse(null));
         n.setStatus(PENDING); n.setAttempts(0); n.setNextAttemptAt(null); n.setDeliveryError(null);
         notifications.save(n);
     }
@@ -109,7 +109,7 @@ public class NotificationService {
     public void resetTemplate(Notification.NotificationType type) { templates.deleteById(type); }
     @Transactional public void queueReminder(Long appointmentId) {
         Appointment a=appointments.findLockedById(appointmentId).orElse(null);
-        LocalDateTime now=LocalDateTime.now();
+        LocalDateTime now=com.echanneling.patterns.ClinicClock.getInstance().now();
         if(a!=null && "SCHEDULED".equals(a.getStatus()) && a.getAppointmentDate().isAfter(now) && !a.getAppointmentDate().isAfter(now.plusHours(24)))
             appointmentEvent(a,REMINDER);
     }

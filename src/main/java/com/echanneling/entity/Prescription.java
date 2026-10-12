@@ -14,7 +14,8 @@ public class Prescription {
     private String medication;
     private String dosage;
     private String duration;
-    private Double price = 0.0;
+    @Column(precision = 19, scale = 2)
+    private java.math.BigDecimal price = java.math.BigDecimal.ZERO.setScale(2);
 
     // Encapsulation
     public Long getId() { return id; }
@@ -27,6 +28,6 @@ public class Prescription {
     public void setDosage(String dosage) { this.dosage = dosage; }
     public String getDuration() { return duration; }
     public void setDuration(String duration) { this.duration = duration; }
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public java.math.BigDecimal getPrice() { return price; }
+    public void setPrice(Number price) { this.price = com.echanneling.service.Money.amount(price); }
 }

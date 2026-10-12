@@ -37,7 +37,8 @@ public class CheckoutService {
         if (existing.isPresent()) return existing.get();
         Invoice invoice = new Invoice();
         invoice.setAppointment(a);
-        invoice.setAmount(a.getPayableFee().doubleValue());
+        if (a.getBookedConsultationFee() == null) a.setBookedConsultationFee(a.getDoctor().getConsultationFee());
+        invoice.setAmount(a.getBookedConsultationFee());
         payment.processPayment(invoice.getAmount());
         invoice.setPaymentMethod(type.toUpperCase(java.util.Locale.ROOT));
         invoice.setStatus("card".equals(type) ? "PAID" : "UNPAID");

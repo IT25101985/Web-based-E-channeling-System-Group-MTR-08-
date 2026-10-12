@@ -5,9 +5,9 @@ import com.echanneling.repository.*;
 import com.echanneling.service.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,7 +26,7 @@ class TC_PAT_PatientManagementTest {
     @Autowired UserService userService;
     @Autowired UserRepository userRepository;
     @Autowired PasswordEncoder passwordEncoder;
-    @MockBean JavaMailSender mail;
+    @MockitoBean JavaMailSender mail;
 
     /** TC_PAT_001 - Valid Patient Registration */
     @Test @DisplayName("TC_PAT_001 - Valid Patient Registration")
@@ -99,7 +99,7 @@ class TC_PAT_PatientManagementTest {
     @Test @DisplayName("TC_PAT_008 - Unauthenticated Access Blocked")
     void TC_PAT_008_unauthenticatedPatientDashboardBlocked() throws Exception {
         mvc.perform(get("/patient/dashboard"))
-            .andExpect(status().is3xxRedirection()).andExpect(redirectedUrlPattern("**/login"));
+            .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
     }
 
     /** TC_PAT_009 - Patient Cannot Access Admin Endpoints (RBAC) */

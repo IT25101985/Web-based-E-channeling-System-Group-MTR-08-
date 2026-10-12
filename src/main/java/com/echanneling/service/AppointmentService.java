@@ -11,9 +11,9 @@ import java.util.List;
 
 @Service
 public class AppointmentService {
-    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.transaction.annotation.Transactional(noRollbackFor = IllegalArgumentException.class)
     public void checkIn(Long id) {
-        Appointment appointment = appointmentRepository.findLockedById(id).orElseThrow();
+        Appointment appointment = appointmentRepository.findLockedById(id).orElseThrow(() -> new IllegalArgumentException("Appointment not found."));
         if ("CHECKED_IN".equals(appointment.getStatus())) return;
         if (!"SCHEDULED".equals(appointment.getStatus())) throw new IllegalArgumentException("Only scheduled appointments can be checked in.");
         if (appointment.getAppointmentDate() == null || !appointment.getAppointmentDate().toLocalDate().equals(com.echanneling.patterns.ClinicClock.getInstance().today()))

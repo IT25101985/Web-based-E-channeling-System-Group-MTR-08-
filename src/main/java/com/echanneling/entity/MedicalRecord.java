@@ -23,6 +23,10 @@ public class MedicalRecord {
     @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL)
     private java.util.List<Prescription> prescriptions = new java.util.ArrayList<>();
 
+    public String getPatientName() {
+        return appointment != null ? appointment.getPatientName() : patient == null ? "Patient" : patient.getFullName();
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

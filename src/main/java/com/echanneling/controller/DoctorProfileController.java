@@ -69,18 +69,10 @@ public class DoctorProfileController {
                     model.addAttribute("totalReviews", reviews.size());
 
                     // Fetch Recent Appointments (Top 5)
-                    List<Appointment> allDoctorAppointments = appointmentService.getAppointmentsForDoctor(doctor);
-                    List<Appointment> recentAppointments = appointmentService.getRecentAppointmentsForDoctor(doctor)
-                            .stream().limit(5).collect(java.util.stream.Collectors.toList());
-                    model.addAttribute("recentAppointments", recentAppointments);
-
-                    java.time.LocalDate today = java.time.LocalDate.now();
-                    long todayCount = allDoctorAppointments.stream()
-                            .filter(a -> a.getAppointmentDate() != null && a.getAppointmentDate().toLocalDate().equals(today))
-                            .count();
-                    long pendingCount = allDoctorAppointments.stream()
-                            .filter(a -> "SCHEDULED".equalsIgnoreCase(a.getStatus()))
-                            .count();
+                    List<Appointment> recentAppointments = appointmentService.doctorHistory(username,0).getContent().stream().limit(5).toList();
+                    model.addAttribute("recentAppointments",recentAppointments);
+                    long todayCount=appointmentService.doctorToday(doctor);
+                    long pendingCount=appointmentService.doctorPending(doctor);
 
                     model.addAttribute("todayPatientsCount", todayCount);
                     model.addAttribute("pendingReportsCount", pendingCount);
@@ -104,7 +96,7 @@ public class DoctorProfileController {
     }
 
     @PostMapping("/update-fee")
-    public String updateFee(@RequestParam("fee") Double fee, Principal principal) {
+    public String updateFee(@RequestParam("fee") java.math.BigDecimal fee, Principal principal) {
         if (principal != null) {
             Optional<User> optUser = userService.findByUsername(principal.getName());
             if (optUser.isPresent()) {

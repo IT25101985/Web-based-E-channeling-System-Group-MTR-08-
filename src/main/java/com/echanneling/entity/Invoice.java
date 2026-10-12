@@ -14,7 +14,8 @@ public class Invoice {
 
     @jakarta.validation.constraints.NotNull(message = "Amount is required")
     @jakarta.validation.constraints.Positive(message = "Amount must be positive")
-    private Double amount;
+    @Column(precision = 19, scale = 2)
+    private java.math.BigDecimal amount;
     private String status; // PAID, UNPAID, REFUNDED
     private String paymentMethod; // CARD (demonstration), CASH; null for historical invoices
     private String collectedBy;
@@ -37,8 +38,8 @@ public class Invoice {
     public Appointment getAppointment() { return appointment; }
     public void setAppointment(Appointment a) { this.appointment = a; }
 
-    public Double getAmount() { return amount; }
-    public void setAmount(Double a) { this.amount = a; }
+    public java.math.BigDecimal getAmount() { return amount; }
+    public void setAmount(Number a) { this.amount = com.echanneling.service.Money.amount(a); }
 
     public String getStatus() { return status; }
     public void setStatus(String s) { this.status = s; }

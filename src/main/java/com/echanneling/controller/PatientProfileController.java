@@ -101,8 +101,8 @@ public class PatientProfileController {
                 // 3. Advanced Input Validation: Defensive Password Strength Policy
                 String rawPassword = null;
                 if (updatedUser.getPassword() != null && !updatedUser.getPassword().trim().isEmpty()) {
-                    rawPassword = updatedUser.getPassword().trim();
-                    if (rawPassword.length() < 8 || rawPassword.length() > 72) {
+                    rawPassword = updatedUser.getPassword();
+                    if (!com.echanneling.service.PasswordPolicy.valid(rawPassword)) {
                         return "redirect:/patient/dashboard?section=profile&error=weak_password";
                     }
                 }
@@ -135,7 +135,7 @@ public class PatientProfileController {
                     currentUser.setProfileImage(updatedUser.getProfileImage());
                     if (rawPassword != null) userService.saveWithNewPassword(currentUser, rawPassword);
                     else userRepository.save(currentUser);
-                    
+
                     String newBg = updatedUser.getBloodGroup();
                     String newBp = (bp != null && !bp.isEmpty()) ? bp : null;
                     String newHr = null;
@@ -239,19 +239,14 @@ public class PatientProfileController {
 
         Map<Long, Invoice> invoiceMap = new HashMap<>();
         Map<Long, MedicalRecord> recordMap = new HashMap<>();
-        for (Appointment a : appointments) {
-            {
-                invoiceService.getInvoiceByAppointment(a).ifPresent(inv -> invoiceMap.put(a.getId(), inv));
-                medicalRecordService.getRecordByAppointment(a).ifPresent(rec -> recordMap.put(a.getId(), rec));
-            }
-        }
+        invoiceService.forAppointments(appointments).forEach(inv -> invoiceMap.put(inv.getAppointment().getId(), inv));
+        medicalRecordService.recordsForAppointments(appointments).forEach(rec -> recordMap.put(rec.getAppointment().getId(), rec));
 
         model.addAttribute("appointments", appointments);
         model.addAttribute("invoiceMap", invoiceMap);
         model.addAttribute("recordMap", recordMap);
 
-        List<MedicalRecord> recentRecords = medicalRecordService.getRecentRecordsByPatient(user).stream()
-                .filter(r -> r.getAppointment() == null || !r.getAppointment().isForSomeoneElse()).toList();
+        List<MedicalRecord> recentRecords = medicalRecordService.latestPersonal(user);
         model.addAttribute("latestRecord", recentRecords.isEmpty() ? null : recentRecords.get(0));
 
         return "patient/dashboard";
