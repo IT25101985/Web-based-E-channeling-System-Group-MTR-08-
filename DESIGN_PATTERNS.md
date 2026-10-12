@@ -1,7 +1,7 @@
 # Lecture design patterns in MediCare Pro
 
 All five patterns from the supplied lectures are now represented in the main application (`src`).
-The separate `github-review` archive is not updated.
+The implementations and their verification tests are included in this repository.
 
 | Pattern | Main classes | Actual workflow |
 | --- | --- | --- |
